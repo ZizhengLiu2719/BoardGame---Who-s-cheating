@@ -175,7 +175,7 @@
       const hostName = document.getElementById('username').value;
       socket.emit('createRoom', { roomId, password, maxPlayers, hostName }, (res) => {
         if (res.success) {
-          window.location.href = `game.html?roomId=${roomId}&maxPlayers=${maxPlayers}&name=${encodeURIComponent(hostName)}&host=1`;
+          window.location.href = `game.html?roomId=${roomId}&maxPlayers=${maxPlayers}&name=${encodeURIComponent(hostName)}&host=1&password=${encodeURIComponent(password)}`;
         } else {
           alert(res.message || 'Failed to create room.');
         }
