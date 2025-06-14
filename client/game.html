@@ -35,6 +35,16 @@
       letter-spacing: 2px;
       margin-bottom: 8px;
     }
+    .room-password-ghibli {
+      margin-top: 8px;
+      font-size: 1.1rem;
+      color: #a07c4f;
+      background: #fffbe7;
+      border: 2px solid #e2c391;
+      border-radius: 14px;
+      padding: 8px 22px;
+      box-shadow: 0 2px 8px 0 #e2c39122;
+    }
     .player-count-box {
       background: #f7e7c6;
       border: 2px solid #bfa16a;
@@ -71,6 +81,7 @@
 <body class="ghibli-game">
   <div class="game-header">
     <div class="room-id-ghibli" id="roomIdBox">Room ID: <span id="roomId"></span></div>
+    <div class="room-password-ghibli" id="roomPasswordBox" style="margin-top:8px; font-size:1.1rem; color:#a07c4f; background:#fffbe7; border:2px solid #e2c391; border-radius:14px; padding:8px 22px; box-shadow:0 2px 8px 0 #e2c39122;">Room Password: <span id="roomPassword"></span></div>
     <div class="player-count-box" id="playerCountBox">Players: <span id="playerCount">1</span>/<span id="maxPlayers">6</span></div>
     <div class="player-list" id="playerList">
       <strong>Players in Room:</strong>
@@ -83,7 +94,7 @@
   </div>
   <script src="/socket.io/socket.io.js"></script>
   <script>
-    // Parse query params for roomId, maxPlayers, name, host
+    // Parse query params for roomId, maxPlayers, name, host, password
     function getQueryParams() {
       const params = {};
       window.location.search.replace(/[?&]+([^=&]+)=([^&]*)/gi, function(str,key,value) {
@@ -96,22 +107,25 @@
     const maxPlayers = params.maxPlayers || 6;
     const myName = params.name || '';
     const isHost = params.host === '1';
+    let roomPassword = params.password || '';
     document.getElementById('roomId').textContent = roomId;
     document.getElementById('maxPlayers').textContent = maxPlayers;
     let playerCount = 1;
     document.getElementById('playerCount').textContent = playerCount;
+    document.getElementById('roomPassword').textContent = roomPassword ? roomPassword : '(hidden)';
 
     // Socket.IO connection
     const socket = io();
 
-    // Join room if not host
-    if (!isHost) {
+    // Store password for joiners after prompt
+    if (!isHost && !roomPassword) {
       let playerName = myName;
       if (!playerName) {
         playerName = prompt('Enter your name:');
       }
-      let password = prompt('Enter room password:');
-      socket.emit('joinRoom', { roomId, password, playerName }, (res) => {
+      roomPassword = prompt('Enter room password:');
+      document.getElementById('roomPassword').textContent = roomPassword;
+      socket.emit('joinRoom', { roomId, password: roomPassword, playerName }, (res) => {
         if (!res.success) {
           alert(res.message || 'Failed to join room.');
           window.location.href = 'joining.html';
@@ -119,11 +133,33 @@
       });
     }
 
-    // Update player list and count
+    // Helper: generate a color from a string (player name)
+    function stringToColor(str) {
+      let hash = 0;
+      for (let i = 0; i < str.length; i++) {
+        hash = str.charCodeAt(i) + ((hash << 5) - hash);
+      }
+      let color = '#';
+      for (let i = 0; i < 3; i++) {
+        color += ('00' + ((hash >> (i * 8)) & 0xFF).toString(16)).slice(-2);
+      }
+      return color;
+    }
+
+    // Update player list and count, host always on top
     socket.on('playerListUpdate', (players) => {
       playerCount = players.length;
       document.getElementById('playerCount').textContent = playerCount;
-      document.getElementById('playerNames').innerHTML = players.map(name => `<li>${name}</li>`).join('');
+      // Place host (the one who created the room) at the top
+      let hostName = params.name || '';
+      if (!isHost && players.length > 0) {
+        hostName = players[0]; // fallback: assume first is host if not known
+      }
+      const sortedPlayers = [hostName, ...players.filter(n => n !== hostName)];
+      document.getElementById('playerNames').innerHTML = sortedPlayers.map((name, idx) => {
+        const color = stringToColor(name);
+        return `<li style="display:flex;align-items:center;margin-bottom:4px;"><span style="display:inline-block;width:18px;height:18px;border-radius:50%;background:${color};margin-right:10px;border:2px solid #e2c391;"></span><span style="font-weight:${idx===0?'bold':'normal'};color:${idx===0?'#a07c4f':'#5a4327'}">${name}${idx===0?' (Host)':''}</span></li>`;
+      }).join('');
     });
   </script>
 </body>
