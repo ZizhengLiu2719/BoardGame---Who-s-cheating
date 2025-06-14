@@ -28,7 +28,7 @@ io.on('connection', (socket) => {
   console.log('A user connected:', socket.id);
 
   // Host creates a room
-  socket.on('createRoom', ({ roomId, password, maxPlayers, hostName }, callback) => {
+  socket.on('createRoom', ({ roomId, password, maxPlayers, hostName, roomName }, callback) => {
     if (rooms[roomId]) {
       return callback({ success: false, message: 'Room already exists.' });
     }
@@ -36,10 +36,15 @@ io.on('connection', (socket) => {
       password,
       maxPlayers: Number(maxPlayers),
       players: [{ id: socket.id, name: hostName }],
+      roomName: roomName || '',
     };
     socket.join(roomId);
     callback({ success: true });
-    io.to(roomId).emit('playerListUpdate', getPlayerList(roomId));
+    io.to(roomId).emit('playerListUpdate', {
+      players: getPlayerList(roomId),
+      roomName: rooms[roomId].roomName,
+      password: rooms[roomId].password
+    });
   });
 
   // Player joins a room
@@ -60,7 +65,11 @@ io.on('connection', (socket) => {
     room.players.push({ id: socket.id, name: playerName });
     socket.join(roomId);
     callback({ success: true });
-    io.to(roomId).emit('playerListUpdate', getPlayerList(roomId));
+    io.to(roomId).emit('playerListUpdate', {
+      players: getPlayerList(roomId),
+      roomName: room.roomName,
+      password: room.password
+    });
   });
 
   // Handle disconnect
@@ -69,7 +78,11 @@ io.on('connection', (socket) => {
       const idx = room.players.findIndex(p => p.id === socket.id);
       if (idx !== -1) {
         room.players.splice(idx, 1);
-        io.to(roomId).emit('playerListUpdate', getPlayerList(roomId));
+        io.to(roomId).emit('playerListUpdate', {
+          players: getPlayerList(roomId),
+          roomName: room.roomName,
+          password: room.password
+        });
         // Remove room if empty
         if (room.players.length === 0) {
           delete rooms[roomId];

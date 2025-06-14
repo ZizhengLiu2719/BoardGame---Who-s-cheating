@@ -160,9 +160,13 @@
     }
 
     // Update player list and count, host always on top
-    socket.on('playerListUpdate', (players) => {
+    socket.on('playerListUpdate', (data) => {
+      const players = data.players || [];
       playerCount = players.length;
       document.getElementById('playerCount').textContent = playerCount;
+      // Update room name and password from server
+      document.getElementById('roomName').textContent = data.roomName ? data.roomName : '(none)';
+      document.getElementById('roomPassword').textContent = data.password ? data.password : '(hidden)';
       // Place host (the one who created the room) at the top
       let hostName = params.name || '';
       if (!isHost && players.length > 0) {
