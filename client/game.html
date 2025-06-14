@@ -130,21 +130,21 @@
     // Socket.IO connection
     const socket = io();
 
-    // Store password for joiners after prompt
-    if (!isHost && !roomPassword) {
-      let playerName = myName;
-      if (!playerName) {
-        playerName = prompt('Enter your name:');
-      }
+    // Always join the room on page load, whether host or not
+    let playerName = myName;
+    if (!playerName) {
+      playerName = prompt('Enter your name:');
+    }
+    if (!roomPassword) {
       roomPassword = prompt('Enter room password:');
       document.getElementById('roomPassword').textContent = roomPassword;
-      socket.emit('joinRoom', { roomId, password: roomPassword, playerName }, (res) => {
-        if (!res.success) {
-          alert(res.message || 'Failed to join room.');
-          window.location.href = 'joining.html';
-        }
-      });
     }
+    socket.emit('joinRoom', { roomId, password: roomPassword, playerName }, (res) => {
+      if (!res.success) {
+        alert(res.message || 'Failed to join room.');
+        window.location.href = 'joining.html';
+      }
+    });
 
     // Helper: generate a color from a string (player name)
     function stringToColor(str) {
@@ -161,6 +161,7 @@
 
     // Update player list and count, host always on top
     socket.on('playerListUpdate', (data) => {
+      console.log('Received playerListUpdate:', data); // DEBUG LOG
       const players = data.players || [];
       playerCount = players.length;
       document.getElementById('playerCount').textContent = playerCount;
