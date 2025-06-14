@@ -167,16 +167,12 @@
       // Update room name and password from server
       document.getElementById('roomName').textContent = data.roomName ? data.roomName : '(none)';
       document.getElementById('roomPassword').textContent = data.password ? data.password : '(hidden)';
-      // Place host (the one who created the room) at the top
-      let hostName = params.name || '';
-      if (!isHost && players.length > 0) {
-        hostName = players[0]; // fallback: assume first is host if not known
-      }
-      const sortedPlayers = [hostName, ...players.filter(n => n !== hostName)];
-      if (sortedPlayers.length === 0) {
+      // Always use the players array from backend
+      if (players.length === 0) {
         document.getElementById('playerNames').innerHTML = '<li style="color:#a07c4f;font-style:italic;">No players yet. Waiting for friends...</li>';
       } else {
-        document.getElementById('playerNames').innerHTML = sortedPlayers.map((name, idx) => {
+        // Mark the host (first player) as (Host)
+        document.getElementById('playerNames').innerHTML = players.map((name, idx) => {
           const color = stringToColor(name);
           return `<li style=\"display:flex;align-items:center;margin-bottom:4px;\"><span style=\"display:inline-block;width:18px;height:18px;border-radius:50%;background:${color};margin-right:10px;border:2px solid #e2c391;\"></span><span style=\"font-weight:${idx===0?'bold':'normal'};color:${idx===0?'#a07c4f':'#5a4327'}\">${name}${idx===0?' (Host)':''}</span></li>`;
         }).join('');
