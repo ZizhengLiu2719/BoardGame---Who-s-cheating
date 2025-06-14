@@ -125,8 +125,8 @@
       }
       socket.emit('joinRoom', { roomId, password, playerName }, (res) => {
         if (res.success) {
-          // On success, redirect to game.html with params
-          window.location.href = `game.html?roomId=${roomId}&name=${encodeURIComponent(playerName)}`;
+          // On success, redirect to game.html with params, including password
+          window.location.href = `game.html?roomId=${roomId}&name=${encodeURIComponent(playerName)}&password=${encodeURIComponent(password)}`;
         } else {
           showError(res.message || 'Failed to join room.');
         }

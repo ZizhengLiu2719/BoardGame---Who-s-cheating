@@ -135,6 +135,7 @@
     if (!playerName) {
       playerName = prompt('Enter your name:');
     }
+    // Only prompt for password if not present in URL
     if (!roomPassword) {
       roomPassword = prompt('Enter room password:');
       document.getElementById('roomPassword').textContent = roomPassword;
