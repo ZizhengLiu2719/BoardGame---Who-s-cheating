@@ -45,18 +45,21 @@ io.on('connection', (socket) => {
       return callback({ success: false, message: 'Room already exists.' });
     }
     const players = [{ id: socket.id, name: hostName }];
+    const readyStates = { [hostName]: false };
     await redis.hmset(`room:${roomId}`,
       'password', password,
       'maxPlayers', maxPlayers,
       'roomName', roomName || '',
-      'players', JSON.stringify(players)
+      'players', JSON.stringify(players),
+      'readyStates', JSON.stringify(readyStates)
     );
     socket.join(roomId);
     callback({ success: true });
     io.to(roomId).emit('playerListUpdate', {
       players: players.map(p => p.name),
       roomName: roomName,
-      password: password
+      password: password,
+      readyStates: readyStates
     });
   });
 
@@ -70,6 +73,7 @@ io.on('connection', (socket) => {
       return callback({ success: false, message: 'Incorrect password.' });
     }
     let players = JSON.parse(room.players || '[]');
+    let readyStates = JSON.parse(room.readyStates || '{}');
     if (players.length >= Number(room.maxPlayers) && !players.some(p => p.name === playerName)) {
       return callback({ success: false, message: 'Room is full.' });
     }
@@ -79,15 +83,47 @@ io.on('connection', (socket) => {
       existing.id = socket.id;
     } else {
       players.push({ id: socket.id, name: playerName });
+      readyStates[playerName] = false;
     }
     await setPlayerList(roomId, players);
+    await redis.hset(`room:${roomId}`, 'readyStates', JSON.stringify(readyStates));
     socket.join(roomId);
     callback({ success: true });
     io.to(roomId).emit('playerListUpdate', {
       players: players.map(p => p.name),
       roomName: room.roomName,
-      password: room.password
+      password: room.password,
+      readyStates: readyStates
     });
+  });
+
+  // Player toggles ready/unready
+  socket.on('setReadyState', async ({ roomId, playerName, isReady }) => {
+    const room = await redis.hgetall(`room:${roomId}`);
+    if (!room) return;
+    let readyStates = JSON.parse(room.readyStates || '{}');
+    readyStates[playerName] = isReady;
+    await redis.hset(`room:${roomId}`, 'readyStates', JSON.stringify(readyStates));
+    const players = JSON.parse(room.players || '[]');
+    io.to(roomId).emit('playerListUpdate', {
+      players: players.map(p => p.name),
+      roomName: room.roomName,
+      password: room.password,
+      readyStates: readyStates
+    });
+  });
+
+  // Host starts the game
+  socket.on('startGame', async ({ roomId }) => {
+    const room = await redis.hgetall(`room:${roomId}`);
+    if (!room) return;
+    const players = JSON.parse(room.players || '[]');
+    const readyStates = JSON.parse(room.readyStates || '{}');
+    const allReady = players.length === Number(room.maxPlayers) && players.every(p => readyStates[p.name]);
+    if (allReady) {
+      io.to(roomId).emit('startGame');
+      // TODO: Add further game logic here
+    }
   });
 
   // Handle disconnect
@@ -98,9 +134,12 @@ io.on('connection', (socket) => {
       const roomId = key.split(':')[1];
       const room = await redis.hgetall(key);
       let players = JSON.parse(room.players || '[]');
+      let readyStates = JSON.parse(room.readyStates || '{}');
       const idx = players.findIndex(p => p.id === socket.id);
       if (idx !== -1) {
+        const playerName = players[idx].name;
         players.splice(idx, 1);
+        delete readyStates[playerName];
         if (players.length === 0) {
           // Add a 5-second delay before deleting the room
           setTimeout(async () => {
@@ -113,10 +152,12 @@ io.on('connection', (socket) => {
           }, 5000);
         } else {
           await setPlayerList(roomId, players);
+          await redis.hset(`room:${roomId}`, 'readyStates', JSON.stringify(readyStates));
           io.to(roomId).emit('playerListUpdate', {
             players: players.map(p => p.name),
             roomName: room.roomName,
-            password: room.password
+            password: room.password,
+            readyStates: readyStates
           });
         }
         break;

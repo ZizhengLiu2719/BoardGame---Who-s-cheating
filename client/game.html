@@ -86,6 +86,69 @@
       min-height: 400px;
       text-align: center;
     }
+    .ghibli-btn-ready {
+      padding: 14px 38px;
+      font-size: 1.15rem;
+      font-family: inherit;
+      background: linear-gradient(100deg, #e2c391 80%, #f7e7c6 100%);
+      color: #5a4327;
+      border: 3px solid #bfa16a;
+      border-radius: 18px 40px 18px 40px / 40px 18px 40px 18px;
+      box-shadow: 4px 8px 24px 0 rgba(90, 67, 39, 0.18), 0 2.5px 0 #e2c391 inset, 0 0 0 8px #e2c39122 inset;
+      cursor: pointer;
+      margin-right: 18px;
+      transition: box-shadow 0.2s, transform 0.18s, background 0.2s, border 0.2s;
+    }
+    .ghibli-btn-ready:hover {
+      background: linear-gradient(100deg, #f9eacb 80%, #e7cfa1 100%);
+      box-shadow: 0 16px 48px 0 rgba(90, 67, 39, 0.28), 0 4px 0 #e2c391 inset, 0 0 0 12px #e2c39133 inset;
+      transform: translateY(-3px) scale(1.03) rotate(-1deg);
+      border-color: #a07c4f;
+    }
+    .ghibli-btn-unready {
+      padding: 14px 38px;
+      font-size: 1.15rem;
+      font-family: inherit;
+      background: linear-gradient(100deg, #f7e7c6 80%, #e2c391 100%);
+      color: #a94442;
+      border: 3px solid #e2c391;
+      border-radius: 18px 40px 18px 40px / 40px 18px 40px 18px;
+      box-shadow: 4px 8px 24px 0 rgba(90, 67, 39, 0.12), 0 2.5px 0 #e2c391 inset, 0 0 0 8px #e2c39111 inset;
+      cursor: pointer;
+      margin-right: 18px;
+      transition: box-shadow 0.2s, transform 0.18s, background 0.2s, border 0.2s;
+    }
+    .ghibli-btn-unready:hover {
+      background: linear-gradient(100deg, #fbead1 80%, #e2c391 100%);
+      box-shadow: 0 16px 48px 0 rgba(90, 67, 39, 0.18), 0 4px 0 #e2c391 inset, 0 0 0 12px #e2c39122 inset;
+      transform: translateY(-3px) scale(1.03) rotate(-1deg);
+      border-color: #a07c4f;
+    }
+    .ghibli-btn-start {
+      padding: 14px 38px;
+      font-size: 1.18rem;
+      font-family: inherit;
+      background: linear-gradient(100deg, #bfa16a 80%, #e2c391 100%);
+      color: #fffbe7;
+      border: 3px solid #7a5a2f;
+      border-radius: 40px 18px 40px 18px / 18px 40px 18px 40px;
+      box-shadow: 4px 8px 32px 0 rgba(90, 67, 39, 0.22), 0 2.5px 0 #e2c391 inset, 0 0 0 8px #e2c39133 inset;
+      cursor: pointer;
+      transition: box-shadow 0.2s, transform 0.18s, background 0.2s, border 0.2s;
+    }
+    .ghibli-btn-start:disabled {
+      background: #e2c391;
+      color: #bfa16a;
+      cursor: not-allowed;
+      opacity: 0.7;
+      border-color: #bfa16a;
+    }
+    .ghibli-btn-start:hover:enabled {
+      background: linear-gradient(100deg, #e2c391 80%, #bfa16a 100%);
+      box-shadow: 0 16px 48px 0 rgba(90, 67, 39, 0.28), 0 4px 0 #e2c391 inset, 0 0 0 12px #e2c39133 inset;
+      transform: translateY(-3px) scale(1.03) rotate(-1deg);
+      border-color: #7a5a2f;
+    }
   </style>
 </head>
 <body class="ghibli-game">
@@ -99,8 +162,9 @@
       <ul id="playerNames" style="margin: 8px 0 0 0; padding-left: 18px;"></ul>
     </div>
   </div>
-  <div class="game-area-ghibli">
+  <div class="game-area-ghibli" id="gameArea">
     <h2>Welcome to the Game Room!</h2>
+    <div id="hostControls" style="margin-top:32px;"></div>
     <p style="font-size:1.2rem; color:#7a5a2f;">Game content will appear here soon...</p>
   </div>
   <script src="/socket.io/socket.io.js"></script>
@@ -160,6 +224,46 @@
       return color;
     }
 
+    // Ready/Unready and Start button logic
+    let isReady = false;
+    let allReady = false;
+    let roomIsFull = false;
+    let playerNamesCache = [];
+    let readyStatesCache = {};
+    function renderHostControls() {
+      const hostControls = document.getElementById('hostControls');
+      if (!isHost) {
+        hostControls.innerHTML = '';
+        return;
+      }
+      // Ready/Unready button
+      const readyBtn = `<button id="readyBtn" class="${isReady ? 'ghibli-btn-unready' : 'ghibli-btn-ready'}">${isReady ? 'Unready' : 'Ready'}</button>`;
+      // Start button (disabled if not all ready or not full)
+      const startBtn = `<button id="startBtn" class="ghibli-btn-start" ${(!allReady || !roomIsFull) ? 'disabled' : ''}>Start</button>`;
+      hostControls.innerHTML = readyBtn + startBtn;
+      document.getElementById('readyBtn').onclick = function() {
+        isReady = !isReady;
+        socket.emit('setReadyState', { roomId, playerName: myName, isReady });
+        renderHostControls();
+      };
+      document.getElementById('startBtn').onclick = function() {
+        if (allReady && roomIsFull) {
+          socket.emit('startGame', { roomId });
+        }
+      };
+    }
+    // For non-hosts, show only Ready/Unready button
+    function renderPlayerControls() {
+      const hostControls = document.getElementById('hostControls');
+      if (isHost) return;
+      const readyBtn = `<button id="readyBtn" class="${isReady ? 'ghibli-btn-unready' : 'ghibli-btn-ready'}">${isReady ? 'Unready' : 'Ready'}</button>`;
+      hostControls.innerHTML = readyBtn;
+      document.getElementById('readyBtn').onclick = function() {
+        isReady = !isReady;
+        socket.emit('setReadyState', { roomId, playerName: myName, isReady });
+        renderPlayerControls();
+      };
+    }
     // Update player list and count, host always on top
     socket.on('playerListUpdate', (data) => {
       console.log('Received playerListUpdate:', data); // DEBUG LOG
@@ -169,16 +273,34 @@
       // Update room name and password from server
       document.getElementById('roomName').textContent = data.roomName ? data.roomName : '(none)';
       document.getElementById('roomPassword').textContent = data.password ? data.password : '(hidden)';
-      // Always use the players array from backend
-      if (players.length === 0) {
+      playerNamesCache = data.players || [];
+      readyStatesCache = data.readyStates || {};
+      roomIsFull = playerCount == maxPlayers;
+      allReady = playerNamesCache.length == maxPlayers && playerNamesCache.every(n => readyStatesCache[n]);
+      isReady = !!readyStatesCache[myName];
+      // Render player list with ready state
+      if (playerNamesCache.length === 0) {
         document.getElementById('playerNames').innerHTML = '<li style="color:#a07c4f;font-style:italic;">No players yet. Waiting for friends...</li>';
       } else {
-        // Mark the host (first player) as (Host)
-        document.getElementById('playerNames').innerHTML = players.map((name, idx) => {
+        document.getElementById('playerNames').innerHTML = playerNamesCache.map((name, idx) => {
           const color = stringToColor(name);
-          return `<li style=\"display:flex;align-items:center;margin-bottom:4px;\"><span style=\"display:inline-block;width:18px;height:18px;border-radius:50%;background:${color};margin-right:10px;border:2px solid #e2c391;\"></span><span style=\"font-weight:${idx===0?'bold':'normal'};color:${idx===0?'#a07c4f':'#5a4327'}\">${name}${idx===0?' (Host)':''}</span></li>`;
+          const ready = readyStatesCache[name];
+          const readyCircle = `<span style=\"display:inline-block;width:14px;height:14px;border-radius:50%;background:${ready ? '#4caf50' : '#e74c3c'};margin-right:6px;border:2px solid #e2c391;box-shadow:0 1px 4px 0 #e2c39122;vertical-align:middle;\"></span>`;
+          return `<li style=\"display:flex;align-items:center;margin-bottom:4px;\">${readyCircle}<span style=\"display:inline-block;width:18px;height:18px;border-radius:50%;background:${color};margin-right:10px;border:2px solid #e2c391;\"></span><span style=\"font-weight:${idx===0?'bold':'normal'};color:${idx===0?'#a07c4f':'#5a4327'}\">${name}${idx===0?' (Host)':''}${ready ? ' (Ready)' : ' (Unready)'}</span></li>`;
         }).join('');
       }
+      // Render controls
+      if (isHost) {
+        renderHostControls();
+      } else {
+        renderPlayerControls();
+      }
+    });
+    // Listen for startGame event
+    socket.on('startGame', () => {
+      // Redirect to start.html with roomId, name, and password
+      const url = `start.html?roomId=${encodeURIComponent(roomId)}&name=${encodeURIComponent(myName)}&password=${encodeURIComponent(roomPassword)}`;
+      window.location.href = url;
     });
   </script>
 </body>
