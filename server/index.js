@@ -2,10 +2,12 @@ const express = require('express');
 const http = require('http');
 const { Server } = require('socket.io');
 const path = require('path');
+const Redis = require('ioredis');
 
 const app = express();
 const server = http.createServer(app);
 const io = new Server(server);
+const redis = new Redis(process.env.REDIS_URL);
 
 // Serve static files from the client directory
 app.use(express.static(path.join(__dirname, '../client')));
@@ -15,12 +17,21 @@ app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, '../client', 'titlePage.html'));
 });
 
-// Room management
-const rooms = {};
+// Helper: get player list for a room from Redis
+async function getPlayerList(roomId) {
+  const room = await redis.hgetall(`room:${roomId}`);
+  if (!room || !room.players) return [];
+  return JSON.parse(room.players);
+}
 
-// Helper: get player list for a room
-function getPlayerList(roomId) {
-  return rooms[roomId]?.players.map(p => p.name) || [];
+// Helper: update player list in Redis
+async function setPlayerList(roomId, players) {
+  await redis.hset(`room:${roomId}`, 'players', JSON.stringify(players));
+}
+
+// Helper: delete room from Redis
+async function deleteRoom(roomId) {
+  await redis.del(`room:${roomId}`);
 }
 
 // Socket.IO connection handler
@@ -28,67 +39,77 @@ io.on('connection', (socket) => {
   console.log('A user connected:', socket.id);
 
   // Host creates a room
-  socket.on('createRoom', ({ roomId, password, maxPlayers, hostName, roomName }, callback) => {
-    if (rooms[roomId]) {
+  socket.on('createRoom', async ({ roomId, password, maxPlayers, hostName, roomName }, callback) => {
+    const exists = await redis.exists(`room:${roomId}`);
+    if (exists) {
       return callback({ success: false, message: 'Room already exists.' });
     }
-    rooms[roomId] = {
-      password,
-      maxPlayers: Number(maxPlayers),
-      players: [{ id: socket.id, name: hostName }],
-      roomName: roomName || '',
-    };
+    const players = [{ id: socket.id, name: hostName }];
+    await redis.hmset(`room:${roomId}`,
+      'password', password,
+      'maxPlayers', maxPlayers,
+      'roomName', roomName || '',
+      'players', JSON.stringify(players)
+    );
     socket.join(roomId);
     callback({ success: true });
     io.to(roomId).emit('playerListUpdate', {
-      players: getPlayerList(roomId),
-      roomName: rooms[roomId].roomName,
-      password: rooms[roomId].password
+      players: players.map(p => p.name),
+      roomName: roomName,
+      password: password
     });
   });
 
   // Player joins a room
-  socket.on('joinRoom', ({ roomId, password, playerName }, callback) => {
-    const room = rooms[roomId];
-    if (!room) {
+  socket.on('joinRoom', async ({ roomId, password, playerName }, callback) => {
+    const room = await redis.hgetall(`room:${roomId}`);
+    if (!room || !room.password) {
       return callback({ success: false, message: 'Room does not exist.' });
     }
     if (room.password !== password) {
       return callback({ success: false, message: 'Incorrect password.' });
     }
-    if (room.players.length >= room.maxPlayers && !room.players.some(p => p.name === playerName)) {
+    let players = JSON.parse(room.players || '[]');
+    if (players.length >= Number(room.maxPlayers) && !players.some(p => p.name === playerName)) {
       return callback({ success: false, message: 'Room is full.' });
     }
     // If name already exists, update socket ID (allow host to rejoin)
-    const existing = room.players.find(p => p.name === playerName);
+    const existing = players.find(p => p.name === playerName);
     if (existing) {
       existing.id = socket.id;
     } else {
-      room.players.push({ id: socket.id, name: playerName });
+      players.push({ id: socket.id, name: playerName });
     }
+    await setPlayerList(roomId, players);
     socket.join(roomId);
     callback({ success: true });
     io.to(roomId).emit('playerListUpdate', {
-      players: getPlayerList(roomId),
+      players: players.map(p => p.name),
       roomName: room.roomName,
       password: room.password
     });
   });
 
   // Handle disconnect
-  socket.on('disconnect', () => {
-    for (const [roomId, room] of Object.entries(rooms)) {
-      const idx = room.players.findIndex(p => p.id === socket.id);
+  socket.on('disconnect', async () => {
+    // Find all rooms (scan keys)
+    const keys = await redis.keys('room:*');
+    for (const key of keys) {
+      const roomId = key.split(':')[1];
+      const room = await redis.hgetall(key);
+      let players = JSON.parse(room.players || '[]');
+      const idx = players.findIndex(p => p.id === socket.id);
       if (idx !== -1) {
-        room.players.splice(idx, 1);
-        io.to(roomId).emit('playerListUpdate', {
-          players: getPlayerList(roomId),
-          roomName: room.roomName,
-          password: room.password
-        });
-        // Remove room if empty
-        if (room.players.length === 0) {
-          delete rooms[roomId];
+        players.splice(idx, 1);
+        if (players.length === 0) {
+          await deleteRoom(roomId);
+        } else {
+          await setPlayerList(roomId, players);
+          io.to(roomId).emit('playerListUpdate', {
+            players: players.map(p => p.name),
+            roomName: room.roomName,
+            password: room.password
+          });
         }
         break;
       }

@@ -175,6 +175,7 @@
       const hostName = document.getElementById('username').value;
       const roomName = document.getElementById('roomname').value;
       socket.emit('createRoom', { roomId, password, maxPlayers, hostName, roomName }, (res) => {
+        console.log('createRoom response:', res); // DEBUG LOG
         if (res.success) {
           window.location.href = `game.html?roomId=${roomId}&maxPlayers=${maxPlayers}&name=${encodeURIComponent(hostName)}&host=1&password=${encodeURIComponent(password)}&roomname=${encodeURIComponent(roomName)}`;
         } else {
