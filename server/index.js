@@ -102,7 +102,15 @@ io.on('connection', (socket) => {
       if (idx !== -1) {
         players.splice(idx, 1);
         if (players.length === 0) {
-          await deleteRoom(roomId);
+          // Add a 5-second delay before deleting the room
+          setTimeout(async () => {
+            const checkRoom = await redis.hgetall(`room:${roomId}`);
+            const checkPlayers = JSON.parse(checkRoom.players || '[]');
+            if (checkPlayers.length === 0) {
+              await deleteRoom(roomId);
+              console.log('Room deleted after delay:', roomId);
+            }
+          }, 5000);
         } else {
           await setPlayerList(roomId, players);
           io.to(roomId).emit('playerListUpdate', {
