@@ -173,9 +173,10 @@
       const maxPlayers = gamemodeInput.value;
       const password = document.getElementById('password').value;
       const hostName = document.getElementById('username').value;
+      const roomName = document.getElementById('roomname').value;
       socket.emit('createRoom', { roomId, password, maxPlayers, hostName }, (res) => {
         if (res.success) {
-          window.location.href = `game.html?roomId=${roomId}&maxPlayers=${maxPlayers}&name=${encodeURIComponent(hostName)}&host=1&password=${encodeURIComponent(password)}`;
+          window.location.href = `game.html?roomId=${roomId}&maxPlayers=${maxPlayers}&name=${encodeURIComponent(hostName)}&host=1&password=${encodeURIComponent(password)}&roomname=${encodeURIComponent(roomName)}`;
         } else {
           alert(res.message || 'Failed to create room.');
         }
