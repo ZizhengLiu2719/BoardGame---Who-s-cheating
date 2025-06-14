@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Game Room – Who's Cheating?</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    body.ghibli-game {
+      background: linear-gradient(120deg, #f7ecd7 60%, #e2c391 100%);
+      font-family: 'Segoe Print', 'Comic Sans MS', 'Arial', cursive;
+      color: #5a4327;
+      margin: 0;
+      padding: 0;
+      min-height: 100vh;
+    }
+    .game-header {
+      position: absolute;
+      top: 24px;
+      left: 32px;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 18px;
+    }
+    .room-id-ghibli {
+      font-size: 1.3rem;
+      color: #7a5a2f;
+      background: #fffbe7;
+      border: 2.5px solid #e2c391;
+      border-radius: 18px;
+      padding: 12px 28px;
+      box-shadow: 0 2px 8px 0 #e2c39133;
+      font-family: 'Segoe Print', 'Comic Sans MS', 'Arial', cursive;
+      letter-spacing: 2px;
+      margin-bottom: 8px;
+    }
+    .player-count-box {
+      background: #f7e7c6;
+      border: 2px solid #bfa16a;
+      border-radius: 14px;
+      padding: 10px 22px;
+      font-size: 1.1rem;
+      color: #5a4327;
+      box-shadow: 0 2px 8px 0 #e2c39122;
+      margin-bottom: 8px;
+    }
+    .player-list {
+      margin-top: 18px;
+      background: #fffbe7;
+      border: 2px solid #e2c391;
+      border-radius: 12px;
+      padding: 10px 18px;
+      min-width: 180px;
+      min-height: 60px;
+      box-shadow: 0 2px 8px 0 #e2c39122;
+    }
+    .game-area-ghibli {
+      margin: 120px auto 0 auto;
+      max-width: 800px;
+      background: #f7ecd7;
+      border: 5px solid #bfa16a;
+      border-radius: 32px;
+      box-shadow: 0 8px 32px 0 rgba(90, 67, 39, 0.18), 0 0 0 18px #e2c39133 inset;
+      padding: 40px 36px 32px 36px;
+      min-height: 400px;
+      text-align: center;
+    }
+  </style>
+</head>
+<body class="ghibli-game">
+  <div class="game-header">
+    <div class="room-id-ghibli" id="roomIdBox">Room ID: <span id="roomId"></span></div>
+    <div class="player-count-box" id="playerCountBox">Players: <span id="playerCount">1</span>/<span id="maxPlayers">6</span></div>
+    <div class="player-list" id="playerList">
+      <strong>Players in Room:</strong>
+      <ul id="playerNames" style="margin: 8px 0 0 0; padding-left: 18px;"></ul>
+    </div>
+  </div>
+  <div class="game-area-ghibli">
+    <h2>Welcome to the Game Room!</h2>
+    <p style="font-size:1.2rem; color:#7a5a2f;">Game content will appear here soon...</p>
+  </div>
+  <script src="/socket.io/socket.io.js"></script>
+  <script>
+    // Parse query params for roomId, maxPlayers, name, host
+    function getQueryParams() {
+      const params = {};
+      window.location.search.replace(/[?&]+([^=&]+)=([^&]*)/gi, function(str,key,value) {
+        params[key] = decodeURIComponent(value);
+      });
+      return params;
+    }
+    const params = getQueryParams();
+    const roomId = params.roomId || '00000';
+    const maxPlayers = params.maxPlayers || 6;
+    const myName = params.name || '';
+    const isHost = params.host === '1';
+    document.getElementById('roomId').textContent = roomId;
+    document.getElementById('maxPlayers').textContent = maxPlayers;
+    let playerCount = 1;
+    document.getElementById('playerCount').textContent = playerCount;
+
+    // Socket.IO connection
+    const socket = io();
+
+    // Join room if not host
+    if (!isHost) {
+      let playerName = myName;
+      if (!playerName) {
+        playerName = prompt('Enter your name:');
+      }
+      let password = prompt('Enter room password:');
+      socket.emit('joinRoom', { roomId, password, playerName }, (res) => {
+        if (!res.success) {
+          alert(res.message || 'Failed to join room.');
+          window.location.href = 'joining.html';
+        }
+      });
+    }
+
+    // Update player list and count
+    socket.on('playerListUpdate', (players) => {
+      playerCount = players.length;
+      document.getElementById('playerCount').textContent = playerCount;
+      document.getElementById('playerNames').innerHTML = players.map(name => `<li>${name}</li>`).join('');
+    });
+  </script>
+</body>
+</html>

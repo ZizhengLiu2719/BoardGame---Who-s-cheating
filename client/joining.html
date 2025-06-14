@@ -100,12 +100,37 @@
       </div>
       <button type="submit">Join Room</button>
     </form>
+    <div id="errorBox" style="display:none; margin-top:18px; background:#fffbe7; border:2px solid #e2c391; border-radius:14px; color:#a94442; font-size:1.1rem; padding:12px 18px; box-shadow:0 2px 8px 0 #e2c39122;"></div>
   </div>
+  <script src="/socket.io/socket.io.js"></script>
   <script>
+    const socket = io();
+    const errorBox = document.getElementById('errorBox');
+    function showError(msg) {
+      errorBox.textContent = msg;
+      errorBox.style.display = 'block';
+    }
+    function hideError() {
+      errorBox.style.display = 'none';
+    }
     document.getElementById('joiningForm').addEventListener('submit', function(e) {
       e.preventDefault();
-      // TODO: Validate/join room logic here
-      alert('Joining room... (implement logic)');
+      hideError();
+      const roomId = document.getElementById('roomid').value.trim();
+      const playerName = document.getElementById('username').value.trim();
+      const password = document.getElementById('password').value;
+      if (!roomId || !playerName || !password) {
+        showError('Please fill in all fields.');
+        return;
+      }
+      socket.emit('joinRoom', { roomId, password, playerName }, (res) => {
+        if (res.success) {
+          // On success, redirect to game.html with params
+          window.location.href = `game.html?roomId=${roomId}&name=${encodeURIComponent(playerName)}`;
+        } else {
+          showError(res.message || 'Failed to join room.');
+        }
+      });
     });
   </script>
 </body>

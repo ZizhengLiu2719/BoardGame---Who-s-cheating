@@ -147,6 +147,7 @@
     </form>
     <div class="room-id-box" id="roomIdBox" style="display:none;">Room ID: <span id="roomId"></span></div>
   </div>
+  <script src="/socket.io/socket.io.js"></script>
   <script>
     // Gamemode button selection
     const gamemodeBtns = document.querySelectorAll('.gamemode-btn');
@@ -161,14 +162,24 @@
     // Default select 6 players
     gamemodeBtns[0].classList.add('selected');
 
+    // Socket.IO connection
+    const socket = io();
+
     // Room creation logic
     document.getElementById('hostingForm').addEventListener('submit', function(e) {
       e.preventDefault();
       // Generate random room ID (1-10000, padded to 5 digits)
       const roomId = String(Math.floor(Math.random() * 10000) + 1).padStart(5, '0');
-      document.getElementById('roomId').textContent = roomId;
-      document.getElementById('roomIdBox').style.display = 'inline-block';
-      // TODO: Send room info to server or proceed to next step
+      const maxPlayers = gamemodeInput.value;
+      const password = document.getElementById('password').value;
+      const hostName = document.getElementById('username').value;
+      socket.emit('createRoom', { roomId, password, maxPlayers, hostName }, (res) => {
+        if (res.success) {
+          window.location.href = `game.html?roomId=${roomId}&maxPlayers=${maxPlayers}&name=${encodeURIComponent(hostName)}&host=1`;
+        } else {
+          alert(res.message || 'Failed to create room.');
+        }
+      });
     });
   </script>
 </body>
