@@ -1,6 +1,7 @@
 const express = require('express');
 const http = require('http');
 const { Server } = require('socket.io');
+const path = require('path');
 
 const app = express();
 const server = http.createServer(app);
@@ -23,5 +24,10 @@ io.on('connection', (socket) => {
 const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => console.log(`Server running on port ${PORT}`));
 
-const path = require('path');
+// Serve static files from the client directory
 app.use(express.static(path.join(__dirname, '../client')));
+
+// Optional: Serve index.html for any unknown routes (for single-page apps)
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, '../client', 'titlePage.html'));
+});
