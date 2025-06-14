@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Who's Cheating? – Characters</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    body.character-ghibli {
+      background: linear-gradient(120deg, #f7ecd7 60%, #e2c391 100%);
+      font-family: 'Segoe Print', 'Comic Sans MS', 'Arial', cursive;
+      color: #5a4327;
+      margin: 0;
+      padding: 0;
+      min-height: 100vh;
+    }
+    .character-container {
+      max-width: 1000px;
+      margin: 48px auto 32px auto;
+      background: rgba(255, 255, 245, 0.92);
+      border-radius: 32px;
+      box-shadow: 0 8px 32px 0 rgba(120, 90, 40, 0.10);
+      padding: 40px 36px 32px 36px;
+      border: 2.5px solid #e2c391;
+    }
+    .character-title {
+      font-size: 2.3rem;
+      font-weight: bold;
+      letter-spacing: 2px;
+      margin-bottom: 24px;
+      text-align: center;
+      color: #7a5a2f;
+      text-shadow: 0 2px 0 #f7e7c6, 0 4px 12px #e2c39144;
+    }
+    .character-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 32px 24px;
+      justify-content: center;
+    }
+    .character-card {
+      background: #f7e7c6;
+      border-radius: 22px;
+      border: 1.5px solid #e2c391;
+      box-shadow: 0 2px 8px 0 #e2c39133;
+      width: 220px;
+      padding: 18px 14px 16px 14px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      transition: transform 0.15s, box-shadow 0.15s;
+    }
+    .character-card:hover {
+      transform: translateY(-4px) scale(1.03) rotate(-1deg);
+      box-shadow: 0 8px 24px 0 rgba(120, 90, 40, 0.18);
+    }
+    .character-img {
+      width: 120px;
+      height: 120px;
+      object-fit: contain;
+      border-radius: 50%;
+      border: 2.5px solid #e2c391;
+      background: #fffbe7;
+      margin-bottom: 12px;
+      box-shadow: 0 2px 8px 0 #e2c39122;
+    }
+    .character-name {
+      font-size: 1.25rem;
+      font-weight: bold;
+      color: #a07c4f;
+      margin-bottom: 6px;
+      text-align: center;
+    }
+    .character-role {
+      font-size: 1.05rem;
+      font-weight: 600;
+      color: #7a5a2f;
+      margin-bottom: 4px;
+      text-align: center;
+    }
+    .character-desc {
+      font-size: 0.98rem;
+      color: #5a4327;
+      text-align: center;
+    }
+    @media (max-width: 700px) {
+      .character-grid { gap: 18px 0; }
+      .character-card { width: 90vw; max-width: 320px; }
+      .character-img { width: 90px; height: 90px; }
+    }
+  </style>
+</head>
+<body class="character-ghibli">
+  <div class="character-container">
+    <div class="character-title">Meet the Characters</div>
+    <div class="character-grid">
+      <!-- Michael -->
+      <div class="character-card">
+        <img src="imgs/michael.png" alt="Michael" class="character-img">
+        <div class="character-name">Michael</div>
+        <div class="character-role">Cheater</div>
+        <div class="character-desc">Creator's Privilege: <b>Finding Abby</b><br>Can guess who Abby is during the Party. If correct, Cheaters win instantly; if wrong, Keepers win instantly.</div>
+      </div>
+      <!-- Jack -->
+      <div class="character-card">
+        <img src="imgs/jack.png" alt="Jack" class="character-img">
+        <div class="character-name">Jack</div>
+        <div class="character-role">Cheater</div>
+        <div class="character-desc">I Would Like to Hide My Card<br>Jack's identity is hidden from Abby and other Cheaters. A mysterious presence at the party.</div>
+      </div>
+      <!-- Wind -->
+      <div class="character-card">
+        <img src="imgs/wind.png" alt="Wind" class="character-img">
+        <div class="character-name">Wind</div>
+        <div class="character-role">Cheater</div>
+        <div class="character-desc">Molesting a Boy: At Night, can add extra Scandal.<br>Mislead: After reveals, can flip one Love to Hate, adding Scandal. A master of stirring up drama.</div>
+      </div>
+      <!-- Abby -->
+      <div class="character-card">
+        <img src="imgs/abby.png" alt="Abby" class="character-img">
+        <div class="character-name">Abby</div>
+        <div class="character-role">Keeper</div>
+        <div class="character-desc">Keen Sight: During setup, learns all Cheaters except Jack. The sharp-eyed detective of the family.</div>
+      </div>
+      <!-- Kennedi -->
+      <div class="character-card">
+        <img src="imgs/kennedi.png" alt="Kennedi" class="character-img">
+        <div class="character-name">Kennedi</div>
+        <div class="character-role">Keeper</div>
+        <div class="character-desc">Protecting the Party: Before reveals, can make all cards count as Love, boosting Close-knot. The heart and shield of the group.</div>
+      </div>
+      <!-- Ker -->
+      <div class="character-card">
+        <img src="imgs/ker.png" alt="Ker" class="character-img">
+        <div class="character-name">Ker</div>
+        <div class="character-role">Keeper</div>
+        <div class="character-desc">The Chosen One: After Helpers are picked, can swap a Helper with a non-Helper. Brings a twist to every party.</div>
+      </div>
+      <!-- Kiko -->
+      <div class="character-card">
+        <img src="imgs/kiko.png" alt="Kiko" class="character-img">
+        <div class="character-name">Kiko</div>
+        <div class="character-role">Keeper (Pet)</div>
+        <div class="character-desc">A loyal companion on the Keeper side, Kiko is also a Keeper but has no special power. Always present at the party, adding warmth and a touch of magic to the family gatherings.</div>
+      </div>
+      <!-- Knox -->
+      <div class="character-card">
+        <img src="imgs/knox.png" alt="Knox" class="character-img">
+        <div class="character-name">Knox</div>
+        <div class="character-role">Keeper (Pet)</div>
+        <div class="character-desc">Faithful and playful, Knox is a Keeper on the Keeper side but has no special power. A source of joy and comfort for everyone, loves to be in the middle of the action.</div>
+      </div>
+      <!-- Nash -->
+      <div class="character-card">
+        <img src="imgs/nash.png" alt="Nash" class="character-img">
+        <div class="character-name">Nash</div>
+        <div class="character-role">Keeper (Pet)</div>
+        <div class="character-desc">The newest addition to the Keeper side, Nash is also a Keeper but has no special power. Brings energy and excitement to every party.</div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

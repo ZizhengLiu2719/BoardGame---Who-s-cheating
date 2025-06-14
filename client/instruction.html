@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Who's Cheating? – Game Instructions</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    body.instruction-ghibli {
+      background: linear-gradient(120deg, #f7ecd7 60%, #e2c391 100%);
+      font-family: 'Segoe Print', 'Comic Sans MS', 'Arial', cursive;
+      color: #5a4327;
+      margin: 0;
+      padding: 0;
+      min-height: 100vh;
+    }
+    .ghibli-container {
+      max-width: 820px;
+      margin: 48px auto 32px auto;
+      background: rgba(255, 255, 245, 0.92);
+      border-radius: 32px;
+      box-shadow: 0 8px 32px 0 rgba(120, 90, 40, 0.10);
+      padding: 40px 36px 32px 36px;
+      border: 2.5px solid #e2c391;
+    }
+    .ghibli-title {
+      font-size: 2.3rem;
+      font-weight: bold;
+      letter-spacing: 2px;
+      margin-bottom: 12px;
+      text-align: center;
+      color: #7a5a2f;
+      text-shadow: 0 2px 0 #f7e7c6, 0 4px 12px #e2c39144;
+    }
+    .ghibli-section {
+      margin-bottom: 32px;
+    }
+    .ghibli-section h2 {
+      font-size: 1.4rem;
+      margin-bottom: 8px;
+      color: #a07c4f;
+      border-left: 5px solid #e2c391;
+      padding-left: 12px;
+      font-weight: bold;
+    }
+    .ghibli-table {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0 6px;
+      margin: 12px 0 18px 0;
+      font-size: 1.05rem;
+    }
+    .ghibli-table th, .ghibli-table td {
+      background: #f7e7c6;
+      border-radius: 10px;
+      padding: 6px 10px;
+      text-align: center;
+      border: 1.5px solid #e2c391;
+    }
+    .ghibli-table th {
+      background: #e2c391;
+      color: #fff;
+      font-weight: bold;
+    }
+    .ghibli-card {
+      background: #f7e7c6;
+      border-radius: 18px;
+      border: 1.5px solid #e2c391;
+      padding: 14px 18px;
+      margin-bottom: 12px;
+      box-shadow: 0 2px 8px 0 #e2c39133;
+      font-size: 1.08rem;
+    }
+    .ghibli-emoji {
+      font-size: 1.3em;
+      vertical-align: middle;
+      margin-right: 4px;
+    }
+    .ghibli-note {
+      background: #fffbe7;
+      border-left: 5px solid #e2c391;
+      padding: 10px 18px;
+      border-radius: 0 16px 16px 0;
+      margin: 10px 0 18px 0;
+      font-size: 1rem;
+      color: #7a5a2f;
+      box-shadow: 0 1px 4px 0 #e2c39122;
+    }
+    @media (max-width: 600px) {
+      .ghibli-container { padding: 18px 4vw; }
+      .ghibli-title { font-size: 1.3rem; }
+    }
+  </style>
+</head>
+<body class="instruction-ghibli">
+  <div class="ghibli-container">
+    <div class="ghibli-title">WHO'S CHEATING? <span style="font-size:1.1rem;">– Family Feud Edition</span></div>
+    <div class="ghibli-section">
+      <div class="ghibli-card">
+        An online, no-elimination social-deduction web game for <b>6–9 players</b>. Over a set number of Family Parties, you'll collect <span class="ghibli-emoji">❤️</span> Close-knot or rack up <span class="ghibli-emoji">💥</span> Scandal points. After the final party (or if Scandal hits 10), whoever leads wins—unless Michael's "Finding Abby" twist upends the result!
+      </div>
+    </div>
+    <div class="ghibli-section">
+      <h2>👪 Players & Parties</h2>
+      <div class="ghibli-card">
+        <b>Pets:</b> Pets are on the Keeper side and are also Keepers, but have no special power. 2-Pet games (6 or 8): Kiko + Knox.<br>
+        3-Pet games (7 or 9): Kiko, Knox + Nash.
+      </div>
+      <table class="ghibli-table">
+        <tr><th>Players</th><th>Cheaters</th><th>Keepers (incl. Pets)</th><th>Pets</th><th>Parties</th></tr>
+        <tr><td>6</td><td>Michael, Wind (2)</td><td>Abby, Kennedi, Kiko, Knox (4)</td><td>Kiko, Knox</td><td>3</td></tr>
+        <tr><td>7</td><td>Michael, Wind (2)</td><td>Abby, Kennedi, Kiko, Knox, Nash (5)</td><td>Kiko, Knox, Nash</td><td>3</td></tr>
+        <tr><td>8</td><td>Michael, Jack, Wind (3)</td><td>Abby, Kennedi, Ker, Kiko, Knox (5)</td><td>Kiko, Knox</td><td>4</td></tr>
+        <tr><td>9</td><td>Michael, Jack, Wind (3)</td><td>Abby, Kennedi, Ker, Kiko, Knox, Nash (6)</td><td>Kiko, Knox, Nash</td><td>4</td></tr>
+      </table>
+    </div>
+    <div class="ghibli-section">
+      <h2>🎲 Components</h2>
+      <ul style="margin-left:18px;">
+        <li>Role cards (one per player)</li>
+        <li>Vote cards: <span class="ghibli-emoji">✅</span> Approve / <span class="ghibli-emoji">❌</span> Reject</li>
+        <li>Drama cards: each player's hand of 1 Love + 1 Hate</li>
+        <li>Close-knot & Scandal tracks (0→10)</li>
+        <li>Night marker (counts nights)</li>
+        <li>Skill buttons are visible only to relevant players</li>
+      </ul>
+    </div>
+    <div class="ghibli-section">
+      <h2>🔧 Setup</h2>
+      <ol style="margin-left:18px;">
+        <li>Deal each player one secret Role card.</li>
+        <li>Abby peeks: View all Cheaters except Jack.</li>
+        <li>Cheaters peek (except Jack): recognize one another; Jack stays hidden.</li>
+        <li>Initialize tracks at 0; Night marker → 0.</li>
+        <li>Randomly select the first Election Candidate.</li>
+      </ol>
+    </div>
+    <div class="ghibli-section">
+      <h2>🔄 Round Flow</h2>
+      <div class="ghibli-card"><b>Repeat for N Family Parties (see table):</b></div>
+      <ol style="margin-left:18px;">
+        <li><b>Night (10 sec)</b><br>
+          Rumors fly: Scandal +1.<br>
+          Wind may click <i>Molesting a Boy</i> (once) to instead add Scandal +2.<br>
+          Advance Night marker.
+        </li>
+        <li><b>Host Election & Helpers</b><br>
+          Elect Host: all vote <span class="ghibli-emoji">✅</span>/<span class="ghibli-emoji">❌</span> on the current Election Candidate.<br>
+          &gt;50% Approve → becomes Host.<br>
+          ≤50% Approve → pass candidate clockwise; return to Night for same party.<br>
+          Helpers: The Host picks 2 Helpers.
+        </li>
+        <li><b>Family Party (Drama & Scoring)</b><br>
+          <b>Skill-use window (10 sec):</b><br>
+          Kennedi may click <i>Protecting the Party</i> (once): all 3 cards count as Love → Close-knot +3.<br>
+          Wind may click <i>Mislead</i> (once): after reveals flip one Love→Hate → Scandal +1.<br>
+          If both are used, compare totals at that moment: the higher side's effect applies.<br>
+          Play Drama cards: Host + 2 Helpers each play Love or Hate.<br>
+          Reveal & tally: Love → +1 Close-knot; Hate → +1 Scandal.<br>
+          Michael may click <i>Finding Abby</i> anytime this Party: name one player as Abby.<br>
+          Correct → immediate Cheater victory.<br>
+          Wrong → immediate Keeper victory.<br>
+          If Parties remain, loop to Night; otherwise → Endgame.
+        </li>
+      </ol>
+    </div>
+    <div class="ghibli-section">
+      <h2>🔮 One-Time Role Powers</h2>
+      <table class="ghibli-table">
+        <tr><th>Role</th><th>Power</th><th>When</th><th>Effect</th></tr>
+        <tr><td>Abby</td><td>Keen Sight</td><td>Setup (auto)</td><td>Learns all the Cheaters except Jack</td></tr>
+        <tr><td>Jack</td><td>I Would Like to Hide My Card</td><td>Passive</td><td>Jack's identity remains hidden from Abby & other Cheaters</td></tr>
+        <tr><td>Wind</td><td>Molesting a Boy</td><td>Night</td><td>Use instead of +1 → Scandal +2</td></tr>
+        <tr><td>Wind</td><td>Mislead</td><td>After the Party reveals</td><td>Flip one Love→Hate → Scandal +1</td></tr>
+        <tr><td>Michael</td><td>Creator's Privilege: Finding Abby</td><td>Anytime during the Party</td><td>Guess Abby; correct → Cheaters win; wrong → Keepers win</td></tr>
+        <tr><td>Kennedi</td><td>Protecting the Party</td><td>Before reveals</td><td>All 3 cards count as Love → Close-knot +3</td></tr>
+        <tr><td>Ker</td><td>The Chosen One</td><td>After Helpers picked</td><td>Swap one chosen Helper with one non-Helper</td></tr>
+      </table>
+      <div class="ghibli-note">
+        <b>Note:</b> Each power is clickable once; button then disables.
+      </div>
+    </div>
+    <div class="ghibli-section">
+      <h2>🏆 Endgame & Victory</h2>
+      <ul style="margin-left:18px;">
+        <li>After all Family Parties:</li>
+        <ul>
+          <li>Close-knot &gt; Scandal → Keepers win</li>
+          <li>Scandal ≥ Close-knot → Cheaters win</li>
+        </ul>
+        <li>Michael's final Finding Abby may overturn a Keeper win if he correctly names Abby.</li>
+      </ul>
+    </div>
+    <div class="ghibli-section">
+      <div class="ghibli-card" style="text-align:center; font-size:1.15rem;">
+        Jump into your browser, click through the drama, and unmask <b>Who's Cheating?</b>!
+      </div>
+    </div>
+  </div>
+</body>
+</html>

@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Join a Game – Who's Cheating?</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    body.joining-ghibli {
+      background: linear-gradient(120deg, #f7ecd7 60%, #e2c391 100%);
+      font-family: 'Segoe Print', 'Comic Sans MS', 'Arial', cursive;
+      color: #5a4327;
+      margin: 0;
+      padding: 0;
+      min-height: 100vh;
+    }
+    .joining-container {
+      max-width: 480px;
+      margin: 80px auto 0 auto;
+      background: #f7ecd7;
+      border: 5px solid #bfa16a;
+      border-radius: 32px;
+      box-shadow: 0 8px 32px 0 rgba(90, 67, 39, 0.18), 0 0 0 18px #e2c39133 inset;
+      padding: 40px 36px 32px 36px;
+      position: relative;
+      overflow: hidden;
+      text-align: center;
+    }
+    .joining-container h1 {
+      font-size: 2rem;
+      color: #7a5a2f;
+      margin-bottom: 24px;
+      text-shadow: 0 2px 0 #f7e7c6, 0 4px 12px #e2c39144;
+    }
+    .joining-form {
+      display: flex;
+      flex-direction: column;
+      gap: 22px;
+      align-items: center;
+      margin-bottom: 18px;
+    }
+    .joining-form label {
+      font-size: 1.1rem;
+      color: #a07c4f;
+      margin-bottom: 6px;
+      font-weight: bold;
+    }
+    .joining-form input[type="text"], .joining-form input[type="password"] {
+      font-size: 1.1rem;
+      padding: 10px 18px;
+      border: 2px solid #e2c391;
+      border-radius: 12px;
+      background: #fffbe7;
+      color: #5a4327;
+      outline: none;
+      font-family: inherit;
+      margin-bottom: 4px;
+      width: 220px;
+      box-shadow: 0 2px 8px 0 #e2c39122;
+      transition: border 0.2s;
+    }
+    .joining-form input[type="text"]:focus, .joining-form input[type="password"]:focus {
+      border: 2.5px solid #bfa16a;
+    }
+    .joining-form button {
+      margin-top: 10px;
+      padding: 12px 36px;
+      font-size: 1.2rem;
+      font-family: inherit;
+      background: linear-gradient(100deg, #f7e7c6 80%, #e2c391 100%);
+      color: #5a4327;
+      border: 3px solid #bfa16a;
+      border-radius: 18px 40px 18px 40px / 40px 18px 40px 18px;
+      box-shadow: 4px 8px 24px 0 rgba(90, 67, 39, 0.18), 0 2.5px 0 #e2c391 inset, 0 0 0 8px #e2c39122 inset;
+      cursor: pointer;
+      transition: box-shadow 0.2s, transform 0.18s, background 0.2s, border 0.2s;
+    }
+    .joining-form button:active {
+      transform: scaleX(0.96) scaleY(0.98) rotateY(12deg);
+      background: linear-gradient(100deg, #e2c391 80%, #f7e7c6 100%);
+      border-color: #a07c4f;
+    }
+  </style>
+</head>
+<body class="joining-ghibli">
+  <div class="joining-container">
+    <h1>Join a Game</h1>
+    <form class="joining-form" id="joiningForm" autocomplete="off">
+      <div>
+        <label for="roomid">Room ID</label><br>
+        <input type="text" id="roomid" name="roomid" required placeholder="Enter room ID">
+      </div>
+      <div>
+        <label for="username">Your Name</label><br>
+        <input type="text" id="username" name="username" required placeholder="Enter your name">
+      </div>
+      <div>
+        <label for="password">Room Password</label><br>
+        <input type="password" id="password" name="password" required placeholder="Enter room password">
+      </div>
+      <button type="submit">Join Room</button>
+    </form>
+  </div>
+  <script>
+    document.getElementById('joiningForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      // TODO: Validate/join room logic here
+      alert('Joining room... (implement logic)');
+    });
+  </script>
+</body>
+</html> 
