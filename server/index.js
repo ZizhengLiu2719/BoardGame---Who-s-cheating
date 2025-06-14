@@ -56,13 +56,16 @@ io.on('connection', (socket) => {
     if (room.password !== password) {
       return callback({ success: false, message: 'Incorrect password.' });
     }
-    if (room.players.length >= room.maxPlayers) {
+    if (room.players.length >= room.maxPlayers && !room.players.some(p => p.name === playerName)) {
       return callback({ success: false, message: 'Room is full.' });
     }
-    if (room.players.some(p => p.name === playerName)) {
-      return callback({ success: false, message: 'Name already taken in this room.' });
+    // If name already exists, update socket ID (allow host to rejoin)
+    const existing = room.players.find(p => p.name === playerName);
+    if (existing) {
+      existing.id = socket.id;
+    } else {
+      room.players.push({ id: socket.id, name: playerName });
     }
-    room.players.push({ id: socket.id, name: playerName });
     socket.join(roomId);
     callback({ success: true });
     io.to(roomId).emit('playerListUpdate', {
