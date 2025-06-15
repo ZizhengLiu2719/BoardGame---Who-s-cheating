@@ -632,6 +632,67 @@
       transform: translateY(-3px) scale(1.03) rotate(-1deg);
       border-color: #7bb0e6;
     }
+    /* Custom disabled style for Finish Talking button */
+    #finishTalkingBtn:disabled, #finishTalkingBtn.disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      background: linear-gradient(100deg, #b0b0b0 80%, #e2c391 100%);
+      border-color: #bfa16a;
+      box-shadow: none;
+      color: #a07c4f;
+      filter: grayscale(0.3) brightness(0.95);
+    }
+    #finishTalkingBtn:not(:disabled):not(.disabled) {
+      background: linear-gradient(100deg, #e2c391 80%, #f7e7c6 100%);
+      color: #5a4327;
+      filter: none;
+    }
+    /* Shared disabled button style for all game buttons */
+    .disabled-btn,
+    .skill-btn:disabled, .skill-btn.disabled,
+    #finishTalkingBtn:disabled, #finishTalkingBtn.disabled,
+    #muteBtn:disabled, #muteBtn.disabled,
+    #voteYesBtn:disabled, #voteYesBtn.disabled,
+    #voteNoBtn:disabled, #voteNoBtn.disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      background: linear-gradient(100deg, #e2c391 80%, #e2c391 100%);
+      border-color: #bfa16a;
+      box-shadow: none;
+      color: #a07c4f;
+    }
+    .skill-btn:disabled:hover, .skill-btn.disabled:hover,
+    #finishTalkingBtn:disabled:hover, #finishTalkingBtn.disabled:hover,
+    #muteBtn:disabled:hover, #muteBtn.disabled:hover,
+    #voteYesBtn:disabled:hover, #voteYesBtn.disabled:hover,
+    #voteNoBtn:disabled:hover, #voteNoBtn.disabled:hover {
+      background: linear-gradient(100deg, #e2c391 80%, #e2c391 100%);
+      box-shadow: none;
+      transform: none;
+      border-color: #bfa16a;
+    }
+    /* Hover effect for Love and Hate buttons */
+    #voteYesBtn:hover {
+      background: linear-gradient(100deg, #ffe7e7 80%, #ffe7b2 100%);
+      box-shadow: 0 8px 24px 0 rgba(247, 178, 183, 0.18), 0 2px 0 #ffd6d6 inset, 0 0 0 6px #ffe7b244 inset;
+      transform: translateY(-2px) scale(1.06) rotate(-1deg);
+      border-color: #e2a84f;
+      color: #c0392b;
+    }
+    #voteNoBtn:hover {
+      background: linear-gradient(100deg, #ffd6d6 80%, #f7b2b7 100%);
+      box-shadow: 0 8px 24px 0 rgba(231, 76, 60, 0.18), 0 2px 0 #f7b2b7 inset, 0 0 0 6px #ffd6d644 inset;
+      transform: translateY(-2px) scale(1.06) rotate(1deg);
+      border-color: #e74c3c;
+      color: #a94442;
+    }
+    #voteSubmitBtn:hover {
+      background: linear-gradient(100deg, #b2e7d7 80%, #7bb0e6 100%);
+      box-shadow: 0 8px 24px 0 rgba(52, 152, 219, 0.18), 0 2px 0 #7bb0e6 inset, 0 0 0 6px #b2e7d744 inset;
+      transform: translateY(-2px) scale(1.06) rotate(1deg);
+      border-color: #3498db;
+      color: #34495e;
+    }
   </style>
 </head>
 <body class="ghibli-game">
@@ -816,12 +877,16 @@
   <button id="testStartBtn" style="position:fixed;left:38px;bottom:38px;z-index:300;padding:14px 38px;font-size:1.15rem;font-family:inherit;background:linear-gradient(100deg,#e2c391 80%,#f7e7c6 100%);color:#5a4327;border:3px solid #bfa16a;border-radius:18px 40px 18px 40px / 40px 18px 40px 18px;box-shadow:4px 8px 24px 0 rgba(90,67,39,0.18),0 2.5px 0 #e2c391 inset,0 0 0 8px #e2c39122 inset;cursor:pointer;transition:box-shadow 0.2s,transform 0.18s,background 0.2s,border 0.2s;">Start</button>
   <button id="finishTalkingBtn" style="display:none;position:fixed;z-index:300;padding:12px 28px;font-size:1.08rem;font-family:inherit;background:linear-gradient(100deg,#e2c391 80%,#f7e7c6 100%);color:#5a4327;border:2.5px solid #bfa16a;border-radius:16px 32px 16px 32px / 32px 16px 32px 16px;box-shadow:2px 4px 12px 0 rgba(90,67,39,0.13),0 1.5px 0 #e2c391 inset,0 0 0 4px #e2c39122 inset;cursor:pointer;transition:box-shadow 0.18s,transform 0.15s,background 0.18s,border 0.18s;">Finish Talking</button>
   <button id="muteBtn" style="display:none;position:fixed;z-index:300;padding:12px 28px;font-size:1.08rem;font-family:inherit;background:linear-gradient(100deg,#e2c391 80%,#f7e7c6 100%);color:#5a4327;border:2.5px solid #bfa16a;border-radius:16px 32px 16px 32px / 32px 16px 32px 16px;box-shadow:2px 4px 12px 0 rgba(90,67,39,0.13),0 1.5px 0 #e2c391 inset,0 0 0 4px #e2c39122 inset;cursor:pointer;transition:box-shadow 0.18s,transform 0.15s,background 0.18s,border 0.18s;">Mute</button>
+  <button id="voteYesBtn" style="display:none;position:fixed;z-index:300;padding:12px 28px;font-size:1.08rem;font-family:inherit;background:linear-gradient(100deg,#b2e7d7 80%,#7bb0e6 100%);color:#2c3e50;border:2.5px solid #7bb0e6;border-radius:16px 32px 16px 32px / 32px 16px 32px 16px;box-shadow:2px 4px 12px 0 rgba(90,67,39,0.13),0 1.5px 0 #7bb0e6 inset,0 0 0 4px #7bb0e622 inset;cursor:pointer;transition:box-shadow 0.18s,transform 0.15s,background 0.18s,border 0.18s;margin-top:8px;margin-right:8px;">❤️ Love</button>
+  <button id="voteNoBtn" style="display:none;position:fixed;z-index:300;padding:12px 28px;font-size:1.08rem;font-family:inherit;background:linear-gradient(100deg,#f7b2b7 80%,#e2c391 100%);color:#2c3e50;border:2.5px solid #e2c391;border-radius:16px 32px 16px 32px / 32px 16px 32px 16px;box-shadow:2px 4px 12px 0 rgba(90,67,39,0.13),0 1.5px 0 #e2c391 inset,0 0 0 4px #e2c39122 inset;cursor:pointer;transition:box-shadow 0.18s,transform 0.15s,background 0.18s,border 0.18s;margin-top:8px;">💔 Hate</button>
+  <button id="voteSubmitBtn" style="display:none;position:fixed;z-index:300;padding:12px 28px;font-size:1.08rem;font-family:inherit;background:linear-gradient(100deg,#7bb0e6 80%,#b2e7d7 100%);color:#fff;border:2.5px solid #3498db;border-radius:16px 32px 16px 32px / 32px 16px 32px 16px;box-shadow:2px 4px 12px 0 rgba(52,152,219,0.13),0 1.5px 0 #7bb0e6 inset,0 0 0 4px #7bb0e622 inset;cursor:pointer;transition:box-shadow 0.18s,transform 0.15s,background 0.18s,border 0.18s;margin-top:8px;margin-left:8px;">Vote</button>
   <script>
     // --- Night/Day Mode Helper ---
     function setNightMode(on) {
       const body = document.body;
       const titleBadge = document.getElementById('gameTitleBadge');
       const titleText = document.getElementById('gameTitleText');
+      const toggleBtn = document.getElementById('toggleStageBtn');
       if (on) {
         body.classList.remove('day-stage');
         // Night mode title
@@ -833,6 +898,13 @@
         titleText.style.fontWeight = '600';
         titleText.style.textShadow = '0 1px 0 #23202a,0 2px 6px #7bb0e644,0 0 8px #23202a99';
         titleText.style.fontSize = '1.45rem';
+        // Night mode toggle button
+        toggleBtn.textContent = '🌞 Switch to Day';
+        toggleBtn.style.background = 'linear-gradient(120deg,#23202a 60%,#22304a 100%)';
+        toggleBtn.style.color = '#7bb0e6';
+        toggleBtn.style.border = '2px solid #7bb0e6';
+        toggleBtn.style.boxShadow = '0 2px 8px 0 #23202a99';
+        toggleBtn.style.transition = 'all 0.2s';
       } else {
         body.classList.add('day-stage');
         // Day mode title
@@ -844,6 +916,13 @@
         titleText.style.fontWeight = 'bold';
         titleText.style.textShadow = '0 1px 0 #fffbe7,0 2px 6px #e2c39144';
         titleText.style.fontSize = '1.45rem';
+        // Day mode toggle button
+        toggleBtn.textContent = '🌙 Switch to Night';
+        toggleBtn.style.background = 'linear-gradient(120deg,#ffe7b2 60%,#e2c391 100%)';
+        toggleBtn.style.color = '#7a5a2f';
+        toggleBtn.style.border = '2px solid #e2c391';
+        toggleBtn.style.boxShadow = '0 2px 8px 0 #e2c39133';
+        toggleBtn.style.transition = 'all 0.2s';
       }
       console.log('Body classList:', body.classList.toString());
     }
@@ -1025,10 +1104,26 @@
       document.getElementById('closeKnotScore').textContent = gameState.closeKnotScore;
     }
 
+    // Add a helper to get the current phase label
+    function getPhaseLabel() {
+      switch (gameState.phase) {
+        case 'night': return '🌙 Night Phase';
+        case 'speech': return '🗣️ Speech Stage';
+        case 'voting': return '🗳️ Voting Stage';
+        case 'host-election': return '👑 Host Election';
+        case 'drama': return '🎭 Drama Play';
+        case 'reveal': return '🔍 Reveal';
+        case 'end': return '🏁 Game Over';
+        default: return '';
+      }
+    }
+
+    // Update showStatus to always show the phase label
     function showStatus(msg) {
       let box = document.getElementById('gameStateBox');
       box.style.display = 'block';
-      box.innerHTML = msg;
+      const phaseLabel = getPhaseLabel();
+      box.innerHTML = (phaseLabel ? `<div style='font-weight:bold;font-size:1.13em;margin-bottom:6px;'>${phaseLabel}</div>` : '') + `<div style='font-weight:bold;color:#3498db;'>${msg}</div>`;
     }
 
     function hideStartButton() {
@@ -1124,6 +1219,12 @@
     function hostElectionPhase() {
       if (gameState.gameEnded) return;
       setNightMode(false); // Always set to day mode at the start of non-night phases
+      gameState.phase = 'host-election';
+      // Pass candidate host to the next player clockwise
+      if (gameState.candidateHost !== null) {
+        let idx = playerNames.indexOf(gameState.candidateHost);
+        gameState.candidateHost = playerNames[(idx + 1) % playerNames.length];
+      }
       // Show candidate host UI
       showCandidateHost();
       showStatus(`<b>Host Election</b>: ${gameState.candidateHost} is the candidate host.`);
@@ -1152,6 +1253,7 @@
     function dramaPlayPhase() {
       if (gameState.gameEnded) return;
       setNightMode(false);
+      gameState.phase = 'drama';
       // For now, randomize Love/Hate
       let loveCount = Math.floor(Math.random() * 3) + 1;
       let hateCount = 3 - loveCount;
@@ -1165,6 +1267,7 @@
     function revealPhase(loveCount, hateCount) {
       if (gameState.gameEnded) return;
       setNightMode(false);
+      gameState.phase = 'reveal';
       // Update scores
       gameState.closeKnotScore += loveCount;
       gameState.scandalScore += hateCount;
@@ -1179,6 +1282,7 @@
       // End conditions
       if (gameState.partyCount >= gameState.maxParties || gameState.scandalScore >= gameState.maxScandal) {
         gameState.gameEnded = true;
+        gameState.phase = 'end';
         let winner = (gameState.closeKnotScore > gameState.scandalScore) ? 'Keepers' : 'Cheaters';
         showStatus(`<b>Game Over!</b><br>Winner: <b>${winner}</b><br>Close-Knot: ${gameState.closeKnotScore}, Scandal: ${gameState.scandalScore}`);
         return;
@@ -1191,6 +1295,9 @@
     function positionFinishTalkingBtn() {
       const btn = document.getElementById('finishTalkingBtn');
       const muteBtn = document.getElementById('muteBtn');
+      const yesBtn = document.getElementById('voteYesBtn');
+      const noBtn = document.getElementById('voteNoBtn');
+      const submitBtn = document.getElementById('voteSubmitBtn');
       const myCard = document.querySelector('.role-card.me');
       if (myCard) {
         const rect = myCard.getBoundingClientRect();
@@ -1201,9 +1308,22 @@
         muteBtn.style.display = 'block';
         muteBtn.style.left = (rect.right + 220) + 'px';
         muteBtn.style.top = (rect.top + rect.height / 2 + 16) + 'px';
+        // Position Love and Hate buttons directly under Finish Talking button
+        yesBtn.style.display = 'block';
+        noBtn.style.display = 'block';
+        submitBtn.style.display = 'block';
+        yesBtn.style.left = btn.style.left;
+        yesBtn.style.top = (parseFloat(btn.style.top) + btn.offsetHeight + 18) + 'px';
+        noBtn.style.left = (parseFloat(btn.style.left) + 102) + 'px';
+        noBtn.style.top = (parseFloat(btn.style.top) + btn.offsetHeight + 18) + 'px';
+        submitBtn.style.left = (parseFloat(btn.style.left) + 204) + 'px';
+        submitBtn.style.top = (parseFloat(btn.style.top) + btn.offsetHeight + 18) + 'px';
       } else {
         btn.style.display = 'none';
         muteBtn.style.display = 'none';
+        yesBtn.style.display = 'none';
+        noBtn.style.display = 'none';
+        submitBtn.style.display = 'none';
       }
     }
     // Show and position the button after cards are rendered
@@ -1211,7 +1331,21 @@
     window.addEventListener('resize', positionFinishTalkingBtn);
     // Optionally, add a click handler
     document.getElementById('finishTalkingBtn').onclick = function() {
-      alert('You finished talking!');
+      if (this.disabled || playerNames[0] !== speechOrder[currentSpeakerIdx]) return;
+      this.disabled = true;
+      this.classList.add('disabled');
+      this.style.opacity = '0.5';
+      currentSpeakerIdx++;
+      if (currentSpeakerIdx < speechOrder.length) {
+        updateSpeechUI();
+        showStatus(`<b>Speech Stage</b>: ${speechOrder[currentSpeakerIdx]}'s turn to speak.`);
+        if (playerNames[0] !== speechOrder[currentSpeakerIdx]) {
+          setTimeout(simulateOtherSpeech, 1200);
+        }
+      } else {
+        // Speech done, start voting
+        startVotingStage();
+      }
     };
 
     // --- Microphone System ---
@@ -1239,6 +1373,171 @@
         muteBtn.style.background = 'linear-gradient(100deg,#e2c391 80%,#f7e7c6 100%)';
       }
     };
+
+    // --- Speech and Voting Logic ---
+    let speechOrder = [];
+    let currentSpeakerIdx = 0;
+    let votingStage = false;
+    let votes = {};
+    let votingTimer = null;
+
+    function startSpeechStage() {
+      // Build speech order starting from candidate host
+      const startIdx = playerNames.indexOf(gameState.candidateHost);
+      speechOrder = [];
+      for (let i = 0; i < playerNames.length; i++) {
+        speechOrder.push(playerNames[(startIdx + i) % playerNames.length]);
+      }
+      currentSpeakerIdx = 0;
+      votingStage = false;
+      gameState.phase = 'speech';
+      updateSpeechUI();
+      showStatus(`<b>Speech Stage</b>: ${speechOrder[currentSpeakerIdx]}'s turn to speak.`);
+      // If not my turn, simulate other player's speech
+      if (playerNames[0] !== speechOrder[currentSpeakerIdx]) {
+        setTimeout(simulateOtherSpeech, 1200);
+      } else {
+        // It's the user's turn, ensure the Finish Talking button is enabled and visible
+        const btn = document.getElementById('finishTalkingBtn');
+        btn.disabled = false;
+        btn.classList.remove('disabled');
+        btn.style.opacity = '1';
+      }
+    }
+
+    function simulateOtherSpeech() {
+      currentSpeakerIdx++;
+      if (currentSpeakerIdx < speechOrder.length) {
+        updateSpeechUI();
+        showStatus(`<b>Speech Stage</b>: ${speechOrder[currentSpeakerIdx]}'s turn to speak.`);
+        if (playerNames[0] !== speechOrder[currentSpeakerIdx]) {
+          setTimeout(simulateOtherSpeech, 1200);
+        }
+        // If it's your turn, pause and wait for your action
+      } else {
+        // Speech done, start voting
+        startVotingStage();
+      }
+    }
+
+    function updateSpeechUI() {
+      const btn = document.getElementById('finishTalkingBtn');
+      if (playerNames[0] === speechOrder[currentSpeakerIdx]) {
+        btn.disabled = false;
+        btn.classList.remove('disabled');
+        btn.style.opacity = '1';
+      } else {
+        btn.disabled = true;
+        btn.classList.add('disabled');
+        btn.style.opacity = '0.5';
+      }
+    }
+
+    function startVotingStage() {
+      votingStage = true;
+      votes = {};
+      gameState.phase = 'voting';
+      showVoteButtons(true);
+      showStatus('<b>Voting Stage</b>: Vote Yes or No for the candidate host!');
+      // 10 sec timer for voting
+      votingTimer = setTimeout(() => {
+        if (!votes[playerNames[0]]) {
+          votes[playerNames[0]] = 'no';
+        }
+        finishVotingStage();
+      }, 10000);
+    }
+
+    function showVoteButtons(show) {
+      const yesBtn = document.getElementById('voteYesBtn');
+      const noBtn = document.getElementById('voteNoBtn');
+      const myCard = document.querySelector('.role-card.me');
+      if (show) {
+        yesBtn.style.display = 'block';
+        noBtn.style.display = 'block';
+        if (myCard) {
+          const rect = myCard.getBoundingClientRect();
+          yesBtn.style.left = (rect.right + 18) + 'px';
+          yesBtn.style.top = (rect.top + rect.height / 2 + 70) + 'px';
+          noBtn.style.left = (rect.right + 120) + 'px';
+          noBtn.style.top = (rect.top + rect.height / 2 + 70) + 'px';
+        }
+        yesBtn.disabled = false;
+        yesBtn.classList.remove('disabled');
+        yesBtn.style.opacity = '1';
+        noBtn.disabled = false;
+        noBtn.classList.remove('disabled');
+        noBtn.style.opacity = '1';
+      } else {
+        yesBtn.style.display = 'none';
+        noBtn.style.display = 'none';
+      }
+    }
+
+    document.getElementById('voteYesBtn').onclick = function() {
+      if (!votingStage || this.disabled) return;
+      votes[playerNames[0]] = 'yes';
+      this.disabled = true;
+      this.classList.add('disabled');
+      this.style.opacity = '0.5';
+      document.getElementById('voteNoBtn').disabled = true;
+      document.getElementById('voteNoBtn').classList.add('disabled');
+      document.getElementById('voteNoBtn').style.opacity = '0.5';
+      clearTimeout(votingTimer);
+      finishVotingStage();
+    };
+    document.getElementById('voteNoBtn').onclick = function() {
+      if (!votingStage || this.disabled) return;
+      votes[playerNames[0]] = 'no';
+      this.disabled = true;
+      this.classList.add('disabled');
+      this.style.opacity = '0.5';
+      document.getElementById('voteYesBtn').disabled = true;
+      document.getElementById('voteYesBtn').classList.add('disabled');
+      document.getElementById('voteYesBtn').style.opacity = '0.5';
+      clearTimeout(votingTimer);
+      finishVotingStage();
+    };
+
+    function finishVotingStage() {
+      votingStage = false;
+      showVoteButtons(false);
+      // Simulate random votes for other players if not already set
+      for (let name of playerNames) {
+        if (name !== playerNames[0] && !votes[name]) {
+          votes[name] = Math.random() < 0.5 ? 'yes' : 'no';
+        }
+      }
+      // Count votes
+      let yesCount = 0, noCount = 0;
+      for (let name of playerNames) {
+        if (votes[name] === 'yes') yesCount++;
+        else noCount++;
+      }
+      // Show result in candidate host UI
+      const box = document.getElementById('candidateHostBox');
+      box.innerHTML = `Candidate Host: ${gameState.candidateHost}<br>Yes: <b>${yesCount}</b> &nbsp; No: <b>${noCount}</b><br>`;
+      if (yesCount > noCount) {
+        box.innerHTML += `<span style='color:#3498db;'>Approved! ${gameState.candidateHost} becomes the real host.</span>`;
+        showStatus(`<b>${gameState.candidateHost} is now the real host! Family Party starts.</b>`);
+        setTimeout(() => helperSelectionPhase(gameState.candidateHost), 5000);
+      } else {
+        box.innerHTML += `<span style='color:#e74c3c;'>Not approved. Passing to next candidate.</span>`;
+        showStatus(`<b>Not approved. Passing to next candidate host.</b>`);
+        setTimeout(hostElectionPhase, 5000);
+      }
+    }
+  </script>
+  <!-- At the end of the script, after all UI is rendered, always show and enable the Yes/No buttons -->
+  <script>
+    window.addEventListener('DOMContentLoaded', function() {
+      const yesBtn = document.getElementById('voteYesBtn');
+      const noBtn = document.getElementById('voteNoBtn');
+      yesBtn.style.display = 'block';
+      noBtn.style.display = 'block';
+      yesBtn.disabled = false;
+      noBtn.disabled = false;
+    });
   </script>
 </body>
 </html>
