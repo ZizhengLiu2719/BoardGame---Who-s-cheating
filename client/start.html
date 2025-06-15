@@ -693,6 +693,46 @@
       border-color: #3498db;
       color: #34495e;
     }
+    .stat-btn {
+      background: linear-gradient(100deg, #e2c391 80%, #f7e7c6 100%);
+      color: #7a5a2f;
+      border: 1.5px solid #bfa16a;
+      border-radius: 8px;
+      font-size: 1.1em;
+      font-family: inherit;
+      padding: 2px 10px;
+      margin: 0 2px;
+      cursor: pointer;
+      transition: background 0.18s, color 0.18s, border 0.18s;
+    }
+    .stat-btn:hover {
+      background: linear-gradient(100deg, #f9eacb 80%, #e7cfa1 100%);
+      color: #a07c4f;
+      border-color: #a07c4f;
+    }
+    .love-hate-box {
+      background: rgba(255, 251, 231, 0.95);
+      border-radius: 15px;
+      padding: 15px;
+      margin: 18px 0 0 0;
+      width: 180px;
+      box-shadow: 0 2px 18px 0 #e2c39133, 0 2px 0 #fffbe7 inset;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      border: 2px solid #e2c391;
+      position: fixed;
+      top: 520px;
+      left: 38px;
+      transform: none;
+      transition: all 0.3s ease;
+      z-index: 120;
+    }
+    .night-mode .love-hate-box {
+      background: rgba(44, 62, 80, 0.95);
+      border: 2px solid #34495e;
+      box-shadow: 0 2px 18px 0 rgba(52, 73, 94, 0.3), 0 2px 0 #2c3e50 inset;
+    }
   </style>
 </head>
 <body class="ghibli-game">
@@ -859,22 +899,60 @@
     <div class="game-stats-box">
       <div class="stat-item">
         <div class="stat-label">Party Count</div>
-        <div class="stat-value" id="partyCount">0</div>
+        <div style="display:flex;align-items:center;justify-content:center;gap:6px;">
+          <button class="stat-btn" onclick="changeStat('partyCount',-1)">-1</button>
+          <div class="stat-value" id="partyCount">0</div>
+          <button class="stat-btn" onclick="changeStat('partyCount',1)">+1</button>
+        </div>
       </div>
       <div class="stat-item">
         <div class="stat-label">Scandal Score</div>
-        <div class="stat-value" id="scandalScore">0</div>
+        <div style="display:flex;align-items:center;justify-content:center;gap:6px;">
+          <button class="stat-btn" onclick="changeStat('scandalScore',-1)">-1</button>
+          <div class="stat-value" id="scandalScore">0</div>
+          <button class="stat-btn" onclick="changeStat('scandalScore',1)">+1</button>
+        </div>
       </div>
       <div class="stat-item">
         <div class="stat-label">Close-Knot Score</div>
-        <div class="stat-value" id="closeKnotScore">0</div>
+        <div style="display:flex;align-items:center;justify-content:center;gap:6px;">
+          <button class="stat-btn" onclick="changeStat('closeKnotScore',-1)">-1</button>
+          <div class="stat-value" id="closeKnotScore">0</div>
+          <button class="stat-btn" onclick="changeStat('closeKnotScore',1)">+1</button>
+        </div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-label">Vote Count</div>
+        <div style="display:flex;align-items:center;justify-content:center;gap:6px;">
+          <button class="stat-btn" onclick="changeStat('voteCount',-1)">-1</button>
+          <div class="stat-value" id="voteCount">0</div>
+          <button class="stat-btn" onclick="changeStat('voteCount',1)">+1</button>
+        </div>
+      </div>
+    </div>
+    <div class="love-hate-box">
+      <div class="stat-item">
+        <div class="stat-label">Love Count</div>
+        <div style="display:flex;align-items:center;justify-content:center;gap:6px;">
+          <button class="stat-btn" onclick="changeStat('loveCount',-1)">-1</button>
+          <div class="stat-value" id="loveCount">0</div>
+          <button class="stat-btn" onclick="changeStat('loveCount',1)">+1</button>
+        </div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-label">Hate Count</div>
+        <div style="display:flex;align-items:center;justify-content:center;gap:6px;">
+          <button class="stat-btn" onclick="changeStat('hateCount',-1)">-1</button>
+          <div class="stat-value" id="hateCount">0</div>
+          <button class="stat-btn" onclick="changeStat('hateCount',1)">+1</button>
+        </div>
       </div>
     </div>
     <div id="skillButtonContainer" style="position:fixed;display:flex;flex-direction:column;gap:12px;"></div>
 
     <div class="game-status-box">
   </div>
-  <button id="testStartBtn" style="position:fixed;left:38px;bottom:38px;z-index:300;padding:14px 38px;font-size:1.15rem;font-family:inherit;background:linear-gradient(100deg,#e2c391 80%,#f7e7c6 100%);color:#5a4327;border:3px solid #bfa16a;border-radius:18px 40px 18px 40px / 40px 18px 40px 18px;box-shadow:4px 8px 24px 0 rgba(90,67,39,0.18),0 2.5px 0 #e2c391 inset,0 0 0 8px #e2c39122 inset;cursor:pointer;transition:box-shadow 0.2s,transform 0.18s,background 0.2s,border 0.2s;">Start</button>
+  <button id="testStartBtn" style="position:fixed;left:38px;bottom:38px;z-index:300;padding:14px 38px;font-size:1.15rem;font-family:inherit;background:linear-gradient(100deg,#e2c391 80%,#f7e7c6 100%);color:#5a4327;border:3px solid #bfa16a;border-radius:18px 40px 18px 40px / 40px 18px 40px 18px;box-shadow:4px 8px 24px 0 rgba(90,67,39,0.18),0 2.5px 0 #e2c391 inset,0 0 0 8px #e2c39122 inset;cursor:pointer;transition:box-shadow 0.2s,transform 0.18s,background 0.2s,border 0.2s;" disabled>Start</button>
   <button id="finishTalkingBtn" style="display:none;position:fixed;z-index:300;padding:12px 28px;font-size:1.08rem;font-family:inherit;background:linear-gradient(100deg,#e2c391 80%,#f7e7c6 100%);color:#5a4327;border:2.5px solid #bfa16a;border-radius:16px 32px 16px 32px / 32px 16px 32px 16px;box-shadow:2px 4px 12px 0 rgba(90,67,39,0.13),0 1.5px 0 #e2c391 inset,0 0 0 4px #e2c39122 inset;cursor:pointer;transition:box-shadow 0.18s,transform 0.15s,background 0.18s,border 0.18s;">Finish Talking</button>
   <button id="muteBtn" style="display:none;position:fixed;z-index:300;padding:12px 28px;font-size:1.08rem;font-family:inherit;background:linear-gradient(100deg,#e2c391 80%,#f7e7c6 100%);color:#5a4327;border:2.5px solid #bfa16a;border-radius:16px 32px 16px 32px / 32px 16px 32px 16px;box-shadow:2px 4px 12px 0 rgba(90,67,39,0.13),0 1.5px 0 #e2c391 inset,0 0 0 4px #e2c39122 inset;cursor:pointer;transition:box-shadow 0.18s,transform 0.15s,background 0.18s,border 0.18s;">Mute</button>
   <button id="voteYesBtn" style="display:none;position:fixed;z-index:300;padding:12px 28px;font-size:1.08rem;font-family:inherit;background:linear-gradient(100deg,#b2e7d7 80%,#7bb0e6 100%);color:#2c3e50;border:2.5px solid #7bb0e6;border-radius:16px 32px 16px 32px / 32px 16px 32px 16px;box-shadow:2px 4px 12px 0 rgba(90,67,39,0.13),0 1.5px 0 #7bb0e6 inset,0 0 0 4px #7bb0e622 inset;cursor:pointer;transition:box-shadow 0.18s,transform 0.15s,background 0.18s,border 0.18s;margin-top:8px;margin-right:8px;">❤️ Love</button>
@@ -905,6 +983,9 @@
         toggleBtn.style.border = '2px solid #7bb0e6';
         toggleBtn.style.boxShadow = '0 2px 8px 0 #23202a99';
         toggleBtn.style.transition = 'all 0.2s';
+        rerenderSkillButtons();
+        updateVoteButtonsUsability();
+        enableLoveHateStatButtons();
       } else {
         body.classList.add('day-stage');
         // Day mode title
@@ -923,6 +1004,9 @@
         toggleBtn.style.border = '2px solid #e2c391';
         toggleBtn.style.boxShadow = '0 2px 8px 0 #e2c39133';
         toggleBtn.style.transition = 'all 0.2s';
+        rerenderSkillButtons();
+        updateVoteButtonsUsability();
+        enableLoveHateStatButtons();
       }
       console.log('Body classList:', body.classList.toString());
     }
@@ -1043,9 +1127,20 @@
         const btn1 = document.createElement('button');
         btn1.textContent = 'Molest';
         btn1.className = 'skill-btn';
-        btn1.disabled = gameState.windMolestUsed;
-        btn1.style.opacity = gameState.windMolestUsed ? '0.5' : '1';
-        // The click handler is set in enableWindMolestButton during night phase
+        // Only enabled if not used and night mode
+        const isNight = !document.body.classList.contains('day-stage');
+        btn1.disabled = gameState.windMolestUsed || !isNight;
+        btn1.style.opacity = (gameState.windMolestUsed || !isNight) ? '0.5' : '1';
+        btn1.onclick = () => {
+          if (gameState.windMolestUsed || !isNight) return;
+          gameState.windMolestUsed = true;
+          let scandalEl = document.getElementById('scandalScore');
+          let val = parseInt(scandalEl.textContent, 10) || 0;
+          val += 2;
+          scandalEl.textContent = val;
+          btn1.disabled = true;
+          btn1.style.opacity = '0.5';
+        };
         const btn2 = document.createElement('button');
         btn2.textContent = 'Mislead';
         btn2.className = 'skill-btn';
@@ -1067,17 +1162,48 @@
         btn.onclick = () => alert('Skill used!');
         container.appendChild(btn);
       }
+      // In renderSkillButtons, add logic for Michael's skill button
+      if (myRole === 'michael') {
+        container.style.display = 'flex';
+        container.style.flexDirection = 'column';
+        container.innerHTML = '';
+        const btn = document.createElement('button');
+        btn.textContent = 'Finding Abby';
+        btn.className = 'skill-btn';
+        btn.disabled = !!gameState.michaelFindingAbbyUsed;
+        btn.style.opacity = btn.disabled ? '0.5' : '1';
+        btn.onclick = () => {
+          if (gameState.michaelFindingAbbyUsed) return;
+          gameState.michaelFindingAbbyUsed = true;
+          btn.disabled = true;
+          btn.style.opacity = '0.5';
+          showStatus("Michael thinks he has found Abby!");
+        };
+        container.appendChild(btn);
+      }
     }
     // Call after rendering cards to ensure position is correct
     renderRoleCards();
+    // Add a helper to always enable stat adjustment buttons in love-hate-box
+    function enableLoveHateStatButtons() {
+      document.querySelectorAll('.love-hate-box .stat-btn').forEach(btn => {
+        btn.disabled = false;
+        btn.classList.remove('disabled');
+        btn.style.opacity = '1';
+      });
+    }
+    // Call this after rerenderSkillButtons, setNightMode, and DOMContentLoaded
     function rerenderSkillButtons() {
-      setTimeout(renderSkillButtons, 150);
+      setTimeout(() => {
+        renderSkillButtons();
+        enableLoveHateStatButtons();
+      }, 150);
     }
     rerenderSkillButtons();
     window.addEventListener('resize', rerenderSkillButtons);
     // Add test Start button logic
     document.getElementById('testStartBtn').onclick = function() {
-      startGame();
+      window.location.reload();
     };
 
     // --- Game Logic ---
@@ -1095,7 +1221,8 @@
       gameEnded: false,
       windMolestUsed: false,
       nightTimer: null,
-      candidateHost: null
+      candidateHost: null,
+      michaelFindingAbbyUsed: false
     };
 
     function updateStatsUI() {
@@ -1527,6 +1654,44 @@
         setTimeout(hostElectionPhase, 5000);
       }
     }
+
+    // Update Love, Vote, and Hate button logic to only be usable in day mode
+    function updateVoteButtonsUsability() {
+      const isDay = document.body.classList.contains('day-stage');
+      const loveBtn = document.getElementById('voteYesBtn');
+      const hateBtn = document.getElementById('voteNoBtn');
+      const voteBtn = document.getElementById('voteSubmitBtn');
+      loveBtn.disabled = !isDay;
+      hateBtn.disabled = !isDay;
+      voteBtn.disabled = !isDay;
+      loveBtn.style.opacity = !isDay ? '0.5' : '1';
+      hateBtn.style.opacity = !isDay ? '0.5' : '1';
+      voteBtn.style.opacity = !isDay ? '0.5' : '1';
+    }
+
+    // Attach click handlers for +1 logic
+    const loveBtn = document.getElementById('voteYesBtn');
+    loveBtn.onclick = function() {
+      if (this.disabled) return;
+      changeStat('loveCount', 1);
+    };
+    const hateBtn = document.getElementById('voteNoBtn');
+    hateBtn.onclick = function() {
+      if (this.disabled) return;
+      changeStat('hateCount', 1);
+    };
+    const voteBtn = document.getElementById('voteSubmitBtn');
+    voteBtn.onclick = function() {
+      if (this.disabled) return;
+      changeStat('voteCount', 1);
+    };
+
+    // Also call updateVoteButtonsUsability on DOMContentLoaded
+    window.addEventListener('DOMContentLoaded', function() {
+      // ... existing code ...
+      updateVoteButtonsUsability();
+      enableLoveHateStatButtons();
+    });
   </script>
   <!-- At the end of the script, after all UI is rendered, always show and enable the Yes/No buttons -->
   <script>
@@ -1538,6 +1703,15 @@
       yesBtn.disabled = false;
       noBtn.disabled = false;
     });
+  </script>
+  <script>
+    function changeStat(statId, delta) {
+      const el = document.getElementById(statId);
+      let val = parseInt(el.textContent, 10) || 0;
+      val += delta;
+      if (val < 0) val = 0;
+      el.textContent = val;
+    }
   </script>
 </body>
 </html>
