@@ -747,117 +747,6 @@
       transform: none;
       border-color: #bfa16a;
     }
-    /* Game phase styles */
-    .phase-content {
-      text-align: center;
-      padding: 20px;
-      background: rgba(255, 255, 255, 0.9);
-      border-radius: 16px;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-      margin: 20px auto;
-      max-width: 600px;
-    }
-
-    .phase-content h2 {
-      color: #2c3e50;
-      margin-bottom: 15px;
-      font-size: 1.8rem;
-    }
-
-    .phase-content p {
-      color: #34495e;
-      margin-bottom: 20px;
-      font-size: 1.2rem;
-    }
-
-    /* Power button styles */
-    .ghibli-btn-power {
-      padding: 12px 24px;
-      font-size: 1.1rem;
-      background: linear-gradient(100deg, #7bb0e6 80%, #b2e7d7 100%);
-      color: #fff;
-      border: 2.5px solid #3498db;
-      border-radius: 16px 32px 16px 32px / 32px 16px 32px 16px;
-      box-shadow: 2px 4px 12px 0 rgba(52, 152, 219, 0.13),
-                  0 1.5px 0 #7bb0e6 inset,
-                  0 0 0 4px #7bb0e622 inset;
-      cursor: pointer;
-      transition: box-shadow 0.18s, transform 0.15s, background 0.18s, border 0.18s;
-      margin: 8px;
-    }
-
-    .ghibli-btn-power:hover:not(:disabled) {
-      transform: translateY(-2px);
-      box-shadow: 4px 8px 16px 0 rgba(52, 152, 219, 0.2),
-                  0 1.5px 0 #7bb0e6 inset,
-                  0 0 0 4px #7bb0e622 inset;
-    }
-
-    .ghibli-btn-power:disabled {
-      opacity: 0.5;
-      cursor: not-allowed;
-    }
-
-    /* Drama card button styles */
-    .ghibli-btn-drama {
-      padding: 15px 30px;
-      font-size: 1.2rem;
-      background: linear-gradient(100deg, #e67e22 80%, #f1c40f 100%);
-      color: #fff;
-      border: 3px solid #d35400;
-      border-radius: 16px 32px 16px 32px / 32px 16px 32px 16px;
-      box-shadow: 2px 4px 12px 0 rgba(211, 84, 0, 0.13),
-                  0 1.5px 0 #e67e22 inset,
-                  0 0 0 4px #e67e2222 inset;
-      cursor: pointer;
-      transition: box-shadow 0.18s, transform 0.15s, background 0.18s, border 0.18s;
-      margin: 8px;
-    }
-
-    .ghibli-btn-drama:hover:not(:disabled) {
-      transform: translateY(-2px);
-      box-shadow: 4px 8px 16px 0 rgba(211, 84, 0, 0.2),
-                  0 1.5px 0 #e67e22 inset,
-                  0 0 0 4px #e67e2222 inset;
-    }
-
-    .ghibli-btn-drama:disabled {
-      opacity: 0.5;
-      cursor: not-allowed;
-    }
-
-    /* Button container styles */
-    .drama-buttons {
-      display: flex;
-      justify-content: center;
-      gap: 16px;
-      margin-top: 20px;
-    }
-
-    #powerControls {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 12px;
-      margin-top: 20px;
-    }
-
-    /* Game stats styles */
-    .game-stats {
-      display: flex;
-      justify-content: center;
-      gap: 24px;
-      margin: 20px 0;
-      font-size: 1.2rem;
-      color: #2c3e50;
-    }
-
-    .game-stats div {
-      background: rgba(255, 255, 255, 0.9);
-      padding: 8px 16px;
-      border-radius: 8px;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-    }
   </style>
 </head>
 <body class="ghibli-game">
@@ -1083,225 +972,757 @@
   <button id="voteYesBtn" style="display:none;position:fixed;z-index:300;padding:12px 28px;font-size:1.08rem;font-family:inherit;background:linear-gradient(100deg,#b2e7d7 80%,#7bb0e6 100%);color:#2c3e50;border:2.5px solid #7bb0e6;border-radius:16px 32px 16px 32px / 32px 16px 32px 16px;box-shadow:2px 4px 12px 0 rgba(90,67,39,0.13),0 1.5px 0 #7bb0e6 inset,0 0 0 4px #7bb0e622 inset;cursor:pointer;transition:box-shadow 0.18s,transform 0.15s,background 0.18s,border 0.18s;margin-top:8px;margin-right:8px;">❤️ Love</button>
   <button id="voteNoBtn" style="display:none;position:fixed;z-index:300;padding:12px 28px;font-size:1.08rem;font-family:inherit;background:linear-gradient(100deg,#f7b2b7 80%,#e2c391 100%);color:#2c3e50;border:2.5px solid #e2c391;border-radius:16px 32px 16px 32px / 32px 16px 32px 16px;box-shadow:2px 4px 12px 0 rgba(90,67,39,0.13),0 1.5px 0 #e2c391 inset,0 0 0 4px #e2c39122 inset;cursor:pointer;transition:box-shadow 0.18s,transform 0.15s,background 0.18s,border 0.18s;margin-top:8px;">💔 Hate</button>
   <button id="voteSubmitBtn" style="display:none;position:fixed;z-index:300;padding:12px 28px;font-size:1.08rem;font-family:inherit;background:linear-gradient(100deg,#7bb0e6 80%,#b2e7d7 100%);color:#fff;border:2.5px solid #3498db;border-radius:16px 32px 16px 32px / 32px 16px 32px 16px;box-shadow:2px 4px 12px 0 rgba(52,152,219,0.13),0 1.5px 0 #7bb0e6 inset,0 0 0 4px #7bb0e622 inset;cursor:pointer;transition:box-shadow 0.18s,transform 0.15s,background 0.18s,border 0.18s;margin-top:8px;margin-left:8px;">Vote</button>
-  <script src="/socket.io/socket.io.js"></script>
   <script>
-    // Initialize Socket.IO connection
-    const socket = io();
-    const roomId = sessionStorage.getItem('roomId');
-    const myName = sessionStorage.getItem('myName');
-    
-    // Join the game room
-    socket.emit('joinRoom', { roomId, playerName: myName }, (res) => {
-      if (!res.success) {
-        alert('Failed to join game room. Please try again.');
-        window.location.href = 'joining.html';
+    // --- Night/Day Mode Helper ---
+    function setNightMode(on) {
+      const body = document.body;
+      const titleBadge = document.getElementById('gameTitleBadge');
+      const titleText = document.getElementById('gameTitleText');
+      const toggleBtn = document.getElementById('toggleStageBtn');
+      if (on) {
+        body.classList.remove('day-stage');
+        // Night mode title
+        titleBadge.style.background = 'linear-gradient(120deg,#23202a 60%,#6b5a3a 100%)';
+        titleBadge.style.borderColor = '#7bb0e6';
+        titleText.textContent = "who's cheating?";
+        titleText.style.color = '#e2c391';
+        titleText.style.fontStyle = 'italic';
+        titleText.style.fontWeight = '600';
+        titleText.style.textShadow = '0 1px 0 #23202a,0 2px 6px #7bb0e644,0 0 8px #23202a99';
+        titleText.style.fontSize = '1.45rem';
+        // Night mode toggle button
+        toggleBtn.textContent = '🌞 Switch to Day';
+        toggleBtn.style.background = 'linear-gradient(120deg,#23202a 60%,#22304a 100%)';
+        toggleBtn.style.color = '#7bb0e6';
+        toggleBtn.style.border = '2px solid #7bb0e6';
+        toggleBtn.style.boxShadow = '0 2px 8px 0 #23202a99';
+        toggleBtn.style.transition = 'all 0.2s';
+        rerenderSkillButtons();
+        updateVoteButtonsUsability();
+        enableLoveHateStatButtons();
+      } else {
+        body.classList.add('day-stage');
+        // Day mode title
+        titleBadge.style.background = 'linear-gradient(120deg,#ffe7b2 60%,#e2c391 100%)';
+        titleBadge.style.borderColor = '#e2c391';
+        titleText.textContent = 'Family Party';
+        titleText.style.color = '#e2a84f';
+        titleText.style.fontStyle = 'normal';
+        titleText.style.fontWeight = 'bold';
+        titleText.style.textShadow = '0 1px 0 #fffbe7,0 2px 6px #e2c39144';
+        titleText.style.fontSize = '1.45rem';
+        // Day mode toggle button
+        toggleBtn.textContent = '🌙 Switch to Night';
+        toggleBtn.style.background = 'linear-gradient(120deg,#ffe7b2 60%,#e2c391 100%)';
+        toggleBtn.style.color = '#7a5a2f';
+        toggleBtn.style.border = '2px solid #e2c391';
+        toggleBtn.style.boxShadow = '0 2px 8px 0 #e2c39133';
+        toggleBtn.style.transition = 'all 0.2s';
+        rerenderSkillButtons();
+        updateVoteButtonsUsability();
+        enableLoveHateStatButtons();
       }
-    });
-
-    // Listen for player list updates
-    socket.on('playerListUpdate', ({ players, readyStates }) => {
-      // Update player names array
-      playerNames.length = 0;
-      playerNames.push(...players);
+      console.log('Body classList:', body.classList.toString());
+    }
+    // --- Game Role Logic ---
+    const roleImages = {
+      michael: 'imgs/michael.png',
+      wind: 'imgs/wind.png',
+      abby: 'imgs/abby.png',
+      kennedi: 'imgs/kennedi.png',
+      kiko: 'imgs/kiko.png',
+      knox: 'imgs/knox.png',
+    };
+    const backsideImg = 'imgs/backSide.png';
+    const playerNames = ['Totoro', 'Kiki', 'Chihiro', 'Howl', 'Satsuki', 'Pazu'];
+    const roles = ['michael','wind','abby','kennedi','kiko','knox'];
+    // Shuffle roles
+    function shuffle(array) {
+      for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+      }
+      return array;
+    }
+    const shuffledRoles = shuffle([...roles]);
+    // Assign "You" a random role
+    const myIndex = 0;
+    const myRole = shuffledRoles[myIndex];
+    // --- Render Role Cards Around Table ---
+    function renderRoleCards() {
+      const container = document.getElementById('roleCardsCircle');
+      container.innerHTML = '';
+      const n = 6; // Fixed to 6 players
+      const radius = 220; // Reduced from 240px for smaller table
       
-      // Re-render role cards with new player names
-      renderRoleCards();
-    });
-
-    // Listen for game start
-    socket.on('startGame', (initialGameState) => {
-      // Update game state
-      gameState = {
-        ...gameState,
-        ...initialGameState
+      // Role info for tooltip
+      const roleInfo = {
+        michael: {name:'Michael', team:'Cheater', power:'Guess Abby for instant win'},
+        wind: {name:'Wind', team:'Cheater', power:'Molest: +2 Scandal at night; Mislead: flip Love→Hate'},
+        jack: {name:'Jack', team:'Cheater', power:'Hidden from Abby & Cheaters'},
+        abby: {name:'Abby', team:'Keeper', power:'Sees all Cheaters except Jack'},
+        kennedi: {name:'Kennedi', team:'Keeper', power:'Protect: all cards count as Love'},
+        ker: {name:'Ker', team:'Keeper', power:'Swap a Helper after picked'},
+        kiko: {name:'Kiko', team:'Keeper (Pet)', power:'No special power'},
+        knox: {name:'Knox', team:'Keeper (Pet)', power:'No special power'}
       };
-      
-      // Re-render UI
-      renderRoleCards();
-      rerenderSkillButtons();
-      updateGameUI();
-      
-      // Show game phase
-      renderGamePhase();
-    });
 
-    // Function to render game phase
-    function renderGamePhase() {
-      const gameArea = document.getElementById('gameArea');
-      if (!gameArea) return;
+      // Show cards face-up for Abby or if player is a cheater (except Jack's card)
+      const showAllCards = myRole === 'abby';
+      const isCheater = ['michael', 'wind'].includes(myRole);
+      const isJack = myRole === 'jack';
       
-      // Game stats display
-      const gameStats = `
-        <div class="game-stats">
-          <div>Night: ${gameState.nightCount}</div>
-          <div>Scandal: ${gameState.scandal}</div>
-          <div>Close Knot: ${gameState.closeKnot}</div>
-        </div>
-      `;
-      
-      let phaseContent = '';
-      
-      switch (gameState.currentPhase) {
-        case 'night':
-          phaseContent = `
-            ${gameStats}
-            <div class="phase-content">
-              <h2>Night Phase</h2>
-              <p>Night ${gameState.nightCount}</p>
-              ${gameState.myRole ? `
-                <div id="powerControls">
-                  ${renderRolePowers()}
-                </div>
-              ` : ''}
-            </div>
-          `;
-          break;
-          
-        case 'party':
-          phaseContent = `
-            ${gameStats}
-            <div class="phase-content">
-              <h2>Family Party Phase</h2>
-              <p>Night ${gameState.nightCount}</p>
-              <div class="drama-buttons">
-                <button class="ghibli-btn-drama" onclick="playDramaCard('love')" ${gameState.playerStates[myName]?.hasPlayedDrama ? 'disabled' : ''}>Play Love Card</button>
-                <button class="ghibli-btn-drama" onclick="playDramaCard('hate')" ${gameState.playerStates[myName]?.hasPlayedDrama ? 'disabled' : ''}>Play Hate Card</button>
-              </div>
-            </div>
-          `;
-          break;
-          
-        case 'gameOver':
-          phaseContent = `
-            ${gameStats}
-            <div class="phase-content">
-              <h2>Game Over</h2>
-              <p>${gameState.winners === 'cheaters' ? 'Cheaters Win!' : 'Keepers Win!'}</p>
-              <button class="ghibli-btn" onclick="window.location.reload()">Play Again</button>
-            </div>
-          `;
-          break;
+      // Calculate angles for 6 players with equal spacing
+      // Each angle is separated by 2π/6 radians (60 degrees)
+      const angles = Array.from({length: 6}, (_, i) => {
+        // Start from bottom (π/2) and distribute evenly
+        return (Math.PI / 2) + (i * (2 * Math.PI / 6));
+      });
+
+      playerNames.forEach((name, i) => {
+        const angle = angles[i];
+        const x = radius * Math.cos(angle);
+        const y = radius * Math.sin(angle);
+        
+        const card = document.createElement('img');
+        card.className = 'role-card' + (i === myIndex ? ' me' : '');
+        card.style.left = `calc(50% + ${x}px - 40px)`;
+        card.style.top = `calc(50% + ${y}px - 60px)`;
+        
+        // Show card face-up if:
+        // 1. It's my own card
+        // 2. I'm Abby and this is Michael or Wind's card
+        // 3. I'm a cheater (not Jack) and this is my teammate's card (except Jack)
+        const role = shuffledRoles[i];
+        const shouldShowCard = i === myIndex || 
+                             (showAllCards && ['michael', 'wind'].includes(role)) || 
+                             (isCheater && ['michael', 'wind'].includes(role) && role !== 'jack');
+        
+        // If I'm Jack, only show my own card
+        const finalShouldShow = isJack ? i === myIndex : shouldShowCard;
+        
+        card.src = finalShouldShow ? roleImages[role] : backsideImg;
+        card.alt = finalShouldShow ? role : 'Hidden';
+        container.appendChild(card);
+
+        // Add role intro tooltip for myself only
+        if (i === myIndex) {
+          const tooltip = document.createElement('div');
+          tooltip.className = 'role-intro-tooltip';
+          const info = roleInfo[myRole];
+          tooltip.innerHTML = `<div class='role-title'>${info.name} (${info.team})</div><div><b>Power:</b> ${info.power}</div>`;
+          card.addEventListener('mouseenter',()=>{tooltip.classList.add('active');});
+          card.addEventListener('mouseleave',()=>{tooltip.classList.remove('active');});
+          container.appendChild(tooltip);
+        }
+
+        // Add player name label with adjusted positioning
+        const nameLabel = document.createElement('div');
+        nameLabel.className = 'player-name-label';
+        const nameOffsetY = y > 0 ? 100 : -100;
+        nameLabel.style.left = `calc(50% + ${x}px)`;
+        nameLabel.style.top = `calc(50% + ${y + nameOffsetY}px)`;
+        nameLabel.textContent = name;
+        container.appendChild(nameLabel);
+      });
+    }
+    renderRoleCards();
+    // Toggle between day and night stage
+    const btn = document.getElementById('toggleStageBtn');
+    const body = document.body;
+    let isDay = false;
+    btn.onclick = function() {
+      isDay = !isDay;
+      setNightMode(isDay);
+    };
+    function renderSkillButtons() {
+      const container = document.getElementById('skillButtonContainer');
+      // No skill button for Jack, Abby, or pets
+      const petRoles = ['kiko', 'knox', 'nash'];
+      if (myRole === 'jack' || myRole === 'abby' || petRoles.includes(myRole)) {
+        container.style.display = 'none';
+        container.innerHTML = '';
+        return;
       }
-      
-      gameArea.innerHTML = phaseContent;
+      // Find my card position first
+      const myCard = document.querySelector('.role-card.me');
+      if (myCard) {
+        const rect = myCard.getBoundingClientRect();
+        // Move skill buttons to the left/below the card
+        container.style.position = 'fixed';
+        container.style.left = (rect.left - 240) + 'px';
+        container.style.top = (rect.top + rect.height + 8) + 'px';
+      }
+      if (myRole === 'wind') {
+        container.style.display = 'flex';
+        container.style.flexDirection = 'row';
+        container.innerHTML = '';
+        const btn1 = document.createElement('button');
+        btn1.textContent = 'Molest';
+        btn1.className = 'skill-btn';
+        // Only enabled if not used and night mode
+        const isNight = !document.body.classList.contains('day-stage');
+        btn1.disabled = gameState.windMolestUsed || !isNight;
+        btn1.style.opacity = (gameState.windMolestUsed || !isNight) ? '0.5' : '1';
+        btn1.onclick = () => {
+          if (gameState.windMolestUsed || !isNight) return;
+          gameState.windMolestUsed = true;
+          let scandalEl = document.getElementById('scandalScore');
+          let val = parseInt(scandalEl.textContent, 10) || 0;
+          val += 2;
+          scandalEl.textContent = val;
+          btn1.disabled = true;
+          btn1.style.opacity = '0.5';
+        };
+        const btn2 = document.createElement('button');
+        btn2.textContent = 'Mislead';
+        btn2.className = 'skill-btn';
+        btn2.onclick = () => alert('Wind: Mislead skill used!');
+        container.appendChild(btn1);
+        container.appendChild(btn2);
+      } else {
+        container.style.display = 'flex';
+        container.style.flexDirection = 'column';
+        container.innerHTML = '';
+        const rolePowers = {
+          michael: 'Finding Abby',
+          kennedi: 'Protecting the Party',
+          ker: 'The Chosen One',
+        };
+        const btn = document.createElement('button');
+        btn.textContent = rolePowers[myRole] || 'Use Skill';
+        btn.className = 'skill-btn';
+        btn.onclick = () => alert('Skill used!');
+        container.appendChild(btn);
+      }
+      // In renderSkillButtons, add logic for Michael's skill button
+      if (myRole === 'michael') {
+        container.style.display = 'flex';
+        container.style.flexDirection = 'column';
+        container.innerHTML = '';
+        const btn = document.createElement('button');
+        btn.textContent = 'Finding Abby';
+        btn.className = 'skill-btn';
+        btn.disabled = !!gameState.michaelFindingAbbyUsed;
+        btn.style.opacity = btn.disabled ? '0.5' : '1';
+        btn.onclick = () => {
+          if (gameState.michaelFindingAbbyUsed) return;
+          gameState.michaelFindingAbbyUsed = true;
+          btn.disabled = true;
+          btn.style.opacity = '0.5';
+          showStatus("Michael thinks he has found Abby!");
+        };
+        container.appendChild(btn);
+      }
+    }
+    // Call after rendering cards to ensure position is correct
+    renderRoleCards();
+    // Add a helper to always enable stat adjustment buttons in love-hate-box
+    function enableLoveHateStatButtons() {
+      document.querySelectorAll('.love-hate-box .stat-btn').forEach(btn => {
+        btn.disabled = false;
+        btn.classList.remove('disabled');
+        btn.style.opacity = '1';
+      });
+    }
+    // Call this after rerenderSkillButtons, setNightMode, and DOMContentLoaded
+    function rerenderSkillButtons() {
+      setTimeout(() => {
+        renderSkillButtons();
+        enableLoveHateStatButtons();
+        setPowerSkillButtonsEnabled(false);
+        attachSkillButtonHandlers();
+      }, 150);
+    }
+    rerenderSkillButtons();
+    window.addEventListener('resize', rerenderSkillButtons);
+    // Add test Start button logic
+    document.getElementById('testStartBtn').onclick = function() {
+      window.location.reload();
+    };
+
+    // --- Game Logic ---
+    let gameState = {
+      partyCount: 0,
+      scandalScore: 0,
+      closeKnotScore: 0,
+      maxParties: 3, // can be set based on player count
+      maxScandal: 10,
+      phase: 'waiting',
+      round: 0,
+      hostIndex: 0,
+      helpers: [],
+      usedSkills: {},
+      gameEnded: false,
+      windMolestUsed: false,
+      nightTimer: null,
+      candidateHost: null,
+      michaelFindingAbbyUsed: false
+    };
+
+    function updateStatsUI() {
+      document.getElementById('partyCount').textContent = gameState.partyCount;
+      document.getElementById('scandalScore').textContent = gameState.scandalScore;
+      document.getElementById('closeKnotScore').textContent = gameState.closeKnotScore;
     }
 
-    // Function to render role powers
-    function renderRolePowers() {
-      if (!gameState.myRole || gameState.usedPowers[myName]) return '';
-      
-      let powerButtons = '';
-      
-      switch (gameState.myRole) {
-        case 'Kennedi':
-          powerButtons = `
-            <button class="ghibli-btn-power" onclick="usePower('protectingParty')">Protect Party (+3 Close Knot)</button>
-          `;
-          break;
-          
-        case 'Wind':
-          powerButtons = `
-            <button class="ghibli-btn-power" onclick="usePower('mislead')">Mislead (+1 Scandal, Flip Love to Hate)</button>
-            <button class="ghibli-btn-power" onclick="usePower('molestBoy')">Molest Boy (+2 Scandal)</button>
-          `;
-          break;
-          
-        case 'Michael':
-          powerButtons = `
-            <button class="ghibli-btn-power" onclick="usePower('findAbby')">Find Abby</button>
-          `;
-          break;
-          
-        case 'Ker':
-          powerButtons = `
-            <button class="ghibli-btn-power" onclick="usePower('swapHelper')">Swap Helper</button>
-          `;
-          break;
+    // Add a helper to get the current phase label
+    function getPhaseLabel() {
+      switch (gameState.phase) {
+        case 'night': return '🌙 Night Phase';
+        case 'speech': return '🗣️ Speech Stage';
+        case 'voting': return '🗳️ Voting Stage';
+        case 'host-election': return '👑 Host Election';
+        case 'drama': return '🎭 Drama Play';
+        case 'reveal': return '🔍 Reveal';
+        case 'end': return '🏁 Game Over';
+        default: return '';
       }
-      
-      return powerButtons;
     }
 
-    // Function to update UI based on game state
-    function updateGameUI() {
+    // Update showStatus to always show the phase label
+    function showStatus(msg) {
+      let box = document.getElementById('gameStateBox');
+      box.style.display = 'block';
+      const phaseLabel = getPhaseLabel();
+      box.innerHTML = (phaseLabel ? `<div style='font-weight:bold;font-size:1.13em;margin-bottom:6px;'>${phaseLabel}</div>` : '') + `<div style='font-weight:bold;color:#3498db;'>${msg}</div>`;
+    }
+
+    function hideStartButton() {
+      document.getElementById('testStartBtn').style.display = 'none';
+    }
+
+    function showCandidateHost() {
+      const box = document.getElementById('candidateHostBox');
+      if (gameState.candidateHost !== null) {
+        box.style.display = 'block';
+        box.textContent = `Candidate Host: ${gameState.candidateHost}`;
+      } else {
+        box.style.display = 'none';
+      }
+    }
+
+    function startGame() {
+      hideStartButton();
+      // Randomly assign candidate host
+      const randIdx = Math.floor(Math.random() * playerNames.length);
+      gameState.candidateHost = playerNames[randIdx];
+      showCandidateHost();
+      gameState.partyCount = 0;
+      gameState.scandalScore = 0;
+      gameState.closeKnotScore = 0;
+      gameState.phase = 'night';
+      gameState.round = 1;
+      gameState.hostIndex = 0;
+      gameState.helpers = [];
+      gameState.usedSkills = {};
+      gameState.gameEnded = false;
+      updateStatsUI();
+      showStatus('<b>Game Started!</b><br>Night phase begins.');
+      setTimeout(nightPhase, 2000);
+    }
+
+    function nightPhase() {
+      if (gameState.gameEnded) return;
+      setNightMode(true); // Always set to night mode at the start of night phase
+      gameState.phase = 'night';
+      showStatus('Night phase: <b>10 seconds</b>... Wind may use <b>Molest</b> (Scandal +2, once per game).');
+      // Enable Wind's Molest button if it's Wind and not used
+      if (myRole === 'wind' && !gameState.windMolestUsed) {
+        enableWindMolestButton();
+      }
+      // 10 second timer
+      gameState.nightTimer = setTimeout(() => {
+        // If Wind didn't use Molest, default Scandal +1
+        if (!gameState.windMolestUsed) {
+          gameState.scandalScore += 1;
+          showStatus('Night phase ended: Scandal +1.');
+        }
+        updateStatsUI();
+        disableWindMolestButton();
+        setNightMode(false); // Always set to day mode after night phase ends
+        setTimeout(hostElectionPhase, 2000);
+      }, 10000);
+    }
+
+    function enableWindMolestButton() {
+      const container = document.getElementById('skillButtonContainer');
+      const btns = container.querySelectorAll('.skill-btn');
+      btns.forEach(btn => {
+        if (btn.textContent === 'Molest') {
+          btn.disabled = false;
+          btn.style.opacity = '1';
+          btn.onclick = () => {
+            if (gameState.phase !== 'night' || gameState.windMolestUsed) return;
+            gameState.windMolestUsed = true;
+            gameState.scandalScore += 2;
+            showStatus('Wind used <b>Molest</b>! Scandal +2.');
+            updateStatsUI();
+            btn.disabled = true;
+            btn.style.opacity = '0.5';
+            // End night phase early if used
+            clearTimeout(gameState.nightTimer);
+            setTimeout(hostElectionPhase, 2000);
+          };
+        }
+      });
+    }
+    function disableWindMolestButton() {
+      const container = document.getElementById('skillButtonContainer');
+      const btns = container.querySelectorAll('.skill-btn');
+      btns.forEach(btn => {
+        if (btn.textContent === 'Molest') {
+          btn.disabled = true;
+          btn.style.opacity = '0.5';
+        }
+      });
+    }
+
+    function hostElectionPhase() {
+      if (gameState.gameEnded) return;
+      setNightMode(false); // Always set to day mode at the start of non-night phases
+      gameState.phase = 'host-election';
+      // Pass candidate host to the next player clockwise
+      if (gameState.candidateHost !== null) {
+        let idx = playerNames.indexOf(gameState.candidateHost);
+        gameState.candidateHost = playerNames[(idx + 1) % playerNames.length];
+      }
+      // Show candidate host UI
+      showCandidateHost();
+      showStatus(`<b>Host Election</b>: ${gameState.candidateHost} is the candidate host.`);
+      setTimeout(() => helperSelectionPhase(gameState.candidateHost), 2000);
+    }
+
+    function helperSelectionPhase(host) {
+      if (gameState.gameEnded) return;
+      setNightMode(false);
+      // For now, pick next 2 players as helpers
+      let h1 = playerNames[(gameState.hostIndex + 1) % playerNames.length];
+      let h2 = playerNames[(gameState.hostIndex + 2) % playerNames.length];
+      gameState.helpers = [h1, h2];
+      showStatus(`<b>${host}</b> picks helpers: <b>${h1}</b> and <b>${h2}</b>.`);
+      setTimeout(skillUsePhase, 2000);
+    }
+
+    function skillUsePhase() {
+      if (gameState.gameEnded) return;
+      setNightMode(false);
+      // For now, just show a message
+      showStatus('Skill use window: eligible players may use skills.');
+      setTimeout(dramaPlayPhase, 2000);
+    }
+
+    function dramaPlayPhase() {
+      if (gameState.gameEnded) return;
+      setNightMode(false);
+      gameState.phase = 'drama';
+      // For now, randomize Love/Hate
+      let loveCount = Math.floor(Math.random() * 3) + 1;
+      let hateCount = 3 - loveCount;
+      // Party count increases only when entering family party (drama play)
+      gameState.partyCount++;
+      updateStatsUI();
+      showStatus(`Drama cards played: <b>${loveCount} Love</b>, <b>${hateCount} Hate</b>.`);
+      setTimeout(() => revealPhase(loveCount, hateCount), 2000);
+    }
+
+    function revealPhase(loveCount, hateCount) {
+      if (gameState.gameEnded) return;
+      setNightMode(false);
+      gameState.phase = 'reveal';
       // Update scores
-      document.getElementById('scandalScore').textContent = gameState.scandal;
-      document.getElementById('closeKnotScore').textContent = gameState.closeKnot;
-      
-      // Update role cards
-      renderRoleCards();
-      
-      // Update skill buttons
-      rerenderSkillButtons();
-      
-      // Update vote buttons
-      updateVoteButtonsUsability();
-      
-      // Update love/hate buttons
-      enableLoveHateStatButtons();
-      
-      // Show game phase
-      renderGamePhase();
+      gameState.closeKnotScore += loveCount;
+      gameState.scandalScore += hateCount;
+      updateStatsUI();
+      showStatus(`Reveal: Close-Knot +${loveCount}, Scandal +${hateCount}.`);
+      setTimeout(endgameCheckPhase, 2000);
     }
 
-    // Listen for game state updates
-    socket.on('gameStateUpdate', (newState) => {
-      // Update local game state
-      Object.assign(gameState, newState);
-      
-      // Update UI
-      updateGameUI();
-    });
+    function endgameCheckPhase() {
+      if (gameState.gameEnded) return;
+      setNightMode(false);
+      // End conditions
+      if (gameState.partyCount >= gameState.maxParties || gameState.scandalScore >= gameState.maxScandal) {
+        gameState.gameEnded = true;
+        gameState.phase = 'end';
+        let winner = (gameState.closeKnotScore > gameState.scandalScore) ? 'Keepers' : 'Cheaters';
+        showStatus(`<b>Game Over!</b><br>Winner: <b>${winner}</b><br>Close-Knot: ${gameState.closeKnotScore}, Scandal: ${gameState.scandalScore}`);
+        return;
+      }
+      // Next round
+      gameState.hostIndex++;
+      setTimeout(nightPhase, 2000);
+    }
 
-    // Modify existing functions to emit events to server
-    function usePower(power) {
-      socket.emit('gameAction', {
-        roomId,
-        action: 'usePower',
-        data: {
-          playerName: myName,
-          power: power
+    function positionFinishTalkingBtn() {
+      const btn = document.getElementById('finishTalkingBtn');
+      const muteBtn = document.getElementById('muteBtn');
+      const yesBtn = document.getElementById('voteYesBtn');
+      const noBtn = document.getElementById('voteNoBtn');
+      const submitBtn = document.getElementById('voteSubmitBtn');
+      const myCard = document.querySelector('.role-card.me');
+      if (myCard) {
+        const rect = myCard.getBoundingClientRect();
+        btn.style.display = 'block';
+        btn.style.left = (rect.right + 18) + 'px';
+        btn.style.top = (rect.top + rect.height / 2 + 16) + 'px';
+        // Position mute button to the right of finish talking button
+        muteBtn.style.display = 'block';
+        muteBtn.style.left = (rect.right + 220) + 'px';
+        muteBtn.style.top = (rect.top + rect.height / 2 + 16) + 'px';
+        // Position Love and Hate buttons directly under Finish Talking button
+        yesBtn.style.display = 'block';
+        noBtn.style.display = 'block';
+        submitBtn.style.display = 'block';
+        yesBtn.style.left = btn.style.left;
+        yesBtn.style.top = (parseFloat(btn.style.top) + btn.offsetHeight + 18) + 'px';
+        noBtn.style.left = (parseFloat(btn.style.left) + 102) + 'px';
+        noBtn.style.top = (parseFloat(btn.style.top) + btn.offsetHeight + 18) + 'px';
+        submitBtn.style.left = (parseFloat(btn.style.left) + 204) + 'px';
+        submitBtn.style.top = (parseFloat(btn.style.top) + btn.offsetHeight + 18) + 'px';
+      } else {
+        btn.style.display = 'none';
+        muteBtn.style.display = 'none';
+        yesBtn.style.display = 'none';
+        noBtn.style.display = 'none';
+        submitBtn.style.display = 'none';
+      }
+    }
+    // Show and position the button after cards are rendered
+    setTimeout(positionFinishTalkingBtn, 300);
+    window.addEventListener('resize', positionFinishTalkingBtn);
+    // Optionally, add a click handler
+    document.getElementById('finishTalkingBtn').onclick = function() {
+      if (this.disabled || playerNames[0] !== speechOrder[currentSpeakerIdx]) return;
+      this.disabled = true;
+      this.classList.add('disabled');
+      this.style.opacity = '0.5';
+      currentSpeakerIdx++;
+      if (currentSpeakerIdx < speechOrder.length) {
+        updateSpeechUI();
+        showStatus(`<b>Speech Stage</b>: ${speechOrder[currentSpeakerIdx]}'s turn to speak.`);
+        if (playerNames[0] !== speechOrder[currentSpeakerIdx]) {
+          setTimeout(simulateOtherSpeech, 1200);
         }
-      });
-    }
+      } else {
+        // Speech done, start voting
+        startVotingStage();
+      }
+    };
 
-    function vote(vote) {
-      socket.emit('gameAction', {
-        roomId,
-        action: 'vote',
-        data: {
-          playerName: myName,
-          vote: vote
+    // --- Microphone System ---
+    let micStream = null;
+    let isMuted = true;
+    const muteBtn = document.getElementById('muteBtn');
+    muteBtn.onclick = async function() {
+      if (isMuted) {
+        // Try to get mic access
+        try {
+          micStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+          isMuted = false;
+          muteBtn.textContent = 'Unmute';
+          muteBtn.style.background = 'linear-gradient(100deg,#b2e7d7 80%,#7bb0e6 100%)';
+        } catch (e) {
+          alert('Microphone access denied or unavailable.');
         }
-      });
-    }
-
-    function playDramaCard(card) {
-      socket.emit('gameAction', {
-        roomId,
-        action: 'playDramaCard',
-        data: {
-          playerName: myName,
-          card: card
+      } else {
+        // Stop all tracks
+        if (micStream) {
+          micStream.getTracks().forEach(track => track.stop());
         }
-      });
+        isMuted = true;
+        muteBtn.textContent = 'Mute';
+        muteBtn.style.background = 'linear-gradient(100deg,#e2c391 80%,#f7e7c6 100%)';
+      }
+    };
+
+    // --- Speech and Voting Logic ---
+    let speechOrder = [];
+    let currentSpeakerIdx = 0;
+    let votingStage = false;
+    let votes = {};
+    let votingTimer = null;
+
+    function startSpeechStage() {
+      // Build speech order starting from candidate host
+      const startIdx = playerNames.indexOf(gameState.candidateHost);
+      speechOrder = [];
+      for (let i = 0; i < playerNames.length; i++) {
+        speechOrder.push(playerNames[(startIdx + i) % playerNames.length]);
+      }
+      currentSpeakerIdx = 0;
+      votingStage = false;
+      gameState.phase = 'speech';
+      updateSpeechUI();
+      showStatus(`<b>Speech Stage</b>: ${speechOrder[currentSpeakerIdx]}'s turn to speak.`);
+      // If not my turn, simulate other player's speech
+      if (playerNames[0] !== speechOrder[currentSpeakerIdx]) {
+        setTimeout(simulateOtherSpeech, 1200);
+      } else {
+        // It's the user's turn, ensure the Finish Talking button is enabled and visible
+        const btn = document.getElementById('finishTalkingBtn');
+        btn.disabled = false;
+        btn.classList.remove('disabled');
+        btn.style.opacity = '1';
+      }
     }
 
-    // Modify stat change functions to emit events
-    function changeStat(statId, delta) {
-      socket.emit('gameAction', {
-        roomId,
-        action: 'changeStat',
-        data: {
-          playerName: myName,
-          stat: statId,
-          delta: delta
+    function simulateOtherSpeech() {
+      currentSpeakerIdx++;
+      if (currentSpeakerIdx < speechOrder.length) {
+        updateSpeechUI();
+        showStatus(`<b>Speech Stage</b>: ${speechOrder[currentSpeakerIdx]}'s turn to speak.`);
+        if (playerNames[0] !== speechOrder[currentSpeakerIdx]) {
+          setTimeout(simulateOtherSpeech, 1200);
         }
-      });
+        // If it's your turn, pause and wait for your action
+      } else {
+        // Speech done, start voting
+        startVotingStage();
+      }
     }
 
-    // Initialize UI
-    updateGameUI();
+    function updateSpeechUI() {
+      const btn = document.getElementById('finishTalkingBtn');
+      if (playerNames[0] === speechOrder[currentSpeakerIdx]) {
+        btn.disabled = false;
+        btn.classList.remove('disabled');
+        btn.style.opacity = '1';
+      } else {
+        btn.disabled = true;
+        btn.classList.add('disabled');
+        btn.style.opacity = '0.5';
+      }
+    }
+
+    function startVotingStage() {
+      votingStage = true;
+      votes = {};
+      gameState.phase = 'voting';
+      showVoteButtons(true);
+      showStatus('<b>Voting Stage</b>: Vote Yes or No for the candidate host!');
+      // 10 sec timer for voting
+      votingTimer = setTimeout(() => {
+        if (!votes[playerNames[0]]) {
+          votes[playerNames[0]] = 'no';
+        }
+        finishVotingStage();
+      }, 10000);
+    }
+
+    function showVoteButtons(show) {
+      const yesBtn = document.getElementById('voteYesBtn');
+      const noBtn = document.getElementById('voteNoBtn');
+      const myCard = document.querySelector('.role-card.me');
+      if (show) {
+        yesBtn.style.display = 'block';
+        noBtn.style.display = 'block';
+        if (myCard) {
+          const rect = myCard.getBoundingClientRect();
+          yesBtn.style.left = (rect.right + 18) + 'px';
+          yesBtn.style.top = (rect.top + rect.height / 2 + 70) + 'px';
+          noBtn.style.left = (rect.right + 120) + 'px';
+          noBtn.style.top = (rect.top + rect.height / 2 + 70) + 'px';
+        }
+        yesBtn.disabled = false;
+        yesBtn.classList.remove('disabled');
+        yesBtn.style.opacity = '1';
+        noBtn.disabled = false;
+        noBtn.classList.remove('disabled');
+        noBtn.style.opacity = '1';
+      } else {
+        yesBtn.style.display = 'none';
+        noBtn.style.display = 'none';
+      }
+    }
+
+    // Update Love, Vote, and Hate button logic to be disabled in both modes
+    function updateVoteButtonsUsability() {
+      const loveBtn = document.getElementById('voteYesBtn');
+      const hateBtn = document.getElementById('voteNoBtn');
+      const voteBtn = document.getElementById('voteSubmitBtn');
+      
+      // Keep buttons disabled in both modes
+      loveBtn.disabled = true;
+      hateBtn.disabled = true;
+      voteBtn.disabled = true;
+      loveBtn.style.opacity = '0.5';
+      hateBtn.style.opacity = '0.5';
+      voteBtn.style.opacity = '0.5';
+    }
+
+    // Remove background mode logic for enabling/disabling Love/Hate buttons
+    function setLoveHateButtonsEnabled(enabled) {
+      const loveBtn = document.getElementById('voteYesBtn');
+      const hateBtn = document.getElementById('voteNoBtn');
+      if (!loveBtn || !hateBtn) return; // Guard against null elements
+      // Only enable if enabled parameter is true
+      loveBtn.disabled = !enabled;
+      hateBtn.disabled = !enabled;
+      loveBtn.style.opacity = enabled ? '1' : '0.5';
+      hateBtn.style.opacity = enabled ? '1' : '0.5';
+    }
+    // Initially disable Love/Hate buttons
+    setLoveHateButtonsEnabled(false);
+    // Take Action button handler
+    document.getElementById('takeActionBtn').onclick = function() {
+      // Show message overlay for Take Action
+      const overlay = document.getElementById('takeActionMessageOverlay');
+      overlay.style.display = 'block';
+      // Keep love/hate buttons disabled during the message
+      setLoveHateButtonsEnabled(false);
+      setTimeout(() => {
+        overlay.style.display = 'none';
+        // Enable love/hate buttons after message disappears
+        setLoveHateButtonsEnabled(true);
+      }, 5000);
+    };
+    document.getElementById('resetCountBtn').onclick = function() {
+      // Reset the counts to 0
+      document.getElementById('loveCount').textContent = '0';
+      document.getElementById('hateCount').textContent = '0';
+      
+      // Show the message overlay
+      const overlay = document.getElementById('resetCountMessageOverlay');
+      overlay.style.display = 'block';
+      setTimeout(() => {
+        overlay.style.display = 'none';
+      }, 5000);
+    };
+    document.getElementById('resetVoteBtn').onclick = function() {
+      // Show voting message overlay
+      const overlay = document.getElementById('voteMessageOverlay');
+      const voteBtn = document.getElementById('voteSubmitBtn');
+      
+      // Enable vote button and show message
+      if (voteBtn) {
+        voteBtn.disabled = false;
+        voteBtn.style.opacity = '1';
+      }
+      overlay.style.display = 'block';
+      
+      // After 10 seconds, hide message and disable vote button
+      setTimeout(() => {
+        overlay.style.display = 'none';
+        if (voteBtn) {
+          voteBtn.disabled = true;
+          voteBtn.style.opacity = '0.5';
+        }
+      }, 10000);
+    };
+    
+    const voteBtn = document.getElementById('voteSubmitBtn');
+    voteBtn.onclick = function() {
+      if (this.disabled) return;
+      let voteEl = document.getElementById('voteCount');
+      let voteVal = parseInt(voteEl.textContent, 10) || 0;
+      voteEl.textContent = voteVal + 1;
+      // Disable the vote button after clicking
+      this.disabled = true;
+      this.style.opacity = '0.5';
+    };
+    // Remove or comment out any calls to updateVoteButtonsUsability that affect Love/Hate buttons
+    // ... existing code ...
   </script>
   <!-- At the end of the script, after all UI is rendered, always show and enable the Yes/No buttons -->
   <script>
@@ -1681,108 +2102,6 @@
         overlay.style.display = 'none';
       }, 5000);
     };
-  </script>
-
-  <script>
-    // Function to render role cards
-    function renderRoleCards() {
-      const roleCardsCircle = document.querySelector('.role-cards-circle');
-      if (!roleCardsCircle) return;
-      
-      // Clear existing cards
-      roleCardsCircle.innerHTML = '';
-      
-      // Calculate positions for each player
-      const numPlayers = playerNames.length;
-      const radius = 270; // Half of the circle's width/height
-      
-      playerNames.forEach((playerName, index) => {
-        const angle = (index * 2 * Math.PI / numPlayers) - Math.PI / 2;
-        const x = radius * Math.cos(angle);
-        const y = radius * Math.sin(angle);
-        
-        const card = document.createElement('div');
-        card.className = 'role-card';
-        if (playerName === myName) {
-          card.classList.add('me');
-        }
-        
-        // Set card position
-        card.style.transform = `translate(${x}px, ${y}px)`;
-        
-        // Add role image if available
-        if (gameState.roles && gameState.roles[playerName]) {
-          const role = gameState.roles[playerName];
-          card.style.backgroundImage = `url('images/${role.toLowerCase()}.png')`;
-          card.style.backgroundSize = 'cover';
-          card.style.backgroundPosition = 'center';
-        }
-        
-        // Add player name label
-        const label = document.createElement('div');
-        label.className = 'player-name-label';
-        label.textContent = playerName;
-        card.appendChild(label);
-        
-        roleCardsCircle.appendChild(card);
-      });
-    }
-
-    // Function to toggle day/night mode
-    function toggleDayNightMode() {
-      const body = document.body;
-      body.classList.toggle('day-stage');
-      
-      // Update sun/moon visibility
-      const sun = document.querySelector('.ghibli-sun');
-      const moon = document.querySelector('.ghibli-moon');
-      if (sun) sun.style.display = body.classList.contains('day-stage') ? 'block' : 'none';
-      if (moon) moon.style.display = body.classList.contains('day-stage') ? 'none' : 'block';
-      
-      // Update floating elements
-      const hearts = document.querySelector('.floating-hearts');
-      if (hearts) {
-        hearts.querySelectorAll('.broken-heart, .loving-heart').forEach(heart => {
-          heart.style.display = body.classList.contains('day-stage') ? 'none' : 'block';
-        });
-        hearts.querySelectorAll('.flower').forEach(flower => {
-          flower.style.display = body.classList.contains('day-stage') ? 'block' : 'none';
-        });
-      }
-    }
-
-    // Add day/night toggle buttons
-    const dayNightButtons = document.createElement('div');
-    dayNightButtons.style.position = 'fixed';
-    dayNightButtons.style.top = '20px';
-    dayNightButtons.style.right = '20px';
-    dayNightButtons.style.zIndex = '300';
-    dayNightButtons.style.display = 'flex';
-    dayNightButtons.style.gap = '10px';
-    
-    const dayButton = document.createElement('button');
-    dayButton.className = 'ghibli-btn';
-    dayButton.textContent = 'Switch to Day';
-    dayButton.onclick = () => {
-      document.body.classList.add('day-stage');
-      toggleDayNightMode();
-    };
-    
-    const nightButton = document.createElement('button');
-    nightButton.className = 'ghibli-btn';
-    nightButton.textContent = 'Switch to Night';
-    nightButton.onclick = () => {
-      document.body.classList.remove('day-stage');
-      toggleDayNightMode();
-    };
-    
-    dayNightButtons.appendChild(dayButton);
-    dayNightButtons.appendChild(nightButton);
-    document.body.appendChild(dayNightButtons);
-
-    // Initialize UI
-    updateGameUI();
-    renderRoleCards();
   </script>
 </body>
 </html>
