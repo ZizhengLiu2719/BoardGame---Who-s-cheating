@@ -733,6 +733,20 @@
       border: 2px solid #34495e;
       box-shadow: 0 2px 18px 0 rgba(52, 73, 94, 0.3), 0 2px 0 #2c3e50 inset;
     }
+    #voteSubmitBtn:disabled, #voteSubmitBtn.disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      background: linear-gradient(100deg, #e2c391 80%, #e2c391 100%);
+      border-color: #bfa16a;
+      box-shadow: none;
+      color: #a07c4f;
+    }
+    #voteSubmitBtn:disabled:hover, #voteSubmitBtn.disabled:hover {
+      background: linear-gradient(100deg, #e2c391 80%, #e2c391 100%);
+      box-shadow: none;
+      transform: none;
+      border-color: #bfa16a;
+    }
   </style>
 </head>
 <body class="ghibli-game">
@@ -944,6 +958,7 @@
       <div style="display:flex;flex-direction:column;align-items:center;gap:12px;">
         <button id="takeActionBtn" class="stat-btn" style="min-width:110px;height:60px;font-size:1.13em;align-self:center;">Take Action</button>
         <button id="resetCountBtn" class="stat-btn" style="min-width:130px;height:54px;font-size:1.08em;align-self:center;">Reset Count</button>
+        <button id="resetVoteBtn" class="stat-btn" style="min-width:130px;height:54px;font-size:1.08em;align-self:center;">Reset Vote</button>
       </div>
     </div>
     <button id="resetBtn" class="stat-btn" style="min-width:170px;height:54px;font-size:1.13em;align-self:center;position:fixed;right:60px;bottom:38px;z-index:121;">Restart the Game</button>
@@ -1600,60 +1615,6 @@
       }
     }
 
-    document.getElementById('voteYesBtn').onclick = function() {
-      if (!votingStage || this.disabled) return;
-      votes[playerNames[0]] = 'yes';
-      this.disabled = true;
-      this.classList.add('disabled');
-      this.style.opacity = '0.5';
-      document.getElementById('voteNoBtn').disabled = true;
-      document.getElementById('voteNoBtn').classList.add('disabled');
-      document.getElementById('voteNoBtn').style.opacity = '0.5';
-      clearTimeout(votingTimer);
-      finishVotingStage();
-    };
-    document.getElementById('voteNoBtn').onclick = function() {
-      if (!votingStage || this.disabled) return;
-      votes[playerNames[0]] = 'no';
-      this.disabled = true;
-      this.classList.add('disabled');
-      this.style.opacity = '0.5';
-      document.getElementById('voteYesBtn').disabled = true;
-      document.getElementById('voteYesBtn').classList.add('disabled');
-      document.getElementById('voteYesBtn').style.opacity = '0.5';
-      clearTimeout(votingTimer);
-      finishVotingStage();
-    };
-
-    function finishVotingStage() {
-      votingStage = false;
-      showVoteButtons(false);
-      // Simulate random votes for other players if not already set
-      for (let name of playerNames) {
-        if (name !== playerNames[0] && !votes[name]) {
-          votes[name] = Math.random() < 0.5 ? 'yes' : 'no';
-        }
-      }
-      // Count votes
-      let yesCount = 0, noCount = 0;
-      for (let name of playerNames) {
-        if (votes[name] === 'yes') yesCount++;
-        else noCount++;
-      }
-      // Show result in candidate host UI
-      const box = document.getElementById('candidateHostBox');
-      box.innerHTML = `Candidate Host: ${gameState.candidateHost}<br>Yes: <b>${yesCount}</b> &nbsp; No: <b>${noCount}</b><br>`;
-      if (yesCount > noCount) {
-        box.innerHTML += `<span style='color:#3498db;'>Approved! ${gameState.candidateHost} becomes the real host.</span>`;
-        showStatus(`<b>${gameState.candidateHost} is now the real host! Family Party starts.</b>`);
-        setTimeout(() => helperSelectionPhase(gameState.candidateHost), 5000);
-      } else {
-        box.innerHTML += `<span style='color:#e74c3c;'>Not approved. Passing to next candidate.</span>`;
-        showStatus(`<b>Not approved. Passing to next candidate host.</b>`);
-        setTimeout(hostElectionPhase, 5000);
-      }
-    }
-
     // Update Love, Vote, and Hate button logic to only be usable in day mode
     function updateVoteButtonsUsability() {
       const isDay = document.body.classList.contains('day-stage');
@@ -1668,29 +1629,41 @@
       voteBtn.style.opacity = !isDay ? '0.5' : '1';
     }
 
-    // Attach click handlers for +1 logic
-    const loveBtn = document.getElementById('voteYesBtn');
-    loveBtn.onclick = function() {
-      if (this.disabled) return;
-      changeStat('loveCount', 1);
+    // Remove background mode logic for enabling/disabling Love/Hate buttons
+    function setLoveHateButtonsEnabled(enabled) {
+      const loveBtn = document.getElementById('voteYesBtn');
+      const hateBtn = document.getElementById('voteNoBtn');
+      const voteSubmitBtn = document.getElementById('voteSubmitBtn');
+      loveBtn.disabled = !enabled;
+      hateBtn.disabled = !enabled;
+      voteSubmitBtn.disabled = !enabled;
+      loveBtn.style.opacity = enabled ? '1' : '0.5';
+      hateBtn.style.opacity = enabled ? '1' : '0.5';
+      voteSubmitBtn.style.opacity = enabled ? '1' : '0.5';
+    }
+    // Initially disable Love/Hate buttons
+    setLoveHateButtonsEnabled(false);
+    document.getElementById('takeActionBtn').onclick = function() {
+      setLoveHateButtonsEnabled(true);
+      alert('Take Action triggered!');
     };
-    const hateBtn = document.getElementById('voteNoBtn');
-    hateBtn.onclick = function() {
-      if (this.disabled) return;
-      changeStat('hateCount', 1);
+    document.getElementById('resetCountBtn').onclick = function() {
+      document.getElementById('loveCount').textContent = 0;
+      document.getElementById('hateCount').textContent = 0;
     };
-    const voteBtn = document.getElementById('voteSubmitBtn');
-    voteBtn.onclick = function() {
-      if (this.disabled) return;
-      changeStat('voteCount', 1);
+    document.getElementById('resetVoteBtn').onclick = function() {
+      setLoveHateButtonsEnabled(true);
     };
-
-    // Also call updateVoteButtonsUsability on DOMContentLoaded
-    window.addEventListener('DOMContentLoaded', function() {
-      // ... existing code ...
-      updateVoteButtonsUsability();
-      enableLoveHateStatButtons();
-    });
+    const voteSubmitBtn = document.getElementById('voteSubmitBtn');
+    voteSubmitBtn.onclick = function() {
+      if (this.disabled) return;
+      let voteEl = document.getElementById('voteCount');
+      let voteVal = parseInt(voteEl.textContent, 10) || 0;
+      voteEl.textContent = voteVal + 1;
+      setLoveHateButtonsEnabled(false);
+    };
+    // Remove or comment out any calls to updateVoteButtonsUsability that affect Love/Hate buttons
+    // ... existing code ...
   </script>
   <!-- At the end of the script, after all UI is rendered, always show and enable the Yes/No buttons -->
   <script>
@@ -1699,8 +1672,10 @@
       const noBtn = document.getElementById('voteNoBtn');
       yesBtn.style.display = 'block';
       noBtn.style.display = 'block';
-      yesBtn.disabled = false;
-      noBtn.disabled = false;
+      yesBtn.disabled = true;
+      noBtn.disabled = true;
+      yesBtn.style.opacity = '0.5';
+      noBtn.style.opacity = '0.5';
     });
   </script>
   <script>
@@ -1713,15 +1688,35 @@
     }
   </script>
   <script>
-    document.getElementById('takeActionBtn').onclick = function() {
-      alert('Take Action triggered!');
-    };
-    document.getElementById('resetCountBtn').onclick = function() {
-      document.getElementById('loveCount').textContent = 0;
-      document.getElementById('hateCount').textContent = 0;
-    };
     document.getElementById('resetBtn').onclick = function() {
       window.location.reload();
+    };
+  </script>
+  <script>
+    // Attach click handlers for +1 logic, only increment if enabled
+    const loveBtn = document.getElementById('voteYesBtn');
+    loveBtn.onclick = function() {
+      if (this.disabled) return;
+      let loveEl = document.getElementById('loveCount');
+      let loveVal = parseInt(loveEl.textContent, 10) || 0;
+      loveEl.textContent = loveVal + 1;
+      setLoveHateButtonsEnabled(false);
+    };
+    const hateBtn = document.getElementById('voteNoBtn');
+    hateBtn.onclick = function() {
+      if (this.disabled) return;
+      let hateEl = document.getElementById('hateCount');
+      let hateVal = parseInt(hateEl.textContent, 10) || 0;
+      hateEl.textContent = hateVal + 1;
+      setLoveHateButtonsEnabled(false);
+    };
+    const voteBtn = document.getElementById('voteBtn');
+    voteBtn.onclick = function() {
+      if (this.disabled) return;
+      let voteEl = document.getElementById('voteCount');
+      let voteVal = parseInt(voteEl.textContent, 10) || 0;
+      voteEl.textContent = voteVal + 1;
+      setLoveHateButtonsEnabled(false);
     };
   </script>
 </body>
