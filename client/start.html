@@ -967,7 +967,7 @@
     <div class="game-status-box">
   </div>
   <button id="testStartBtn" style="position:fixed;left:38px;bottom:38px;z-index:300;padding:14px 38px;font-size:1.15rem;font-family:inherit;background:linear-gradient(100deg,#e2c391 80%,#f7e7c6 100%);color:#5a4327;border:3px solid #bfa16a;border-radius:18px 40px 18px 40px / 40px 18px 40px 18px;box-shadow:4px 8px 24px 0 rgba(90,67,39,0.18),0 2.5px 0 #e2c391 inset,0 0 0 8px #e2c39122 inset;cursor:pointer;transition:box-shadow 0.2s,transform 0.18s,background 0.2s,border 0.2s;display:none;" disabled>Start</button>
-  <button id="finishTalkingBtn" style="display:none;position:fixed;z-index:300;padding:12px 28px;font-size:1.08rem;font-family:inherit;background:linear-gradient(100deg,#e2c391 80%,#f7e7c6 100%);color:#5a4327;border:2.5px solid #bfa16a;border-radius:16px 32px 16px 32px / 32px 16px 32px 16px;box-shadow:2px 4px 12px 0 rgba(90,67,39,0.13),0 1.5px 0 #e2c391 inset,0 0 0 4px #e2c39122 inset;cursor:pointer;transition:box-shadow 0.18s,transform 0.15s,background 0.18s,border 0.18s;">Finish Talking</button>
+  <button id="finishTalkingBtn" style="display:none;position:fixed;z-index:300;padding:12px 28px;font-size:1.08rem;font-family:inherit;background:linear-gradient(100deg,#e2c391 80%,#f7e7c6 100%);color:#5a4327;border:2.5px solid #bfa16a;border-radius:16px 32px 16px 32px / 32px 16px 32px 16px;box-shadow:2px 4px 12px 0 rgba(90,67,39,0.13),0 1.5px 0 #e2c391 inset,0 0 0 4px #e2c39122 inset;cursor:pointer;transition:box-shadow 0.18s,transform 0.15s,background 0.18s,border 0.18s;visibility:hidden;">Finish Talking</button>
   <button id="muteBtn" style="display:none;position:fixed;z-index:300;padding:12px 28px;font-size:1.08rem;font-family:inherit;background:linear-gradient(100deg,#e2c391 80%,#f7e7c6 100%);color:#5a4327;border:2.5px solid #bfa16a;border-radius:16px 32px 16px 32px / 32px 16px 32px 16px;box-shadow:2px 4px 12px 0 rgba(90,67,39,0.13),0 1.5px 0 #e2c391 inset,0 0 0 4px #e2c39122 inset;cursor:pointer;transition:box-shadow 0.18s,transform 0.15s,background 0.18s,border 0.18s;">Mute</button>
   <button id="voteYesBtn" style="display:none;position:fixed;z-index:300;padding:12px 28px;font-size:1.08rem;font-family:inherit;background:linear-gradient(100deg,#b2e7d7 80%,#7bb0e6 100%);color:#2c3e50;border:2.5px solid #7bb0e6;border-radius:16px 32px 16px 32px / 32px 16px 32px 16px;box-shadow:2px 4px 12px 0 rgba(90,67,39,0.13),0 1.5px 0 #7bb0e6 inset,0 0 0 4px #7bb0e622 inset;cursor:pointer;transition:box-shadow 0.18s,transform 0.15s,background 0.18s,border 0.18s;margin-top:8px;margin-right:8px;">❤️ Love</button>
   <button id="voteNoBtn" style="display:none;position:fixed;z-index:300;padding:12px 28px;font-size:1.08rem;font-family:inherit;background:linear-gradient(100deg,#f7b2b7 80%,#e2c391 100%);color:#2c3e50;border:2.5px solid #e2c391;border-radius:16px 32px 16px 32px / 32px 16px 32px 16px;box-shadow:2px 4px 12px 0 rgba(90,67,39,0.13),0 1.5px 0 #e2c391 inset,0 0 0 4px #e2c39122 inset;cursor:pointer;transition:box-shadow 0.18s,transform 0.15s,background 0.18s,border 0.18s;margin-top:8px;">💔 Hate</button>
@@ -1659,8 +1659,16 @@
       }, 5000);
     };
     document.getElementById('resetCountBtn').onclick = function() {
-      document.getElementById('loveCount').textContent = 0;
-      document.getElementById('hateCount').textContent = 0;
+      // Reset the counts to 0
+      document.getElementById('loveCount').textContent = '0';
+      document.getElementById('hateCount').textContent = '0';
+      
+      // Show the message overlay
+      const overlay = document.getElementById('resetCountMessageOverlay');
+      overlay.style.display = 'block';
+      setTimeout(() => {
+        overlay.style.display = 'none';
+      }, 5000);
     };
     document.getElementById('resetVoteBtn').onclick = function() {
       // Show voting message overlay
@@ -1726,7 +1734,11 @@
   </script>
   <script>
     document.getElementById('resetBtn').onclick = function() {
-      window.location.reload();
+      const overlay = document.getElementById('restartMessageOverlay');
+      overlay.style.display = 'block';
+      setTimeout(() => {
+        window.location.reload();
+      }, 5000);
     };
   </script>
   <script>
@@ -2039,6 +2051,38 @@
         };
       }
     });
+  </script>
+  <!-- Add a message overlay div for restart -->
+  <div id="restartMessageOverlay" style="display:none;position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:9999;background:rgba(255,251,231,0.98);border-radius:18px;padding:32px 48px 28px 48px;box-shadow:0 2px 32px 0 #e2c39177,0 2px 0 #fffbe7 inset;font-size:1.45rem;font-family:'Caveat','Segoe Print','Comic Sans MS',cursive;color:#7a5a2f;font-weight:bold;text-align:center;pointer-events:none;">The game restarts!</div>
+  <script>
+    document.getElementById('resetBtn').onclick = function() {
+      const overlay = document.getElementById('restartMessageOverlay');
+      overlay.style.display = 'block';
+      setTimeout(() => {
+        window.location.reload();
+      }, 5000);
+    };
+  </script>
+  <!-- Add a message overlay div for reset count -->
+  <div id="resetCountMessageOverlay" style="display:none;position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:9999;background:rgba(255,251,231,0.98);border-radius:18px;padding:32px 48px 28px 48px;box-shadow:0 2px 32px 0 #e2c39177,0 2px 0 #fffbe7 inset;font-size:1.45rem;font-family:'Caveat','Segoe Print','Comic Sans MS',cursive;color:#7a5a2f;font-weight:bold;text-align:center;pointer-events:none;">The action count reset!</div>
+  <script>
+    // Remove any existing click handlers for resetCountBtn
+    const resetCountBtn = document.getElementById('resetCountBtn');
+    resetCountBtn.onclick = null;
+    
+    // Add the new click handler
+    resetCountBtn.onclick = function() {
+      // Reset the counts to 0
+      document.getElementById('loveCount').textContent = '0';
+      document.getElementById('hateCount').textContent = '0';
+      
+      // Show the message overlay
+      const overlay = document.getElementById('resetCountMessageOverlay');
+      overlay.style.display = 'block';
+      setTimeout(() => {
+        overlay.style.display = 'none';
+      }, 5000);
+    };
   </script>
 </body>
 </html>
