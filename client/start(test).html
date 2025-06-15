@@ -1617,40 +1617,44 @@
       }
     }
 
-    // Update Love, Vote, and Hate button logic to only be usable in day mode
+    // Update Love, Vote, and Hate button logic to be disabled in both modes
     function updateVoteButtonsUsability() {
-      const isDay = document.body.classList.contains('day-stage');
       const loveBtn = document.getElementById('voteYesBtn');
       const hateBtn = document.getElementById('voteNoBtn');
       const voteBtn = document.getElementById('voteSubmitBtn');
-      loveBtn.disabled = !isDay;
-      hateBtn.disabled = !isDay;
-      voteBtn.disabled = !isDay;
-      loveBtn.style.opacity = !isDay ? '0.5' : '1';
-      hateBtn.style.opacity = !isDay ? '0.5' : '1';
-      voteBtn.style.opacity = !isDay ? '0.5' : '1';
+      
+      // Keep buttons disabled in both modes
+      loveBtn.disabled = true;
+      hateBtn.disabled = true;
+      voteBtn.disabled = true;
+      loveBtn.style.opacity = '0.5';
+      hateBtn.style.opacity = '0.5';
+      voteBtn.style.opacity = '0.5';
     }
 
     // Remove background mode logic for enabling/disabling Love/Hate buttons
     function setLoveHateButtonsEnabled(enabled) {
       const loveBtn = document.getElementById('voteYesBtn');
       const hateBtn = document.getElementById('voteNoBtn');
-      const voteSubmitBtn = document.getElementById('voteSubmitBtn');
+      if (!loveBtn || !hateBtn) return; // Guard against null elements
+      // Only enable if enabled parameter is true
       loveBtn.disabled = !enabled;
       hateBtn.disabled = !enabled;
-      voteSubmitBtn.disabled = !enabled;
       loveBtn.style.opacity = enabled ? '1' : '0.5';
       hateBtn.style.opacity = enabled ? '1' : '0.5';
-      voteSubmitBtn.style.opacity = enabled ? '1' : '0.5';
     }
     // Initially disable Love/Hate buttons
     setLoveHateButtonsEnabled(false);
+    // Take Action button handler
     document.getElementById('takeActionBtn').onclick = function() {
       // Show message overlay for Take Action
       const overlay = document.getElementById('takeActionMessageOverlay');
       overlay.style.display = 'block';
+      // Keep love/hate buttons disabled during the message
+      setLoveHateButtonsEnabled(false);
       setTimeout(() => {
         overlay.style.display = 'none';
+        // Enable love/hate buttons after message disappears
         setLoveHateButtonsEnabled(true);
       }, 5000);
     };
@@ -1659,23 +1663,36 @@
       document.getElementById('hateCount').textContent = 0;
     };
     document.getElementById('resetVoteBtn').onclick = function() {
-      setLoveHateButtonsEnabled(true);
+      // Show voting message overlay
+      const overlay = document.getElementById('voteMessageOverlay');
+      const voteBtn = document.getElementById('voteSubmitBtn');
+      
+      // Enable vote button and show message
+      if (voteBtn) {
+        voteBtn.disabled = false;
+        voteBtn.style.opacity = '1';
+      }
+      overlay.style.display = 'block';
+      
+      // After 10 seconds, hide message and disable vote button
+      setTimeout(() => {
+        overlay.style.display = 'none';
+        if (voteBtn) {
+          voteBtn.disabled = true;
+          voteBtn.style.opacity = '0.5';
+        }
+      }, 10000);
     };
-    const voteSubmitBtn = document.getElementById('voteSubmitBtn');
-    voteSubmitBtn.onclick = function() {
+    
+    const voteBtn = document.getElementById('voteSubmitBtn');
+    voteBtn.onclick = function() {
       if (this.disabled) return;
       let voteEl = document.getElementById('voteCount');
       let voteVal = parseInt(voteEl.textContent, 10) || 0;
       voteEl.textContent = voteVal + 1;
-      setLoveHateButtonsEnabled(false);
-      // Show message overlay
-      const overlay = document.getElementById('powerMessageOverlay');
-      overlay.style.display = 'block';
-      setPowerSkillButtonsEnabled(true);
-      setTimeout(() => {
-        overlay.style.display = 'none';
-        setPowerSkillButtonsEnabled(false);
-      }, 10000);
+      // Disable the vote button after clicking
+      this.disabled = true;
+      this.style.opacity = '0.5';
     };
     // Remove or comment out any calls to updateVoteButtonsUsability that affect Love/Hate buttons
     // ... existing code ...
@@ -1691,6 +1708,11 @@
       noBtn.disabled = true;
       yesBtn.style.opacity = '0.5';
       noBtn.style.opacity = '0.5';
+      // Initialize vote button as disabled
+      if (voteBtn) {
+        voteBtn.disabled = true;
+        voteBtn.style.opacity = '0.5';
+      }
     });
   </script>
   <script>
@@ -1708,11 +1730,33 @@
     };
   </script>
   <script>
+    // Initialize all buttons on page load
+    window.addEventListener('DOMContentLoaded', function() {
+      // Initialize love/hate buttons
+      const yesBtn = document.getElementById('voteYesBtn');
+      const noBtn = document.getElementById('voteNoBtn');
+      const voteBtn = document.getElementById('voteSubmitBtn');
+      
+      // Set up love/hate buttons
+      yesBtn.style.display = 'block';
+      noBtn.style.display = 'block';
+      setLoveHateButtonsEnabled(false);
+
+      // Set up vote button
+      if (voteBtn) {
+        voteBtn.disabled = true;
+        voteBtn.style.opacity = '0.5';
+      }
+    });
+  </script>
+  <script>
     // Attach click handlers for +1 logic, only increment if enabled
     const loveBtn = document.getElementById('voteYesBtn');
     loveBtn.onclick = function() {
       if (this.disabled) return;
+      // Store the action first
       pendingAction = 'love';
+      // Then disable both love and hate buttons
       setLoveHateButtonsEnabled(false);
       // Show message overlay and enable skills for 10s
       const overlay = document.getElementById('powerMessageOverlay');
@@ -1721,13 +1765,16 @@
       setTimeout(() => {
         overlay.style.display = 'none';
         setPowerSkillButtonsEnabled(false);
+        // Process the action after the message disappears
         processPendingAction();
       }, 10000);
     };
     const hateBtn = document.getElementById('voteNoBtn');
     hateBtn.onclick = function() {
       if (this.disabled) return;
+      // Store the action first
       pendingAction = 'hate';
+      // Then disable both love and hate buttons
       setLoveHateButtonsEnabled(false);
       // Show message overlay and enable skills for 10s
       const overlay = document.getElementById('powerMessageOverlay');
@@ -1736,16 +1783,19 @@
       setTimeout(() => {
         overlay.style.display = 'none';
         setPowerSkillButtonsEnabled(false);
+        // Process the action after the message disappears
         processPendingAction();
       }, 10000);
     };
-    const voteBtn = document.getElementById('voteBtn');
+    const voteBtn = document.getElementById('voteSubmitBtn');
     voteBtn.onclick = function() {
       if (this.disabled) return;
       let voteEl = document.getElementById('voteCount');
       let voteVal = parseInt(voteEl.textContent, 10) || 0;
       voteEl.textContent = voteVal + 1;
-      setLoveHateButtonsEnabled(false);
+      // Disable the vote button after clicking
+      this.disabled = true;
+      this.style.opacity = '0.5';
     };
   </script>
   <!-- Add a message overlay div to the body -->
@@ -1758,14 +1808,26 @@
       // Wind's Mislead
       const misleadBtn = Array.from(document.querySelectorAll('.skill-btn')).find(btn => btn.textContent.trim().toLowerCase().includes('mislead'));
       if (misleadBtn) {
-        misleadBtn.disabled = !enabled;
-        misleadBtn.style.opacity = enabled ? '1' : '0.5';
+        // Check if button has been used
+        if (misleadBtn.getAttribute('data-used') === 'true' || windMisleadUsed) {
+          misleadBtn.disabled = true;
+          misleadBtn.style.opacity = '0.5';
+        } else {
+          misleadBtn.disabled = !enabled;
+          misleadBtn.style.opacity = enabled ? '1' : '0.5';
+        }
       }
       // Kennedi's Protect the Party
       const protectBtn = Array.from(document.querySelectorAll('.skill-btn')).find(btn => btn.textContent.trim().toLowerCase().includes('protect'));
       if (protectBtn) {
-        protectBtn.disabled = !enabled;
-        protectBtn.style.opacity = enabled ? '1' : '0.5';
+        // Check if button has been used
+        if (protectBtn.getAttribute('data-used') === 'true' || kennediProtectUsed) {
+          protectBtn.disabled = true;
+          protectBtn.style.opacity = '0.5';
+        } else {
+          protectBtn.disabled = !enabled;
+          protectBtn.style.opacity = enabled ? '1' : '0.5';
+        }
       }
     }
   </script>
@@ -1812,6 +1874,8 @@
       pendingAction = null;
       kennediProtectUsed = false;
       windMisleadUsed = false;
+      // Disable love/hate buttons after action is processed
+      setLoveHateButtonsEnabled(false);
     }
   </script>
   <script>
@@ -1825,6 +1889,7 @@
           windMisleadUsed = true;
           this.disabled = true;
           this.style.opacity = '0.5';
+          this.setAttribute('data-used', 'true');
           // Removed message overlay for Mislead
         };
         misleadBtn._handlerAttached = true;
@@ -1837,6 +1902,7 @@
           kennediProtectUsed = true;
           this.disabled = true;
           this.style.opacity = '0.5';
+          this.setAttribute('data-used', 'true');
           // Removed message overlay for Protecting the Party
         };
         protectBtn._handlerAttached = true;
@@ -1855,6 +1921,124 @@
         attachSkillButtonHandlers();
       }, 150);
     }
+  </script>
+  <!-- Add a message overlay div for voting -->
+  <div id="voteMessageOverlay" style="display:none;position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:9999;background:rgba(255,251,231,0.98);border-radius:18px;padding:32px 48px 28px 48px;box-shadow:0 2px 32px 0 #e2c39177,0 2px 0 #fffbe7 inset;font-size:1.45rem;font-family:'Caveat','Segoe Print','Comic Sans MS',cursive;color:#7a5a2f;font-weight:bold;text-align:center;pointer-events:none;">Now every player can vote!</div>
+  <script>
+    // Remove background mode logic for enabling/disabling Love/Hate buttons
+    function setLoveHateButtonsEnabled(enabled) {
+      const loveBtn = document.getElementById('voteYesBtn');
+      const hateBtn = document.getElementById('voteNoBtn');
+      if (!loveBtn || !hateBtn) {
+        console.log('Love/Hate buttons not found');
+        return;
+      }
+      console.log('Setting love/hate buttons enabled:', enabled);
+      // Only enable if enabled parameter is true
+      loveBtn.disabled = !enabled;
+      hateBtn.disabled = !enabled;
+      loveBtn.style.opacity = enabled ? '1' : '0.5';
+      hateBtn.style.opacity = enabled ? '1' : '0.5';
+    }
+
+    // Initialize all buttons on page load
+    window.addEventListener('DOMContentLoaded', function() {
+      console.log('DOM Content Loaded');
+      // Initialize love/hate buttons
+      const loveBtn = document.getElementById('voteYesBtn');
+      const hateBtn = document.getElementById('voteNoBtn');
+      const voteBtn = document.getElementById('voteSubmitBtn');
+      
+      console.log('Love button:', loveBtn);
+      console.log('Hate button:', hateBtn);
+      
+      // Set up love/hate buttons
+      if (loveBtn && hateBtn) {
+        loveBtn.style.display = 'block';
+        hateBtn.style.display = 'block';
+        setLoveHateButtonsEnabled(false);
+      }
+
+      // Set up vote button
+      if (voteBtn) {
+        voteBtn.disabled = true;
+        voteBtn.style.opacity = '0.5';
+      }
+
+      // Take Action button handler
+      const takeActionBtn = document.getElementById('takeActionBtn');
+      if (takeActionBtn) {
+        takeActionBtn.onclick = function() {
+          console.log('Take Action button clicked');
+          // Show message overlay for Take Action
+          const overlay = document.getElementById('takeActionMessageOverlay');
+          if (overlay) {
+            overlay.style.display = 'block';
+            // Keep love/hate buttons disabled during the message
+            setLoveHateButtonsEnabled(false);
+            setTimeout(() => {
+              overlay.style.display = 'none';
+              // Enable love/hate buttons after message disappears
+              setLoveHateButtonsEnabled(true);
+            }, 5000);
+          }
+        };
+      }
+
+      // Love button click handler
+      if (loveBtn) {
+        loveBtn.onclick = function() {
+          console.log('Love button clicked');
+          if (this.disabled) {
+            console.log('Love button is disabled');
+            return;
+          }
+          // Store the action first
+          pendingAction = 'love';
+          // Then disable both love and hate buttons
+          setLoveHateButtonsEnabled(false);
+          // Show message overlay and enable skills for 10s
+          const overlay = document.getElementById('powerMessageOverlay');
+          if (overlay) {
+            overlay.style.display = 'block';
+            setPowerSkillButtonsEnabled(true);
+            setTimeout(() => {
+              overlay.style.display = 'none';
+              setPowerSkillButtonsEnabled(false);
+              // Process the action after the message disappears
+              processPendingAction();
+            }, 10000);
+          }
+        };
+      }
+
+      // Hate button click handler
+      if (hateBtn) {
+        hateBtn.onclick = function() {
+          console.log('Hate button clicked');
+          if (this.disabled) {
+            console.log('Hate button is disabled');
+            return;
+          }
+          // Store the action first
+          pendingAction = 'hate';
+          // Then disable both love and hate buttons
+          setLoveHateButtonsEnabled(false);
+          // Show message overlay and enable skills for 10s
+          const overlay = document.getElementById('powerMessageOverlay');
+          if (overlay) {
+            overlay.style.display = 'block';
+            setPowerSkillButtonsEnabled(true);
+            setTimeout(() => {
+              overlay.style.display = 'none';
+              setPowerSkillButtonsEnabled(false);
+              // Process the action after the message disappears
+              processPendingAction();
+            }, 10000);
+          }
+        };
+      }
+    });
   </script>
 </body>
 </html>
