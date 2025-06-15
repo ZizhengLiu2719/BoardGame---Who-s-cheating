@@ -121,9 +121,183 @@ io.on('connection', (socket) => {
     const readyStates = JSON.parse(room.readyStates || '{}');
     const allReady = players.length === Number(room.maxPlayers) && players.every(p => readyStates[p.name]);
     if (allReady) {
-      io.to(roomId).emit('startGame');
-      // TODO: Add further game logic here
+      // Initialize game state
+      const gameState = {
+        nightCount: 0,
+        scandal: 0,
+        closeKnot: 0,
+        roles: {},
+        dramaCards: {},
+        votes: {},
+        usedPowers: {},
+        currentPhase: 'night',
+        playerStates: {},
+        gameOver: false,
+        winners: null
+      };
+      
+      // Assign roles randomly
+      const roles = ['Abby', 'Jack', 'Wind', 'Michael', 'Kennedi', 'Ker'];
+      const shuffledRoles = roles.sort(() => Math.random() - 0.5);
+      players.forEach((player, index) => {
+        gameState.roles[player.name] = shuffledRoles[index];
+        gameState.playerStates[player.name] = {
+          hasVoted: false,
+          hasPlayedDrama: false
+        };
+      });
+      
+      // Save game state
+      await redis.hset(`room:${roomId}`, 'gameState', JSON.stringify(gameState));
+      
+      // Start game
+      io.to(roomId).emit('startGame', gameState);
     }
+  });
+
+  // Handle game actions
+  socket.on('gameAction', async ({ roomId, action, data }) => {
+    const room = await redis.hgetall(`room:${roomId}`);
+    if (!room) return;
+    
+    let gameState = JSON.parse(room.gameState || '{}');
+    
+    switch (action) {
+      case 'usePower':
+        if (!gameState.usedPowers[data.playerName]) {
+          gameState.usedPowers[data.playerName] = true;
+          const role = gameState.roles[data.playerName];
+          
+          switch (data.power) {
+            case 'protectingParty': // Kennedi
+              if (role === 'Kennedi') {
+                gameState.closeKnot += 3;
+              }
+              break;
+              
+            case 'mislead': // Wind
+              if (role === 'Wind') {
+                gameState.scandal += 1;
+                // Find one Love card and flip it to Hate
+                const loveCards = Object.entries(gameState.dramaCards)
+                  .filter(([_, card]) => card === 'love');
+                if (loveCards.length > 0) {
+                  const [playerName] = loveCards[0];
+                  gameState.dramaCards[playerName] = 'hate';
+                  gameState.closeKnot -= 1;
+                  gameState.scandal += 1;
+                }
+              }
+              break;
+              
+            case 'molestBoy': // Wind
+              if (role === 'Wind') {
+                gameState.scandal += 2;
+              }
+              break;
+              
+            case 'findAbby': // Michael
+              if (role === 'Michael') {
+                const targetName = data.targetName;
+                if (gameState.roles[targetName] === 'Abby') {
+                  // Cheaters win immediately
+                  gameState.gameOver = true;
+                  gameState.winners = 'cheaters';
+                } else {
+                  // Keepers win immediately
+                  gameState.gameOver = true;
+                  gameState.winners = 'keepers';
+                }
+              }
+              break;
+              
+            case 'swapHelper': // Ker
+              if (role === 'Ker') {
+                const { oldHelper, newHelper } = data;
+                if (gameState.currentHelpers.includes(oldHelper)) {
+                  const idx = gameState.currentHelpers.indexOf(oldHelper);
+                  gameState.currentHelpers[idx] = newHelper;
+                }
+              }
+              break;
+          }
+        }
+        break;
+        
+      case 'vote':
+        gameState.votes[data.playerName] = data.vote;
+        gameState.playerStates[data.playerName].hasVoted = true;
+        
+        // Check if all players have voted
+        const allVoted = Object.values(gameState.playerStates).every(state => state.hasVoted);
+        if (allVoted) {
+          // Count votes
+          const voteCounts = Object.values(gameState.votes).reduce((acc, vote) => {
+            acc[vote] = (acc[vote] || 0) + 1;
+            return acc;
+          }, {});
+          
+          // Update scores based on votes
+          if (voteCounts.love > voteCounts.hate) {
+            gameState.closeKnot += 1;
+          } else if (voteCounts.hate > voteCounts.love) {
+            gameState.scandal += 1;
+          }
+          
+          // Reset votes for next round
+          gameState.votes = {};
+          Object.values(gameState.playerStates).forEach(state => {
+            state.hasVoted = false;
+          });
+          
+          // Move to next phase
+          gameState.currentPhase = gameState.currentPhase === 'night' ? 'party' : 'night';
+          gameState.nightCount += 1;
+        }
+        break;
+        
+      case 'playDramaCard':
+        gameState.dramaCards[data.playerName] = data.card;
+        gameState.playerStates[data.playerName].hasPlayedDrama = true;
+        
+        // Check if all players have played their cards
+        const allPlayed = Object.values(gameState.playerStates).every(state => state.hasPlayedDrama);
+        if (allPlayed) {
+          // Count cards
+          const cardCounts = Object.values(gameState.dramaCards).reduce((acc, card) => {
+            acc[card] = (acc[card] || 0) + 1;
+            return acc;
+          }, {});
+          
+          // Update scores based on cards
+          if (cardCounts.love > cardCounts.hate) {
+            gameState.closeKnot += 2;
+          } else if (cardCounts.hate > cardCounts.love) {
+            gameState.scandal += 2;
+          }
+          
+          // Reset cards for next round
+          gameState.dramaCards = {};
+          Object.values(gameState.playerStates).forEach(state => {
+            state.hasPlayedDrama = false;
+          });
+        }
+        break;
+        
+      case 'changeStat':
+        const { stat, delta } = data;
+        if (gameState[stat] !== undefined) {
+          gameState[stat] += delta;
+          if (gameState[stat] < 0) gameState[stat] = 0;
+        }
+        break;
+    }
+    
+    // Save updated game state
+    await redis.hset(`room:${roomId}`, 'gameState', JSON.stringify(gameState));
+    
+    // Broadcast updated state to all players
+    io.to(roomId).emit('gameStateUpdate', gameState);
   });
 
   // Handle disconnect
