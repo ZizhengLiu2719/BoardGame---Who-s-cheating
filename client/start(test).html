@@ -693,6 +693,60 @@
       border-color: #3498db;
       color: #34495e;
     }
+    .stat-btn {
+      background: linear-gradient(100deg, #e2c391 80%, #f7e7c6 100%);
+      color: #7a5a2f;
+      border: 1.5px solid #bfa16a;
+      border-radius: 8px;
+      font-size: 1.1em;
+      font-family: inherit;
+      padding: 2px 10px;
+      margin: 0 2px;
+      cursor: pointer;
+      transition: background 0.18s, color 0.18s, border 0.18s;
+    }
+    .stat-btn:hover {
+      background: linear-gradient(100deg, #f9eacb 80%, #e7cfa1 100%);
+      color: #a07c4f;
+      border-color: #a07c4f;
+    }
+    .love-hate-box {
+      background: rgba(255, 251, 231, 0.95);
+      border-radius: 15px;
+      padding: 15px;
+      margin: 18px 0 0 0;
+      width: 180px;
+      box-shadow: 0 2px 18px 0 #e2c39133, 0 2px 0 #fffbe7 inset;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      border: 2px solid #e2c391;
+      position: fixed;
+      top: 520px;
+      left: 38px;
+      transform: none;
+      transition: all 0.3s ease;
+      z-index: 120;
+    }
+    .night-mode .love-hate-box {
+      background: rgba(44, 62, 80, 0.95);
+      border: 2px solid #34495e;
+      box-shadow: 0 2px 18px 0 rgba(52, 73, 94, 0.3), 0 2px 0 #2c3e50 inset;
+    }
+    #voteSubmitBtn:disabled, #voteSubmitBtn.disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      background: linear-gradient(100deg, #e2c391 80%, #e2c391 100%);
+      border-color: #bfa16a;
+      box-shadow: none;
+      color: #a07c4f;
+    }
+    #voteSubmitBtn:disabled:hover, #voteSubmitBtn.disabled:hover {
+      background: linear-gradient(100deg, #e2c391 80%, #e2c391 100%);
+      box-shadow: none;
+      transform: none;
+      border-color: #bfa16a;
+    }
   </style>
 </head>
 <body class="ghibli-game">
@@ -859,22 +913,60 @@
     <div class="game-stats-box">
       <div class="stat-item">
         <div class="stat-label">Party Count</div>
-        <div class="stat-value" id="partyCount">0</div>
+        <div style="display:flex;align-items:center;justify-content:center;gap:6px;">
+          <button class="stat-btn" onclick="changeStat('partyCount',-1)">-1</button>
+          <div class="stat-value" id="partyCount">0</div>
+          <button class="stat-btn" onclick="changeStat('partyCount',1)">+1</button>
+        </div>
       </div>
       <div class="stat-item">
         <div class="stat-label">Scandal Score</div>
-        <div class="stat-value" id="scandalScore">0</div>
+        <div style="display:flex;align-items:center;justify-content:center;gap:6px;">
+          <button class="stat-btn" onclick="changeStat('scandalScore',-1)">-1</button>
+          <div class="stat-value" id="scandalScore">0</div>
+          <button class="stat-btn" onclick="changeStat('scandalScore',1)">+1</button>
+        </div>
       </div>
       <div class="stat-item">
         <div class="stat-label">Close-Knot Score</div>
-        <div class="stat-value" id="closeKnotScore">0</div>
+        <div style="display:flex;align-items:center;justify-content:center;gap:6px;">
+          <button class="stat-btn" onclick="changeStat('closeKnotScore',-1)">-1</button>
+          <div class="stat-value" id="closeKnotScore">0</div>
+          <button class="stat-btn" onclick="changeStat('closeKnotScore',1)">+1</button>
+        </div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-label">Vote Count</div>
+        <div style="display:flex;align-items:center;justify-content:center;gap:6px;">
+          <button class="stat-btn" onclick="changeStat('voteCount',-1)">-1</button>
+          <div class="stat-value" id="voteCount">0</div>
+          <button class="stat-btn" onclick="changeStat('voteCount',1)">+1</button>
+        </div>
       </div>
     </div>
+    <div class="love-hate-box" style="display: flex; flex-direction: row; align-items: center; justify-content: space-between;">
+      <div style="flex:1;">
+        <div class="stat-item">
+          <div class="stat-label">Love Count</div>
+          <div class="stat-value" id="loveCount">0</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-label">Hate Count</div>
+          <div class="stat-value" id="hateCount">0</div>
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;align-items:center;gap:12px;">
+        <button id="takeActionBtn" class="stat-btn" style="min-width:110px;height:60px;font-size:1.13em;align-self:center;">Take Action</button>
+        <button id="resetCountBtn" class="stat-btn" style="min-width:130px;height:54px;font-size:1.08em;align-self:center;">Reset Count</button>
+        <button id="resetVoteBtn" class="stat-btn" style="min-width:130px;height:54px;font-size:1.08em;align-self:center;">Reset Vote</button>
+      </div>
+    </div>
+    <button id="resetBtn" class="stat-btn" style="min-width:170px;height:54px;font-size:1.13em;align-self:center;position:fixed;right:60px;bottom:38px;z-index:121;">Restart the Game</button>
     <div id="skillButtonContainer" style="position:fixed;display:flex;flex-direction:column;gap:12px;"></div>
 
     <div class="game-status-box">
   </div>
-  <button id="testStartBtn" style="position:fixed;left:38px;bottom:38px;z-index:300;padding:14px 38px;font-size:1.15rem;font-family:inherit;background:linear-gradient(100deg,#e2c391 80%,#f7e7c6 100%);color:#5a4327;border:3px solid #bfa16a;border-radius:18px 40px 18px 40px / 40px 18px 40px 18px;box-shadow:4px 8px 24px 0 rgba(90,67,39,0.18),0 2.5px 0 #e2c391 inset,0 0 0 8px #e2c39122 inset;cursor:pointer;transition:box-shadow 0.2s,transform 0.18s,background 0.2s,border 0.2s;">Start</button>
+  <button id="testStartBtn" style="position:fixed;left:38px;bottom:38px;z-index:300;padding:14px 38px;font-size:1.15rem;font-family:inherit;background:linear-gradient(100deg,#e2c391 80%,#f7e7c6 100%);color:#5a4327;border:3px solid #bfa16a;border-radius:18px 40px 18px 40px / 40px 18px 40px 18px;box-shadow:4px 8px 24px 0 rgba(90,67,39,0.18),0 2.5px 0 #e2c391 inset,0 0 0 8px #e2c39122 inset;cursor:pointer;transition:box-shadow 0.2s,transform 0.18s,background 0.2s,border 0.2s;display:none;" disabled>Start</button>
   <button id="finishTalkingBtn" style="display:none;position:fixed;z-index:300;padding:12px 28px;font-size:1.08rem;font-family:inherit;background:linear-gradient(100deg,#e2c391 80%,#f7e7c6 100%);color:#5a4327;border:2.5px solid #bfa16a;border-radius:16px 32px 16px 32px / 32px 16px 32px 16px;box-shadow:2px 4px 12px 0 rgba(90,67,39,0.13),0 1.5px 0 #e2c391 inset,0 0 0 4px #e2c39122 inset;cursor:pointer;transition:box-shadow 0.18s,transform 0.15s,background 0.18s,border 0.18s;">Finish Talking</button>
   <button id="muteBtn" style="display:none;position:fixed;z-index:300;padding:12px 28px;font-size:1.08rem;font-family:inherit;background:linear-gradient(100deg,#e2c391 80%,#f7e7c6 100%);color:#5a4327;border:2.5px solid #bfa16a;border-radius:16px 32px 16px 32px / 32px 16px 32px 16px;box-shadow:2px 4px 12px 0 rgba(90,67,39,0.13),0 1.5px 0 #e2c391 inset,0 0 0 4px #e2c39122 inset;cursor:pointer;transition:box-shadow 0.18s,transform 0.15s,background 0.18s,border 0.18s;">Mute</button>
   <button id="voteYesBtn" style="display:none;position:fixed;z-index:300;padding:12px 28px;font-size:1.08rem;font-family:inherit;background:linear-gradient(100deg,#b2e7d7 80%,#7bb0e6 100%);color:#2c3e50;border:2.5px solid #7bb0e6;border-radius:16px 32px 16px 32px / 32px 16px 32px 16px;box-shadow:2px 4px 12px 0 rgba(90,67,39,0.13),0 1.5px 0 #7bb0e6 inset,0 0 0 4px #7bb0e622 inset;cursor:pointer;transition:box-shadow 0.18s,transform 0.15s,background 0.18s,border 0.18s;margin-top:8px;margin-right:8px;">❤️ Love</button>
@@ -905,6 +997,9 @@
         toggleBtn.style.border = '2px solid #7bb0e6';
         toggleBtn.style.boxShadow = '0 2px 8px 0 #23202a99';
         toggleBtn.style.transition = 'all 0.2s';
+        rerenderSkillButtons();
+        updateVoteButtonsUsability();
+        enableLoveHateStatButtons();
       } else {
         body.classList.add('day-stage');
         // Day mode title
@@ -923,6 +1018,9 @@
         toggleBtn.style.border = '2px solid #e2c391';
         toggleBtn.style.boxShadow = '0 2px 8px 0 #e2c39133';
         toggleBtn.style.transition = 'all 0.2s';
+        rerenderSkillButtons();
+        updateVoteButtonsUsability();
+        enableLoveHateStatButtons();
       }
       console.log('Body classList:', body.classList.toString());
     }
@@ -1043,9 +1141,20 @@
         const btn1 = document.createElement('button');
         btn1.textContent = 'Molest';
         btn1.className = 'skill-btn';
-        btn1.disabled = gameState.windMolestUsed;
-        btn1.style.opacity = gameState.windMolestUsed ? '0.5' : '1';
-        // The click handler is set in enableWindMolestButton during night phase
+        // Only enabled if not used and night mode
+        const isNight = !document.body.classList.contains('day-stage');
+        btn1.disabled = gameState.windMolestUsed || !isNight;
+        btn1.style.opacity = (gameState.windMolestUsed || !isNight) ? '0.5' : '1';
+        btn1.onclick = () => {
+          if (gameState.windMolestUsed || !isNight) return;
+          gameState.windMolestUsed = true;
+          let scandalEl = document.getElementById('scandalScore');
+          let val = parseInt(scandalEl.textContent, 10) || 0;
+          val += 2;
+          scandalEl.textContent = val;
+          btn1.disabled = true;
+          btn1.style.opacity = '0.5';
+        };
         const btn2 = document.createElement('button');
         btn2.textContent = 'Mislead';
         btn2.className = 'skill-btn';
@@ -1067,17 +1176,50 @@
         btn.onclick = () => alert('Skill used!');
         container.appendChild(btn);
       }
+      // In renderSkillButtons, add logic for Michael's skill button
+      if (myRole === 'michael') {
+        container.style.display = 'flex';
+        container.style.flexDirection = 'column';
+        container.innerHTML = '';
+        const btn = document.createElement('button');
+        btn.textContent = 'Finding Abby';
+        btn.className = 'skill-btn';
+        btn.disabled = !!gameState.michaelFindingAbbyUsed;
+        btn.style.opacity = btn.disabled ? '0.5' : '1';
+        btn.onclick = () => {
+          if (gameState.michaelFindingAbbyUsed) return;
+          gameState.michaelFindingAbbyUsed = true;
+          btn.disabled = true;
+          btn.style.opacity = '0.5';
+          showStatus("Michael thinks he has found Abby!");
+        };
+        container.appendChild(btn);
+      }
     }
     // Call after rendering cards to ensure position is correct
     renderRoleCards();
+    // Add a helper to always enable stat adjustment buttons in love-hate-box
+    function enableLoveHateStatButtons() {
+      document.querySelectorAll('.love-hate-box .stat-btn').forEach(btn => {
+        btn.disabled = false;
+        btn.classList.remove('disabled');
+        btn.style.opacity = '1';
+      });
+    }
+    // Call this after rerenderSkillButtons, setNightMode, and DOMContentLoaded
     function rerenderSkillButtons() {
-      setTimeout(renderSkillButtons, 150);
+      setTimeout(() => {
+        renderSkillButtons();
+        enableLoveHateStatButtons();
+        setPowerSkillButtonsEnabled(false);
+        attachSkillButtonHandlers();
+      }, 150);
     }
     rerenderSkillButtons();
     window.addEventListener('resize', rerenderSkillButtons);
     // Add test Start button logic
     document.getElementById('testStartBtn').onclick = function() {
-      startGame();
+      window.location.reload();
     };
 
     // --- Game Logic ---
@@ -1095,7 +1237,8 @@
       gameEnded: false,
       windMolestUsed: false,
       nightTimer: null,
-      candidateHost: null
+      candidateHost: null,
+      michaelFindingAbbyUsed: false
     };
 
     function updateStatsUI() {
@@ -1474,59 +1617,68 @@
       }
     }
 
-    document.getElementById('voteYesBtn').onclick = function() {
-      if (!votingStage || this.disabled) return;
-      votes[playerNames[0]] = 'yes';
-      this.disabled = true;
-      this.classList.add('disabled');
-      this.style.opacity = '0.5';
-      document.getElementById('voteNoBtn').disabled = true;
-      document.getElementById('voteNoBtn').classList.add('disabled');
-      document.getElementById('voteNoBtn').style.opacity = '0.5';
-      clearTimeout(votingTimer);
-      finishVotingStage();
-    };
-    document.getElementById('voteNoBtn').onclick = function() {
-      if (!votingStage || this.disabled) return;
-      votes[playerNames[0]] = 'no';
-      this.disabled = true;
-      this.classList.add('disabled');
-      this.style.opacity = '0.5';
-      document.getElementById('voteYesBtn').disabled = true;
-      document.getElementById('voteYesBtn').classList.add('disabled');
-      document.getElementById('voteYesBtn').style.opacity = '0.5';
-      clearTimeout(votingTimer);
-      finishVotingStage();
-    };
-
-    function finishVotingStage() {
-      votingStage = false;
-      showVoteButtons(false);
-      // Simulate random votes for other players if not already set
-      for (let name of playerNames) {
-        if (name !== playerNames[0] && !votes[name]) {
-          votes[name] = Math.random() < 0.5 ? 'yes' : 'no';
-        }
-      }
-      // Count votes
-      let yesCount = 0, noCount = 0;
-      for (let name of playerNames) {
-        if (votes[name] === 'yes') yesCount++;
-        else noCount++;
-      }
-      // Show result in candidate host UI
-      const box = document.getElementById('candidateHostBox');
-      box.innerHTML = `Candidate Host: ${gameState.candidateHost}<br>Yes: <b>${yesCount}</b> &nbsp; No: <b>${noCount}</b><br>`;
-      if (yesCount > noCount) {
-        box.innerHTML += `<span style='color:#3498db;'>Approved! ${gameState.candidateHost} becomes the real host.</span>`;
-        showStatus(`<b>${gameState.candidateHost} is now the real host! Family Party starts.</b>`);
-        setTimeout(() => helperSelectionPhase(gameState.candidateHost), 5000);
-      } else {
-        box.innerHTML += `<span style='color:#e74c3c;'>Not approved. Passing to next candidate.</span>`;
-        showStatus(`<b>Not approved. Passing to next candidate host.</b>`);
-        setTimeout(hostElectionPhase, 5000);
-      }
+    // Update Love, Vote, and Hate button logic to only be usable in day mode
+    function updateVoteButtonsUsability() {
+      const isDay = document.body.classList.contains('day-stage');
+      const loveBtn = document.getElementById('voteYesBtn');
+      const hateBtn = document.getElementById('voteNoBtn');
+      const voteBtn = document.getElementById('voteSubmitBtn');
+      loveBtn.disabled = !isDay;
+      hateBtn.disabled = !isDay;
+      voteBtn.disabled = !isDay;
+      loveBtn.style.opacity = !isDay ? '0.5' : '1';
+      hateBtn.style.opacity = !isDay ? '0.5' : '1';
+      voteBtn.style.opacity = !isDay ? '0.5' : '1';
     }
+
+    // Remove background mode logic for enabling/disabling Love/Hate buttons
+    function setLoveHateButtonsEnabled(enabled) {
+      const loveBtn = document.getElementById('voteYesBtn');
+      const hateBtn = document.getElementById('voteNoBtn');
+      const voteSubmitBtn = document.getElementById('voteSubmitBtn');
+      loveBtn.disabled = !enabled;
+      hateBtn.disabled = !enabled;
+      voteSubmitBtn.disabled = !enabled;
+      loveBtn.style.opacity = enabled ? '1' : '0.5';
+      hateBtn.style.opacity = enabled ? '1' : '0.5';
+      voteSubmitBtn.style.opacity = enabled ? '1' : '0.5';
+    }
+    // Initially disable Love/Hate buttons
+    setLoveHateButtonsEnabled(false);
+    document.getElementById('takeActionBtn').onclick = function() {
+      // Show message overlay for Take Action
+      const overlay = document.getElementById('takeActionMessageOverlay');
+      overlay.style.display = 'block';
+      setTimeout(() => {
+        overlay.style.display = 'none';
+        setLoveHateButtonsEnabled(true);
+      }, 5000);
+    };
+    document.getElementById('resetCountBtn').onclick = function() {
+      document.getElementById('loveCount').textContent = 0;
+      document.getElementById('hateCount').textContent = 0;
+    };
+    document.getElementById('resetVoteBtn').onclick = function() {
+      setLoveHateButtonsEnabled(true);
+    };
+    const voteSubmitBtn = document.getElementById('voteSubmitBtn');
+    voteSubmitBtn.onclick = function() {
+      if (this.disabled) return;
+      let voteEl = document.getElementById('voteCount');
+      let voteVal = parseInt(voteEl.textContent, 10) || 0;
+      voteEl.textContent = voteVal + 1;
+      setLoveHateButtonsEnabled(false);
+      // Show message overlay
+      const overlay = document.getElementById('powerMessageOverlay');
+      overlay.style.display = 'block';
+      setPowerSkillButtonsEnabled(true);
+      setTimeout(() => {
+        overlay.style.display = 'none';
+        setPowerSkillButtonsEnabled(false);
+      }, 10000);
+    };
+    // Remove or comment out any calls to updateVoteButtonsUsability that affect Love/Hate buttons
+    // ... existing code ...
   </script>
   <!-- At the end of the script, after all UI is rendered, always show and enable the Yes/No buttons -->
   <script>
@@ -1535,10 +1687,174 @@
       const noBtn = document.getElementById('voteNoBtn');
       yesBtn.style.display = 'block';
       noBtn.style.display = 'block';
-      yesBtn.disabled = false;
-      noBtn.disabled = false;
+      yesBtn.disabled = true;
+      noBtn.disabled = true;
+      yesBtn.style.opacity = '0.5';
+      noBtn.style.opacity = '0.5';
     });
+  </script>
+  <script>
+    function changeStat(statId, delta) {
+      const el = document.getElementById(statId);
+      let val = parseInt(el.textContent, 10) || 0;
+      val += delta;
+      if (val < 0) val = 0;
+      el.textContent = val;
+    }
+  </script>
+  <script>
+    document.getElementById('resetBtn').onclick = function() {
+      window.location.reload();
+    };
+  </script>
+  <script>
+    // Attach click handlers for +1 logic, only increment if enabled
+    const loveBtn = document.getElementById('voteYesBtn');
+    loveBtn.onclick = function() {
+      if (this.disabled) return;
+      pendingAction = 'love';
+      setLoveHateButtonsEnabled(false);
+      // Show message overlay and enable skills for 10s
+      const overlay = document.getElementById('powerMessageOverlay');
+      overlay.style.display = 'block';
+      setPowerSkillButtonsEnabled(true);
+      setTimeout(() => {
+        overlay.style.display = 'none';
+        setPowerSkillButtonsEnabled(false);
+        processPendingAction();
+      }, 10000);
+    };
+    const hateBtn = document.getElementById('voteNoBtn');
+    hateBtn.onclick = function() {
+      if (this.disabled) return;
+      pendingAction = 'hate';
+      setLoveHateButtonsEnabled(false);
+      // Show message overlay and enable skills for 10s
+      const overlay = document.getElementById('powerMessageOverlay');
+      overlay.style.display = 'block';
+      setPowerSkillButtonsEnabled(true);
+      setTimeout(() => {
+        overlay.style.display = 'none';
+        setPowerSkillButtonsEnabled(false);
+        processPendingAction();
+      }, 10000);
+    };
+    const voteBtn = document.getElementById('voteBtn');
+    voteBtn.onclick = function() {
+      if (this.disabled) return;
+      let voteEl = document.getElementById('voteCount');
+      let voteVal = parseInt(voteEl.textContent, 10) || 0;
+      voteEl.textContent = voteVal + 1;
+      setLoveHateButtonsEnabled(false);
+    };
+  </script>
+  <!-- Add a message overlay div to the body -->
+  <div id="powerMessageOverlay" style="display:none;position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:9999;background:rgba(255,251,231,0.98);border-radius:18px;padding:32px 48px 28px 48px;box-shadow:0 2px 32px 0 #e2c39177,0 2px 0 #fffbe7 inset;font-size:1.45rem;font-family:'Caveat','Segoe Print','Comic Sans MS',cursive;color:#7a5a2f;font-weight:bold;text-align:center;pointer-events:none;">Wind and Kennedi are allowed to the power now!</div>
+  <!-- Add a message overlay div for Take Action if not already present -->
+  <div id="takeActionMessageOverlay" style="display:none;position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:9999;background:rgba(255,251,231,0.98);border-radius:18px;padding:32px 48px 28px 48px;box-shadow:0 2px 32px 0 #e2c39177,0 2px 0 #fffbe7 inset;font-size:1.45rem;font-family:'Caveat','Segoe Print','Comic Sans MS',cursive;color:#7a5a2f;font-weight:bold;text-align:center;pointer-events:none;">Host and helpers can take your love or hate action now!</div>
+  <script>
+    // Utility to enable/disable Wind's Mislead and Kennedi's Protect the Party skill buttons
+    function setPowerSkillButtonsEnabled(enabled) {
+      // Wind's Mislead
+      const misleadBtn = Array.from(document.querySelectorAll('.skill-btn')).find(btn => btn.textContent.trim().toLowerCase().includes('mislead'));
+      if (misleadBtn) {
+        misleadBtn.disabled = !enabled;
+        misleadBtn.style.opacity = enabled ? '1' : '0.5';
+      }
+      // Kennedi's Protect the Party
+      const protectBtn = Array.from(document.querySelectorAll('.skill-btn')).find(btn => btn.textContent.trim().toLowerCase().includes('protect'));
+      if (protectBtn) {
+        protectBtn.disabled = !enabled;
+        protectBtn.style.opacity = enabled ? '1' : '0.5';
+      }
+    }
+  </script>
+  <script>
+    // On page load and after rerenderSkillButtons, always disable these skill buttons by default
+    window.addEventListener('DOMContentLoaded', function() {
+      setPowerSkillButtonsEnabled(false);
+      attachSkillButtonHandlers();
+    });
+  </script>
+
+
+  <script>
+    // Add global variables to track pending action and skill usage
+    let pendingAction = null;
+    let kennediProtectUsed = false;
+    let windMisleadUsed = false;
+  </script>
+
+  <script>
+    // Add a function to process the pending action after 10s
+    function processPendingAction() {
+      if (!pendingAction) return;
+      // Kennedi's skill takes absolute precedence
+      if (kennediProtectUsed) {
+        let loveEl = document.getElementById('loveCount');
+        let loveVal = parseInt(loveEl.textContent, 10) || 0;
+        loveEl.textContent = loveVal + 1;
+      } else if (windMisleadUsed && pendingAction === 'love') {
+        // Wind's Mislead always flips 1 Love to 1 Hate
+        let hateEl = document.getElementById('hateCount');
+        let hateVal = parseInt(hateEl.textContent, 10) || 0;
+        hateEl.textContent = hateVal + 1;
+      } else if (pendingAction === 'love') {
+        let loveEl = document.getElementById('loveCount');
+        let loveVal = parseInt(loveEl.textContent, 10) || 0;
+        loveEl.textContent = loveVal + 1;
+      } else if (pendingAction === 'hate') {
+        let hateEl = document.getElementById('hateCount');
+        let hateVal = parseInt(hateEl.textContent, 10) || 0;
+        hateEl.textContent = hateVal + 1;
+      }
+      // Reset for next round
+      pendingAction = null;
+      kennediProtectUsed = false;
+      windMisleadUsed = false;
+    }
+  </script>
+  <script>
+    // Place this logic after renderSkillButtons or rerenderSkillButtons, and only attach handlers if not already attached
+    function attachSkillButtonHandlers() {
+      // Wind's Mislead
+      const misleadBtn = Array.from(document.querySelectorAll('.skill-btn')).find(btn => btn.textContent.trim().toLowerCase().includes('mislead'));
+      if (misleadBtn && !misleadBtn._handlerAttached) {
+        misleadBtn.onclick = function() {
+          if (this.disabled) return;
+          windMisleadUsed = true;
+          this.disabled = true;
+          this.style.opacity = '0.5';
+          // Removed message overlay for Mislead
+        };
+        misleadBtn._handlerAttached = true;
+      }
+      // Kennedi's Protect the Party
+      const protectBtn = Array.from(document.querySelectorAll('.skill-btn')).find(btn => btn.textContent.trim().toLowerCase().includes('protect'));
+      if (protectBtn && !protectBtn._handlerAttached) {
+        protectBtn.onclick = function() {
+          if (this.disabled) return;
+          kennediProtectUsed = true;
+          this.disabled = true;
+          this.style.opacity = '0.5';
+          // Removed message overlay for Protecting the Party
+        };
+        protectBtn._handlerAttached = true;
+      }
+    }
+    // Call attachSkillButtonHandlers after rerenderSkillButtons and on DOMContentLoaded
+    window.addEventListener('DOMContentLoaded', function() {
+      setPowerSkillButtonsEnabled(false);
+      attachSkillButtonHandlers();
+    });
+    function rerenderSkillButtons() {
+      setTimeout(() => {
+        renderSkillButtons();
+        enableLoveHateStatButtons();
+        setPowerSkillButtonsEnabled(false);
+        attachSkillButtonHandlers();
+      }, 150);
+    }
   </script>
 </body>
 </html>
-
