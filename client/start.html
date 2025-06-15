@@ -600,6 +600,20 @@
       transform: translateY(-2px) scale(1.03) rotate(-1deg);
       border-color: #a07c4f;
     }
+    .skill-btn:disabled, .skill-btn.disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      background: linear-gradient(100deg, #e2c391 80%, #e2c391 100%);
+      border-color: #bfa16a;
+      box-shadow: none;
+      color: #a07c4f;
+    }
+    .skill-btn:disabled:hover, .skill-btn.disabled:hover {
+      background: linear-gradient(100deg, #e2c391 80%, #e2c391 100%);
+      box-shadow: none;
+      transform: none;
+      border-color: #bfa16a;
+    }
     #testStartBtn:hover {
       background: linear-gradient(100deg, #f9eacb 80%, #e7cfa1 100%);
       box-shadow: 0 16px 48px 0 rgba(90, 67, 39, 0.28), 0 4px 0 #e2c391 inset, 0 0 0 12px #e2c39133 inset;
@@ -777,6 +791,7 @@
   </div>
   <div id="gameStateBox" style="position:fixed;left:38px;top:70%;transform:translateY(-50%);z-index:200;background:rgba(255,251,231,0.93);border-radius:18px;padding:18px 22px 14px 22px;box-shadow:0 2px 18px 0 #e2c39133,0 2px 0 #fffbe7 inset;font-size:1.08rem;min-width:220px;max-width:340px;line-height:1.5;border:2px solid #e2c391;display:none;"></div>
   <div id="gameActionBox" style="position:fixed;left:38px;bottom:38px;z-index:210;background:rgba(255,251,231,0.97);border-radius:18px;padding:18px 22px 14px 22px;box-shadow:0 2px 18px 0 #e2c39133,0 2px 0 #fffbe7 inset;font-size:1.08rem;min-width:220px;max-width:420px;line-height:1.5;border:2px solid #e2c391;display:none;text-align:center;"></div>
+  <div id="candidateHostBox" style="position:fixed;top:60px;right:38px;left:auto;transform:none;z-index:210;background:rgba(255,251,231,0.97);border-radius:16px;padding:12px 32px 10px 32px;box-shadow:0 2px 12px 0 #e2c39133,0 2px 0 #fffbe7 inset;font-size:1.18rem;min-width:160px;max-width:320px;line-height:1.5;border:2px solid #e2c391;text-align:center;font-family:'Caveat','Segoe Print','Comic Sans MS',cursive;display:none;font-weight:bold;color:#7a5a2f;"></div>
   <div class="game-container">
     <h1 class="game-title">Who's Cheating?</h1>
     
@@ -802,6 +817,36 @@
   <button id="finishTalkingBtn" style="display:none;position:fixed;z-index:300;padding:12px 28px;font-size:1.08rem;font-family:inherit;background:linear-gradient(100deg,#e2c391 80%,#f7e7c6 100%);color:#5a4327;border:2.5px solid #bfa16a;border-radius:16px 32px 16px 32px / 32px 16px 32px 16px;box-shadow:2px 4px 12px 0 rgba(90,67,39,0.13),0 1.5px 0 #e2c391 inset,0 0 0 4px #e2c39122 inset;cursor:pointer;transition:box-shadow 0.18s,transform 0.15s,background 0.18s,border 0.18s;">Finish Talking</button>
   <button id="muteBtn" style="display:none;position:fixed;z-index:300;padding:12px 28px;font-size:1.08rem;font-family:inherit;background:linear-gradient(100deg,#e2c391 80%,#f7e7c6 100%);color:#5a4327;border:2.5px solid #bfa16a;border-radius:16px 32px 16px 32px / 32px 16px 32px 16px;box-shadow:2px 4px 12px 0 rgba(90,67,39,0.13),0 1.5px 0 #e2c391 inset,0 0 0 4px #e2c39122 inset;cursor:pointer;transition:box-shadow 0.18s,transform 0.15s,background 0.18s,border 0.18s;">Mute</button>
   <script>
+    // --- Night/Day Mode Helper ---
+    function setNightMode(on) {
+      const body = document.body;
+      const titleBadge = document.getElementById('gameTitleBadge');
+      const titleText = document.getElementById('gameTitleText');
+      if (on) {
+        body.classList.remove('day-stage');
+        // Night mode title
+        titleBadge.style.background = 'linear-gradient(120deg,#23202a 60%,#6b5a3a 100%)';
+        titleBadge.style.borderColor = '#7bb0e6';
+        titleText.textContent = "who's cheating?";
+        titleText.style.color = '#e2c391';
+        titleText.style.fontStyle = 'italic';
+        titleText.style.fontWeight = '600';
+        titleText.style.textShadow = '0 1px 0 #23202a,0 2px 6px #7bb0e644,0 0 8px #23202a99';
+        titleText.style.fontSize = '1.45rem';
+      } else {
+        body.classList.add('day-stage');
+        // Day mode title
+        titleBadge.style.background = 'linear-gradient(120deg,#ffe7b2 60%,#e2c391 100%)';
+        titleBadge.style.borderColor = '#e2c391';
+        titleText.textContent = 'Family Party';
+        titleText.style.color = '#e2a84f';
+        titleText.style.fontStyle = 'normal';
+        titleText.style.fontWeight = 'bold';
+        titleText.style.textShadow = '0 1px 0 #fffbe7,0 2px 6px #e2c39144';
+        titleText.style.fontSize = '1.45rem';
+      }
+      console.log('Body classList:', body.classList.toString());
+    }
     // --- Game Role Logic ---
     const roleImages = {
       michael: 'imgs/michael.png',
@@ -889,34 +934,10 @@
     // Toggle between day and night stage
     const btn = document.getElementById('toggleStageBtn');
     const body = document.body;
-    const titleBadge = document.getElementById('gameTitleBadge');
-    const titleText = document.getElementById('gameTitleText');
     let isDay = false;
     btn.onclick = function() {
       isDay = !isDay;
-      if (isDay) {
-        body.classList.add('day-stage');
-        btn.textContent = 'Switch to Night';
-        titleBadge.style.background = 'linear-gradient(120deg,#ffe7b2 60%,#e2c391 100%)';
-        titleBadge.style.borderColor = '#e2c391';
-        titleText.textContent = 'Family Party';
-        titleText.style.color = '#e2a84f';
-        titleText.style.fontStyle = 'normal';
-        titleText.style.fontWeight = 'bold';
-        titleText.style.textShadow = '0 1px 0 #fffbe7,0 2px 6px #e2c39144';
-        titleText.style.fontSize = '1.45rem';
-      } else {
-        body.classList.remove('day-stage');
-        btn.textContent = 'Switch to Day';
-        titleBadge.style.background = 'linear-gradient(120deg,#23202a 60%,#6b5a3a 100%)';
-        titleBadge.style.borderColor = '#7bb0e6';
-        titleText.textContent = "who's cheating?";
-        titleText.style.color = '#e2c391';
-        titleText.style.fontStyle = 'italic';
-        titleText.style.fontWeight = '600';
-        titleText.style.textShadow = '0 1px 0 #23202a,0 2px 6px #7bb0e644,0 0 8px #23202a99';
-        titleText.style.fontSize = '1.45rem';
-      }
+      setNightMode(isDay);
     };
     function renderSkillButtons() {
       const container = document.getElementById('skillButtonContainer');
@@ -931,6 +952,7 @@
       const myCard = document.querySelector('.role-card.me');
       if (myCard) {
         const rect = myCard.getBoundingClientRect();
+        // Move skill buttons to the left/below the card
         container.style.position = 'fixed';
         container.style.left = (rect.left - 240) + 'px';
         container.style.top = (rect.top + rect.height + 8) + 'px';
@@ -942,7 +964,9 @@
         const btn1 = document.createElement('button');
         btn1.textContent = 'Molest';
         btn1.className = 'skill-btn';
-        btn1.onclick = () => alert('Wind: Molest skill used!');
+        btn1.disabled = gameState.windMolestUsed;
+        btn1.style.opacity = gameState.windMolestUsed ? '0.5' : '1';
+        // The click handler is set in enableWindMolestButton during night phase
         const btn2 = document.createElement('button');
         btn2.textContent = 'Mislead';
         btn2.className = 'skill-btn';
@@ -989,7 +1013,10 @@
       hostIndex: 0,
       helpers: [],
       usedSkills: {},
-      gameEnded: false
+      gameEnded: false,
+      windMolestUsed: false,
+      nightTimer: null,
+      candidateHost: null
     };
 
     function updateStatsUI() {
@@ -1008,8 +1035,22 @@
       document.getElementById('testStartBtn').style.display = 'none';
     }
 
+    function showCandidateHost() {
+      const box = document.getElementById('candidateHostBox');
+      if (gameState.candidateHost !== null) {
+        box.style.display = 'block';
+        box.textContent = `Candidate Host: ${gameState.candidateHost}`;
+      } else {
+        box.style.display = 'none';
+      }
+    }
+
     function startGame() {
       hideStartButton();
+      // Randomly assign candidate host
+      const randIdx = Math.floor(Math.random() * playerNames.length);
+      gameState.candidateHost = playerNames[randIdx];
+      showCandidateHost();
       gameState.partyCount = 0;
       gameState.scandalScore = 0;
       gameState.closeKnotScore = 0;
@@ -1026,29 +1067,72 @@
 
     function nightPhase() {
       if (gameState.gameEnded) return;
-      // Wind's Molest skill (if used) or default Scandal +1
-      let windUsed = gameState.usedSkills['wind-molest'];
-      if (windUsed) {
-        gameState.scandalScore += 2;
-        showStatus('Wind used <b>Molest</b>! Scandal +2.');
-      } else {
-        gameState.scandalScore += 1;
-        showStatus('Night phase: Scandal +1.');
+      setNightMode(true); // Always set to night mode at the start of night phase
+      gameState.phase = 'night';
+      showStatus('Night phase: <b>10 seconds</b>... Wind may use <b>Molest</b> (Scandal +2, once per game).');
+      // Enable Wind's Molest button if it's Wind and not used
+      if (myRole === 'wind' && !gameState.windMolestUsed) {
+        enableWindMolestButton();
       }
-      updateStatsUI();
-      setTimeout(hostElectionPhase, 2000);
+      // 10 second timer
+      gameState.nightTimer = setTimeout(() => {
+        // If Wind didn't use Molest, default Scandal +1
+        if (!gameState.windMolestUsed) {
+          gameState.scandalScore += 1;
+          showStatus('Night phase ended: Scandal +1.');
+        }
+        updateStatsUI();
+        disableWindMolestButton();
+        setNightMode(false); // Always set to day mode after night phase ends
+        setTimeout(hostElectionPhase, 2000);
+      }, 10000);
+    }
+
+    function enableWindMolestButton() {
+      const container = document.getElementById('skillButtonContainer');
+      const btns = container.querySelectorAll('.skill-btn');
+      btns.forEach(btn => {
+        if (btn.textContent === 'Molest') {
+          btn.disabled = false;
+          btn.style.opacity = '1';
+          btn.onclick = () => {
+            if (gameState.phase !== 'night' || gameState.windMolestUsed) return;
+            gameState.windMolestUsed = true;
+            gameState.scandalScore += 2;
+            showStatus('Wind used <b>Molest</b>! Scandal +2.');
+            updateStatsUI();
+            btn.disabled = true;
+            btn.style.opacity = '0.5';
+            // End night phase early if used
+            clearTimeout(gameState.nightTimer);
+            setTimeout(hostElectionPhase, 2000);
+          };
+        }
+      });
+    }
+    function disableWindMolestButton() {
+      const container = document.getElementById('skillButtonContainer');
+      const btns = container.querySelectorAll('.skill-btn');
+      btns.forEach(btn => {
+        if (btn.textContent === 'Molest') {
+          btn.disabled = true;
+          btn.style.opacity = '0.5';
+        }
+      });
     }
 
     function hostElectionPhase() {
       if (gameState.gameEnded) return;
-      // For now, just rotate host
-      let host = playerNames[gameState.hostIndex % playerNames.length];
-      showStatus(`<b>Host Election</b>: ${host} is the host.`);
-      setTimeout(() => helperSelectionPhase(host), 2000);
+      setNightMode(false); // Always set to day mode at the start of non-night phases
+      // Show candidate host UI
+      showCandidateHost();
+      showStatus(`<b>Host Election</b>: ${gameState.candidateHost} is the candidate host.`);
+      setTimeout(() => helperSelectionPhase(gameState.candidateHost), 2000);
     }
 
     function helperSelectionPhase(host) {
       if (gameState.gameEnded) return;
+      setNightMode(false);
       // For now, pick next 2 players as helpers
       let h1 = playerNames[(gameState.hostIndex + 1) % playerNames.length];
       let h2 = playerNames[(gameState.hostIndex + 2) % playerNames.length];
@@ -1059,6 +1143,7 @@
 
     function skillUsePhase() {
       if (gameState.gameEnded) return;
+      setNightMode(false);
       // For now, just show a message
       showStatus('Skill use window: eligible players may use skills.');
       setTimeout(dramaPlayPhase, 2000);
@@ -1066,6 +1151,7 @@
 
     function dramaPlayPhase() {
       if (gameState.gameEnded) return;
+      setNightMode(false);
       // For now, randomize Love/Hate
       let loveCount = Math.floor(Math.random() * 3) + 1;
       let hateCount = 3 - loveCount;
@@ -1078,6 +1164,7 @@
 
     function revealPhase(loveCount, hateCount) {
       if (gameState.gameEnded) return;
+      setNightMode(false);
       // Update scores
       gameState.closeKnotScore += loveCount;
       gameState.scandalScore += hateCount;
@@ -1088,6 +1175,7 @@
 
     function endgameCheckPhase() {
       if (gameState.gameEnded) return;
+      setNightMode(false);
       // End conditions
       if (gameState.partyCount >= gameState.maxParties || gameState.scandalScore >= gameState.maxScandal) {
         gameState.gameEnded = true;
