@@ -1222,24 +1222,7 @@
       window.location.reload();
     };
 
-    // --- Game Logic ---
-    let gameState = {
-      partyCount: 0,
-      scandalScore: 0,
-      closeKnotScore: 0,
-      maxParties: 3, // can be set based on player count
-      maxScandal: 10,
-      phase: 'waiting',
-      round: 0,
-      hostIndex: 0,
-      helpers: [],
-      usedSkills: {},
-      gameEnded: false,
-      windMolestUsed: false,
-      nightTimer: null,
-      candidateHost: null,
-      michaelFindingAbbyUsed: false
-    };
+
 
     function updateStatsUI() {
       document.getElementById('partyCount').textContent = gameState.partyCount;
@@ -1855,6 +1838,86 @@
         attachSkillButtonHandlers();
       }, 150);
     }
+  </script>
+  <!-- Add Socket.IO client -->
+  <script src="/socket.io/socket.io.js"></script>
+  <script>
+  // Multiplayer setup
+  const socket = io();
+  const urlParams = new URLSearchParams(window.location.search);
+  const myName = urlParams.get('name');
+  const roomId = urlParams.get('room');
+
+  // Join the game room
+  socket.emit('joinGame', { playerName: myName, roomId });
+
+  // Listen for game state updates from the server
+  let gameState = {};
+  socket.on('gameState', (state) => {
+    gameState = state;
+    updateUIFromState();
+  });
+
+  // Emit actions to the server
+  function onVote(vote) {
+    socket.emit('playerVote', { vote, roomId });
+  }
+  function onUseSkill(skill) {
+    socket.emit('playerSkill', { skill, roomId });
+  }
+
+  // UI update function (to be implemented based on your UI structure)
+  function updateUIFromState() {
+    // Example: update stats
+    document.getElementById('partyCount').textContent = gameState.partyCount || 0;
+    document.getElementById('scandalScore').textContent = gameState.scandalScore || 0;
+    document.getElementById('closeKnotScore').textContent = gameState.closeKnotScore || 0;
+    document.getElementById('loveCount').textContent = gameState.loveCount || 0;
+    document.getElementById('hateCount').textContent = gameState.hateCount || 0;
+    document.getElementById('voteCount').textContent = gameState.voteCount || 0;
+    // TODO: update player list, roles, skill buttons, etc. from gameState
+  }
+
+  // Replace all button click handlers to emit events
+  const loveBtn = document.getElementById('voteYesBtn');
+  loveBtn.onclick = function() {
+    if (this.disabled) return;
+    onVote('love');
+  };
+  const hateBtn = document.getElementById('voteNoBtn');
+  hateBtn.onclick = function() {
+    if (this.disabled) return;
+    onVote('hate');
+  };
+  const voteSubmitBtn = document.getElementById('voteSubmitBtn');
+  voteSubmitBtn.onclick = function() {
+    if (this.disabled) return;
+    onVote('vote');
+  };
+  // Example for skill button (you may need to update selector/logic)
+  function attachSkillButtonHandlers() {
+    const misleadBtn = Array.from(document.querySelectorAll('.skill-btn')).find(btn => btn.textContent.trim().toLowerCase().includes('mislead'));
+    if (misleadBtn && !misleadBtn._handlerAttached) {
+      misleadBtn.onclick = function() {
+        if (this.disabled) return;
+        onUseSkill('mislead');
+      };
+      misleadBtn._handlerAttached = true;
+    }
+    const protectBtn = Array.from(document.querySelectorAll('.skill-btn')).find(btn => btn.textContent.trim().toLowerCase().includes('protect'));
+    if (protectBtn && !protectBtn._handlerAttached) {
+      protectBtn.onclick = function() {
+        if (this.disabled) return;
+        onUseSkill('protect');
+      };
+      protectBtn._handlerAttached = true;
+    }
+  }
+  window.addEventListener('DOMContentLoaded', function() {
+    attachSkillButtonHandlers();
+  });
+  // Remove all local simulation, random votes, and local-only state changes
+  // All game logic and state updates should now come from the server
   </script>
 </body>
 </html>
