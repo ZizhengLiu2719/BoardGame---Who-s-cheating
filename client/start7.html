@@ -1054,23 +1054,25 @@
       const container = document.getElementById('roleCardsCircle');
       container.innerHTML = '';
       const n = 7; // Fixed to 7 players
-      const radius = 240; // Reduced from 280px for tighter spacing
+      const radius = 240; // Same radius as 7 players
       
       // Role info for tooltip
       const roleInfo = {
         michael: {name:'Michael', team:'Cheater', power:'Guess Abby for instant win'},
         wind: {name:'Wind', team:'Cheater', power:'Molest: +2 Scandal at night; Mislead: flip Love→Hate'},
+        jack: {name:'Jack', team:'Cheater', power:'Hidden from Abby & Cheaters'},
         abby: {name:'Abby', team:'Keeper', power:'Sees all Cheaters except Jack'},
         kennedi: {name:'Kennedi', team:'Keeper', power:'Protect: all cards count as Love'},
+        ker: {name:'Ker', team:'Keeper', power:'Swap a Helper after picked'},
         kiko: {name:'Kiko', team:'Keeper (Pet)', power:'No special power'},
         knox: {name:'Knox', team:'Keeper (Pet)', power:'No special power'},
-        nash: {name:'Nash', team:'Keeper (Pet)', power:'No special power'},
-        jack: {name:'Jack', team:'Cheater', power:'Hidden from Abby & Cheaters'},
-        ker: {name:'Ker', team:'Keeper', power:'Swap a Helper after picked'},
+        nash: {name:'Nash', team:'Keeper (Pet)', power:'No special power'}
       };
 
-      // Only if myRole is Abby, show all cards face-up
+      // Show cards face-up for Abby or if player is a cheater (except Jack's card)
       const showAllCards = myRole === 'abby';
+      const isCheater = ['michael', 'wind'].includes(myRole);
+      const isJack = myRole === 'jack';
       
       // Calculate angles for 7 players with equal spacing
       // Each angle is separated by 2π/7 radians (approximately 51.43 degrees)
@@ -1086,17 +1088,23 @@
         
         const card = document.createElement('img');
         card.className = 'role-card' + (i === myIndex ? ' me' : '');
-        card.style.left = `calc(50% + ${x}px - 45px)`; // Adjusted for new card size
-        card.style.top = `calc(50% + ${y}px - 67.5px)`; // Adjusted for new card size
+        card.style.left = `calc(50% + ${x}px - 45px)`;
+        card.style.top = `calc(50% + ${y}px - 67.5px)`;
         
-        // If myRole is Abby, show all cards face-up
-        if (showAllCards) {
-          card.src = roleImages[shuffledRoles[i]] || backsideImg;
-          card.alt = shuffledRoles[i];
-        } else {
-          card.src = i === myIndex ? roleImages[myRole] : backsideImg;
-          card.alt = i === myIndex ? myRole : 'Hidden';
-        }
+        // Show card face-up if:
+        // 1. It's my own card
+        // 2. I'm Abby and this is Michael or Wind's card
+        // 3. I'm a cheater (not Jack) and this is my teammate's card (except Jack)
+        const role = shuffledRoles[i];
+        const shouldShowCard = i === myIndex || 
+                             (showAllCards && ['michael', 'wind'].includes(role)) || 
+                             (isCheater && ['michael', 'wind'].includes(role) && role !== 'jack');
+        
+        // If I'm Jack, only show my own card
+        const finalShouldShow = isJack ? i === myIndex : shouldShowCard;
+        
+        card.src = finalShouldShow ? roleImages[role] : backsideImg;
+        card.alt = finalShouldShow ? role : 'Hidden';
         container.appendChild(card);
 
         // Add role intro tooltip for myself only
@@ -1113,7 +1121,7 @@
         // Add player name label with adjusted positioning
         const nameLabel = document.createElement('div');
         nameLabel.className = 'player-name-label';
-        const nameOffsetY = y > 0 ? 100 : -100; // Adjusted for better spacing
+        const nameOffsetY = y > 0 ? 100 : -100;
         nameLabel.style.left = `calc(50% + ${x}px)`;
         nameLabel.style.top = `calc(50% + ${y + nameOffsetY}px)`;
         nameLabel.textContent = name;
