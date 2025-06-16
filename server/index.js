@@ -254,36 +254,41 @@ io.on('connection', (socket) => {
   });
 
   // Player joins a room
-  socket.on('joinRoom', async ({ roomId, password, playerName }, callback) => {
+  socket.on('joinRoom', async ({ roomId, playerName }, callback) => {
     const room = await redis.hgetall(`room:${roomId}`);
-    if (!room || !room.password) {
-      return callback({ success: false, message: 'Room does not exist.' });
+    if (!room) {
+      return callback({ success: false, message: 'Room not found.' });
     }
-    if (room.password !== password) {
-      return callback({ success: false, message: 'Incorrect password.' });
-    }
-    let players = JSON.parse(room.players || '[]');
-    let readyStates = JSON.parse(room.readyStates || '{}');
-    if (players.length >= Number(room.maxPlayers) && !players.some(p => p.name === playerName)) {
+
+    const players = JSON.parse(room.players || '[]');
+    if (players.length >= room.maxPlayers) {
       return callback({ success: false, message: 'Room is full.' });
     }
-    // If name already exists, update socket ID (allow host to rejoin)
-    const existing = players.find(p => p.name === playerName);
-    if (existing) {
-      existing.id = socket.id;
-    } else {
-      players.push({ id: socket.id, name: playerName });
-      readyStates[playerName] = false;
-    }
+
+    // Add new player
+    players.push({ id: socket.id, name: playerName });
     await setPlayerList(roomId, players);
-    await redis.hset(`room:${roomId}`, 'readyStates', JSON.stringify(readyStates));
     socket.join(roomId);
+
+    // If this is the last player, distribute roles
+    if (players.length === parseInt(room.maxPlayers)) {
+      const roles = distributeRoles(players.length);
+      const gameState = await initializeGameState(roomId, players);
+      
+      // Assign roles to players
+      gameState.players = gameState.players.map((player, index) => ({
+        ...player,
+        role: roles[index]
+      }));
+      
+      await updateGameState(roomId, gameState);
+      io.to(roomId).emit('initialGameState', gameState);
+    }
+
     callback({ success: true });
     io.to(roomId).emit('playerListUpdate', {
       players: players.map(p => p.name),
-      roomName: room.roomName,
-      password: room.password,
-      readyStates: readyStates
+      roomName: room.roomName
     });
   });
 
@@ -420,6 +425,68 @@ io.on('connection', (socket) => {
         // Optionally update helpers in gameState if you track them
         break;
     }
+  });
+
+  // Handle love/hate actions
+  socket.on('loveHateAction', async ({ type, count }) => {
+    const roomId = Array.from(socket.rooms)[1]; // Get room ID
+    if (!roomId) return;
+
+    const gameState = await getGameState(roomId);
+    if (!gameState) return;
+
+    // Update temporary counts
+    if (type === 'love') {
+      gameState.loveCount = count;
+    } else {
+      gameState.hateCount = count;
+    }
+
+    await updateGameState(roomId, gameState);
+    
+    // Broadcast updated counts to all players
+    io.to(roomId).emit('updateLoveHateCount', {
+      love: gameState.loveCount,
+      hate: gameState.hateCount
+    });
+
+    // Show skill phase message
+    await broadcastUIMessage(roomId, "Wind and Kennedi are allowed to use their skills right now!", 10000);
+  });
+
+  // Handle skill usage
+  socket.on('useSkill', async ({ skill }) => {
+    const roomId = Array.from(socket.rooms)[1];
+    if (!roomId) return;
+
+    const gameState = await getGameState(roomId);
+    if (!gameState) return;
+
+    const player = gameState.players.find(p => p.id === socket.id);
+    if (!player) return;
+
+    // Check if player can use the skill
+    if (!canPlayerUseSkill(gameState, player.name, skill)) {
+      return;
+    }
+
+    // Apply skill effect
+    applySkillEffect(gameState, player.name, skill);
+
+    // Mark skill as used
+    markSkillUsed(gameState, player.name, skill);
+
+    // Update game state
+    await updateGameState(roomId, gameState);
+
+    // Broadcast updated counts
+    io.to(roomId).emit('updateLoveHateCount', {
+      love: gameState.loveCount,
+      hate: gameState.hateCount
+    });
+
+    // Show confirmation message
+    await broadcastUIMessage(roomId, `${player.name} used their ${skill} skill!`, 3000);
   });
 
   // Handle disconnect

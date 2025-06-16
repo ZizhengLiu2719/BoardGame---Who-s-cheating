@@ -330,6 +330,231 @@
   </div>
   <div id="gameStateBox" style="display:none;"></div>
   <script src="/socket.io/socket.io.js"></script>
-  <!-- Inline JS logic will be inserted here -->
+  <script>
+    const socket = io();
+    let tempLoveCount = 0;
+    let tempHateCount = 0;
+    let isSkillPhase = false;
+    let currentPlayer = null;
+    let gameState = null;
+
+    // Get DOM elements
+    const loveBtn = document.getElementById('voteYesBtn');
+    const hateBtn = document.getElementById('voteNoBtn');
+    const loveCount = document.getElementById('loveCount');
+    const hateCount = document.getElementById('hateCount');
+    const windSkillBtn = document.getElementById('windSkillBtn');
+    const kennediSkillBtn = document.getElementById('kennediSkillBtn');
+    const roleCardsCircle = document.getElementById('roleCardsCircle');
+    const uiMessageBox = document.createElement('div');
+    uiMessageBox.style.cssText = `
+      position: fixed;
+      top: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(0, 0, 0, 0.8);
+      color: white;
+      padding: 15px 30px;
+      border-radius: 10px;
+      font-size: 1.2em;
+      z-index: 1000;
+      display: none;
+    `;
+    document.body.appendChild(uiMessageBox);
+
+    // Function to position cards in a circle
+    function positionCardsInCircle(players) {
+      roleCardsCircle.innerHTML = ''; // Clear existing cards
+      
+      const radius = 200; // Radius of the circle
+      const centerX = 240; // Center X of the circle
+      const centerY = 240; // Center Y of the circle
+      
+      players.forEach((player, index) => {
+        const angle = (index * 2 * Math.PI) / players.length;
+        const x = centerX + radius * Math.cos(angle);
+        const y = centerY + radius * Math.sin(angle);
+        
+        // Create card container
+        const cardContainer = document.createElement('div');
+        cardContainer.style.cssText = `
+          position: absolute;
+          left: ${x}px;
+          top: ${y}px;
+          transform: translate(-50%, -50%);
+          width: 80px;
+          height: 120px;
+          transition: all 0.3s ease;
+        `;
+        
+        // Create role card
+        const roleCard = document.createElement('img');
+        roleCard.className = 'role-card';
+        if (player.id === socket.id) {
+          roleCard.classList.add('me');
+        }
+        
+        // Set card image based on role
+        if (player.role) {
+          roleCard.src = `/imgs/${player.role.toLowerCase()}.png`;
+        } else {
+          roleCard.src = '/imgs/backSide.png';
+        }
+        
+        // Create player name label
+        const nameLabel = document.createElement('div');
+        nameLabel.className = 'player-name-label';
+        nameLabel.textContent = player.name;
+        
+        cardContainer.appendChild(roleCard);
+        cardContainer.appendChild(nameLabel);
+        roleCardsCircle.appendChild(cardContainer);
+      });
+    }
+
+    // Show UI message
+    function showUIMessage(text, duration) {
+      uiMessageBox.textContent = text;
+      uiMessageBox.style.display = 'block';
+      if (duration) {
+        setTimeout(() => {
+          uiMessageBox.style.display = 'none';
+          if (text.includes('Wind and Kennedi')) {
+            isSkillPhase = false;
+            if (windSkillBtn) windSkillBtn.disabled = true;
+            if (kennediSkillBtn) kennediSkillBtn.disabled = true;
+          }
+        }, duration);
+      }
+    }
+
+    // Handle love/hate actions
+    loveBtn.addEventListener('click', () => {
+      if (!loveBtn.disabled) {
+        tempLoveCount++;
+        loveCount.textContent = tempLoveCount;
+        loveBtn.disabled = true;
+        hateBtn.disabled = true;
+        socket.emit('loveHateAction', { type: 'love', count: tempLoveCount });
+      }
+    });
+
+    hateBtn.addEventListener('click', () => {
+      if (!hateBtn.disabled) {
+        tempHateCount++;
+        hateCount.textContent = tempHateCount;
+        loveBtn.disabled = true;
+        hateBtn.disabled = true;
+        socket.emit('loveHateAction', { type: 'hate', count: tempHateCount });
+      }
+    });
+
+    // Handle skill buttons
+    if (windSkillBtn) {
+      windSkillBtn.addEventListener('click', () => {
+        if (!windSkillBtn.disabled && isSkillPhase) {
+          socket.emit('useSkill', { skill: 'mislead' });
+          windSkillBtn.disabled = true;
+        }
+      });
+    }
+
+    if (kennediSkillBtn) {
+      kennediSkillBtn.addEventListener('click', () => {
+        if (!kennediSkillBtn.disabled && isSkillPhase) {
+          socket.emit('useSkill', { skill: 'protectingParty' });
+          kennediSkillBtn.disabled = true;
+        }
+      });
+    }
+
+    // Socket event listeners
+    socket.on('uiMessage', (message) => {
+      if (message) {
+        showUIMessage(message.text, 10000);
+        if (message.text.includes('Wind and Kennedi')) {
+          isSkillPhase = true;
+          if (windSkillBtn) windSkillBtn.disabled = false;
+          if (kennediSkillBtn) kennediSkillBtn.disabled = false;
+        }
+      }
+    });
+
+    socket.on('updateLoveHateCount', ({ love, hate }) => {
+      loveCount.textContent = love;
+      hateCount.textContent = hate;
+      tempLoveCount = love;
+      tempHateCount = hate;
+    });
+
+    socket.on('enableLoveHate', () => {
+      loveBtn.disabled = false;
+      hateBtn.disabled = false;
+    });
+
+    socket.on('disableLoveHate', () => {
+      loveBtn.disabled = true;
+      hateBtn.disabled = true;
+    });
+
+    // Handle game state updates
+    socket.on('gameStateUpdate', (newGameState) => {
+      gameState = newGameState;
+      if (gameState.players) {
+        positionCardsInCircle(gameState.players);
+      }
+    });
+
+    // Handle initial game state
+    socket.on('initialGameState', (state) => {
+      gameState = state;
+      if (gameState.players) {
+        positionCardsInCircle(gameState.players);
+      }
+    });
+
+    // --- Room Join Logic ---
+    function getQueryParams() {
+      const params = {};
+      window.location.search.replace(/[?&]+([^=&]+)=([^&]*)/gi, function(str,key,value) {
+        params[key] = decodeURIComponent(value);
+      });
+      return params;
+    }
+    const params = getQueryParams();
+    const roomId = params.roomId || '00000';
+    let myName = params.name || '';
+    const password = params.password || '';
+    const roomName = params.roomname || '';
+    const maxPlayers = params.maxPlayers || 6;
+    const isCreateRoom = params.createRoom === '1';
+    if (!myName) {
+      myName = prompt('Enter your name:');
+    }
+    if (isCreateRoom) {
+      // Host: create the room first, then join
+      socket.emit('createRoom', { roomId, password, maxPlayers, hostName: myName, roomName }, (res) => {
+        if (res.success) {
+          socket.emit('joinRoom', { roomId, playerName: myName }, (res2) => {
+            if (!res2.success) {
+              alert(res2.message || 'Failed to join room.');
+              window.location.href = 'joining.html';
+            }
+          });
+        } else {
+          alert(res.message || 'Failed to create test room.');
+          window.location.href = 'joining.html';
+        }
+      });
+    } else {
+      // Regular player: just join
+      socket.emit('joinRoom', { roomId, playerName: myName }, (res) => {
+        if (!res.success) {
+          alert(res.message || 'Failed to join room.');
+          window.location.href = 'joining.html';
+        }
+      });
+    }
+  </script>
 </body>
 </html>
