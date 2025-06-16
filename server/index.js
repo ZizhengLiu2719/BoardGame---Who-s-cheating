@@ -220,14 +220,20 @@ function markSkillUsed(gameState, playerName, skill) {
 // Helper: Apply skill effect
 function applySkillEffect(gameState, playerName, skill, extraData) {
   switch (skill) {
-    case 'mislead':
+    case 'molest':
       // Wind's molest: +2 scandalScore
       gameState.scandalScore += 2;
       break;
+    case 'mislead':
+      // Wind's mislead: flip love/hate counts
+      const temp = gameState.loveCount;
+      gameState.loveCount = gameState.hateCount;
+      gameState.hateCount = temp;
+      break;
     case 'protectingParty':
-      // Kennedi's skill: check rules for effect
-      // Example: add 3 to loveCount
-      gameState.loveCount += 3;
+      // Kennedi's skill: convert all hate to love
+      gameState.loveCount += gameState.hateCount;
+      gameState.hateCount = 0;
       break;
     case 'findAbby':
       // Michael's skill: just send UI message
@@ -451,31 +457,15 @@ io.on('connection', (socket) => {
       case 'useSkill':
         if (!canPlayerUseSkill(gameState, playerName, data.skill)) return;
         const player = gameState.players.find(p => p.name === playerName);
-        
         // Check skill-specific conditions
         if (data.skill === 'molest' && gameState.isDay) return; // Jack can only molest at night
         if ((data.skill === 'mislead' || data.skill === 'protectingParty') && !gameState.windKennediSkillWindow) return;
-        
         // Apply skill effects
-        if (data.skill === 'molest') {
-          gameState.scandalScore += 2;
-        } else if (data.skill === 'mislead') {
-          // Flip love to hate
-          const temp = gameState.loveCount;
-          gameState.loveCount = gameState.hateCount;
-          gameState.hateCount = temp;
-        } else if (data.skill === 'protectingParty') {
-          // All helpers count as love
-          gameState.loveCount += gameState.hateCount;
-          gameState.hateCount = 0;
-        }
-        
+        applySkillEffect(gameState, playerName, data.skill, data.extraData);
         markSkillUsed(gameState, playerName, data.skill);
-        
         if (data.skill === 'findAbby') {
           await broadcastUIMessage(roomId, 'Michael thinks he has found Abby now!', 5000);
         }
-        
         await updateGameState(roomId, gameState);
         io.to(roomId).emit('gameStateUpdate', gameState);
         break;

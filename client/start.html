@@ -737,12 +737,20 @@
     socket.on('gameStateUpdate', (newGameState) => {
       console.log('[gameStateUpdate]', newGameState);
       gameState = newGameState;
-      
+
+      // Update playerNames and roles from server state
+      playerNames = gameState.players.map(p => p.name);
+      shuffledRoles = gameState.players.map(p => p.role.toLowerCase());
+      myName = socket.myName || (window.myName ? window.myName : '');
+      myIndex = gameState.players.findIndex(p => p.id === socket.id || p.name === myName);
+      myRole = shuffledRoles[myIndex];
+
       // Update UI based on game state
       if (gameState.players) {
         positionCardsInCircle(gameState.players);
-        updateHostOnlyButtons();
+        renderRoleCards();
         renderSkillButtons();
+        updateHostOnlyButtons();
       }
       
       // Update day/night mode
@@ -766,11 +774,10 @@
     // Update button states based on game state
     function updateButtonStates() {
       if (!gameState) return;
-      
       const me = gameState.players.find(p => p.id === socket.id);
       if (!me) return;
-      
-      // Update love/hate buttons
+
+      // Update love/hate buttons ONLY if loveHateWindow is active
       const loveBtn = document.getElementById('loveBtn');
       const hateBtn = document.getElementById('hateBtn');
       if (loveBtn && hateBtn) {
@@ -778,8 +785,8 @@
         loveBtn.disabled = !canLoveHate;
         hateBtn.disabled = !canLoveHate;
       }
-      
-      // Update vote buttons
+
+      // Update vote buttons ONLY if voteWindow is active
       const voteYesBtn = document.getElementById('voteYesBtn');
       const voteNoBtn = document.getElementById('voteNoBtn');
       const voteSubmitBtn = document.getElementById('voteSubmitBtn');
@@ -789,7 +796,7 @@
         voteNoBtn.disabled = !canVote;
         voteSubmitBtn.disabled = !canVote;
       }
-      
+
       // Update skill buttons
       const skillButtons = document.querySelectorAll('.skill-btn');
       skillButtons.forEach(btn => {
