@@ -502,6 +502,7 @@
       gameState = newGameState;
       if (gameState.players) {
         positionCardsInCircle(gameState.players);
+        updateHostOnlyButtons();
       }
     });
 
@@ -510,6 +511,7 @@
       gameState = state;
       if (gameState.players) {
         positionCardsInCircle(gameState.players);
+        updateHostOnlyButtons();
       }
     });
 
@@ -553,6 +555,15 @@
           alert(res.message || 'Failed to join room.');
           window.location.href = 'joining.html';
         }
+      });
+    }
+
+    function updateHostOnlyButtons() {
+      if (!gameState || !gameState.players) return;
+      const me = gameState.players.find(p => p.id === socket.id);
+      const isHost = me && me.isHost;
+      document.querySelectorAll('.host-only').forEach(btn => {
+        btn.disabled = !isHost;
       });
     }
   </script>

@@ -86,8 +86,7 @@
   <script>
     function openTestRoom(event) {
       event.preventDefault();
-      
-      // Test room configuration
+
       const testRoomId = 'TEST123';
       const testPassword = 'test123';
       const testRoomName = 'Test Room';
@@ -100,11 +99,17 @@
         'Test Player 6'
       ];
 
-      // Open 6 tabs with different test players
-      testPlayers.forEach((playerName, index) => {
-        const url = `start.html?roomId=${testRoomId}&password=${testPassword}&name=${encodeURIComponent(playerName)}&roomname=${encodeURIComponent(testRoomName)}${index === 0 ? '&host=1' : ''}`;
-        window.open(url, `testPlayer${index + 1}`);
-      });
+      // Open the host tab first (creates the room)
+      const hostUrl = `start.html?roomId=${testRoomId}&password=${testPassword}&name=${encodeURIComponent(testPlayers[0])}&roomname=${encodeURIComponent(testRoomName)}&host=1&maxPlayers=6&createRoom=1`;
+      window.open(hostUrl, `testPlayer1`);
+
+      // Open the other 5 player tabs after a short delay
+      setTimeout(() => {
+        for (let i = 1; i < testPlayers.length; i++) {
+          const url = `start.html?roomId=${testRoomId}&password=${testPassword}&name=${encodeURIComponent(testPlayers[i])}&roomname=${encodeURIComponent(testRoomName)}&maxPlayers=6`;
+          window.open(url, `testPlayer${i + 1}`);
+        }
+      }, 1200); // 1.2 seconds delay to ensure host creates the room first
     }
   </script>
 </body>
