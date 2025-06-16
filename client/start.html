@@ -593,31 +593,61 @@
 
     // --- Skill Button Logic (polished) ---
     function renderSkillButtons() {
-      const skillButtonContainer = document.getElementById('skillButtonContainer');
-      skillButtonContainer.innerHTML = '';
-      if (!gameState || !gameState.players) return;
-      const me = gameState.players.find(p => p.id === socket.id);
-      if (!me || !me.role) return;
-      const usedSkills = (gameState.usedActions && gameState.usedActions.skills && gameState.usedActions.skills[me.name]) || {};
-      let enabled = false;
-      if (me.role === 'Wind') {
-        enabled = windKennediSkillWindow && !usedSkills['mislead'];
-      } else if (me.role === 'Kennedi') {
-        enabled = windKennediSkillWindow && !usedSkills['protectingparty'];
-      } else if (me.role === 'Jack') {
-        enabled = !gameState.isDay && !usedSkills['molest'];
-      } else if (me.role === 'Michael') {
-        enabled = !usedSkills['findabby'];
-      } else if (me.role === 'Ker') {
-        enabled = !usedSkills['thechosenone'];
+      const container = document.getElementById('skillButtonContainer');
+      container.innerHTML = '';
+      const petRoles = ['kiko', 'knox', 'nash'];
+      if (myRole === 'jack' || myRole === 'abby' || petRoles.includes(myRole)) {
+        container.style.display = 'none';
+        return;
       }
-      skillButtonContainer.appendChild(createSkillButton(me.role, usedSkills[getSkillButtonLabel(me.role).toLowerCase().replace(/ /g, '')], enabled, () => {
-        if (me.role === 'Ker') {
-          showKerPopup();
-        } else {
-          socket.emit('useSkill', { skill: getSkillButtonLabel(me.role).toLowerCase().replace(/ /g, '') });
+      container.style.display = 'block';
+      // Wind: Molest always at night, Mislead only during skill window
+      if (myRole === 'wind') {
+        if (!gameState.isDay) {
+          const molestBtn = document.createElement('button');
+          molestBtn.className = 'skill-btn';
+          molestBtn.textContent = 'Molest';
+          molestBtn.disabled = !!gameState.usedActions.skills[myName]?.molest;
+          molestBtn.onclick = () => socket.emit('gameAction', { action: 'useSkill', data: { skill: 'molest' }, playerName: myName });
+          container.appendChild(molestBtn);
         }
-      }));
+        if (gameState.windKennediSkillWindow && !gameState.usedActions.skills[myName]?.mislead) {
+          const misleadBtn = document.createElement('button');
+          misleadBtn.className = 'skill-btn';
+          misleadBtn.textContent = 'Mislead';
+          misleadBtn.onclick = () => socket.emit('gameAction', { action: 'useSkill', data: { skill: 'mislead' }, playerName: myName });
+          container.appendChild(misleadBtn);
+        }
+        return;
+      }
+      // Michael: Find Abby
+      if (myRole === 'michael') {
+        const findAbbyBtn = document.createElement('button');
+        findAbbyBtn.className = 'skill-btn';
+        findAbbyBtn.textContent = 'Find Abby';
+        findAbbyBtn.disabled = !!gameState.usedActions.skills[myName]?.findAbby;
+        findAbbyBtn.onclick = () => socket.emit('gameAction', { action: 'useSkill', data: { skill: 'findAbby' }, playerName: myName });
+        container.appendChild(findAbbyBtn);
+        return;
+      }
+      // Kennedi: Protecting Party (only during skill window)
+      if (myRole === 'kennedi' && gameState.windKennediSkillWindow && !gameState.usedActions.skills[myName]?.protectingParty) {
+        const protectBtn = document.createElement('button');
+        protectBtn.className = 'skill-btn';
+        protectBtn.textContent = 'Protecting Party';
+        protectBtn.onclick = () => socket.emit('gameAction', { action: 'useSkill', data: { skill: 'protectingParty' }, playerName: myName });
+        container.appendChild(protectBtn);
+        return;
+      }
+      // Ker: The Chosen One
+      if (myRole === 'ker' && !gameState.usedActions.skills[myName]?.theChosenOne) {
+        const chosenBtn = document.createElement('button');
+        chosenBtn.className = 'skill-btn';
+        chosenBtn.textContent = 'The Chosen One';
+        chosenBtn.onclick = () => handleKerSkill();
+        container.appendChild(chosenBtn);
+        return;
+      }
     }
 
     // --- Love/Hate/Vote Button One-Time Use Logic ---
@@ -941,7 +971,7 @@
       // Role info for tooltip
       const roleInfo = {
         michael: {name:'Michael', team:'Cheater', power:'Can see Wind\'s card. Can guess Abby for instant win'},
-        wind: {name:'Wind', team:'Cheater', power:'Can see Michael\'s card. Molest: +2 Scandal; Mislead: flip Love→Hate'},
+        wind: {name:'Wind', team:'Cheater', power:'Can see Michael\'s card. Molest: +2 Scandal at night; Mislead: flip Love→Hate'},
         jack: {name:'Jack', team:'Cheater', power:'Hidden from everyone except self'},
         abby: {name:'Abby', team:'Keeper', power:'Can see all Cheaters except Jack'},
         kennedi: {name:'Kennedi', team:'Keeper', power:'Can see own card. All Helpers count as Love'},
@@ -951,15 +981,18 @@
         nash: {name:'Nash', team:'Keeper (Pet)', power:'No special power'}
       };
 
-      // Show cards face-up based on role visibility rules
-      const isAbby = myRole === 'abby';
-      const isMichael = myRole === 'michael';
-      const isWind = myRole === 'wind';
-      
+      // Helper functions for role visibility
+      function canSeeCard(viewerRole, viewerIndex, targetRole, targetIndex) {
+        if (viewerIndex === targetIndex) return true; // Always see own card
+        if (viewerRole === 'abby') return ['michael', 'wind'].includes(targetRole); // Abby sees all cheaters except Jack
+        if (viewerRole === 'michael') return targetRole === 'wind'; // Michael sees Wind
+        if (viewerRole === 'wind') return targetRole === 'michael'; // Wind sees Michael
+        // All others (Kennedi, Ker, Jack, Pets) see only their own card
+        return false;
+      }
+
       // Calculate angles for players with equal spacing
-      const angles = Array.from({length: n}, (_, i) => {
-        return (Math.PI / 2) + (i * (2 * Math.PI / n));
-      });
+      const angles = Array.from({length: n}, (_, i) => (Math.PI / 2) + (i * (2 * Math.PI / n)));
 
       playerNames.forEach((name, i) => {
         const angle = angles[i];
@@ -978,15 +1011,8 @@
         if (i === myIndex) {
           // Everyone can see their own card
           shouldShowCard = true;
-        } else if (isAbby) {
-          // Abby can see all Cheaters except Jack
-          shouldShowCard = ['michael', 'wind'].includes(role);
-        } else if (isMichael) {
-          // Michael can see Wind's card
-          shouldShowCard = role === 'wind';
-        } else if (isWind) {
-          // Wind can see Michael's card
-          shouldShowCard = role === 'michael';
+        } else if (canSeeCard(myRole, myIndex, role, i)) {
+          shouldShowCard = true;
         }
         
         card.src = shouldShowCard ? roleImages[role] : backsideImg;
@@ -1017,9 +1043,9 @@
 
     // Handle Ker's skill
     function handleKerSkill() {
-      const dialog = document.createElement('div');
-      dialog.className = 'ker-skill-dialog';
-      dialog.innerHTML = `
+      const popup = document.createElement('div');
+      popup.className = 'ker-skill-dialog';
+      popup.innerHTML = `
         <div class="dialog-content">
           <h3>The Chosen One</h3>
           <div class="input-section">
@@ -1034,15 +1060,24 @@
           <button onclick="closeKerDialog()">Cancel</button>
         </div>
       `;
-      document.body.appendChild(dialog);
+      document.body.appendChild(popup);
+      document.getElementById('kerSubmit').onclick = function() {
+        const helper = document.getElementById('helperToSwap').value;
+        const nonHelper = document.getElementById('newHelper').value;
+        socket.emit('gameAction', { roomId, action: 'theChosenOne', data: { oldHelper: helper, newHelper: nonHelper }, playerName: me.name });
+        document.body.removeChild(popup);
+      };
+      document.getElementById('kerCancel').onclick = function() {
+        document.body.removeChild(popup);
+      };
     }
 
     function submitKerSwap() {
-      const helperToSwap = document.getElementById('helperToSwap').value;
-      const newHelper = document.getElementById('newHelper').value;
-      if (helperToSwap && newHelper) {
-        socket.emit('kerSwap', { helperToSwap, newHelper });
-        showUIMessage(`Ker swap ${helperToSwap} helper to ${newHelper} as new helper!`, 10000);
+      const helper = document.getElementById('helperToSwap').value;
+      const nonHelper = document.getElementById('newHelper').value;
+      if (helper && nonHelper) {
+        socket.emit('kerSwap', { helperToSwap: helper, newHelper: nonHelper });
+        showUIMessage(`Ker swap ${helper} helper to ${nonHelper} as new helper!`, 10000);
         closeKerDialog();
       }
     }
@@ -1229,6 +1264,9 @@
     function resetLoveHateCount() {
       if (!isHost) return;
       socket.emit('gameAction', { action: 'resetLoveHateCount' });
+      // Optimistically update UI
+      document.getElementById('loveCount').textContent = '0';
+      document.getElementById('hateCount').textContent = '0';
     }
 
     function resetVote() {

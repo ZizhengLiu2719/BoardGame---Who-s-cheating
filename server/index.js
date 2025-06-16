@@ -140,15 +140,17 @@ async function resetGameState(roomId) {
   const room = await redis.hgetall(`room:${roomId}`);
   if (!room) return;
   const players = JSON.parse(room.players || '[]');
+  // Redistribute roles
+  const roles = distributeRoles(players.length);
   const gameState = {
-    players: players.map(p => ({
+    players: players.map((p, index) => ({
       id: p.id,
       name: p.name,
-      role: null,
-      position: null,
+      role: roles[index],
+      position: index,
       isHost: p.name === players[0].name
     })),
-    roles: [],
+    roles,
     isDay: false,  // Default to night mode
     partyCount: 0,
     scandalScore: 0,
