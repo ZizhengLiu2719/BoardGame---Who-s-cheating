@@ -593,61 +593,31 @@
 
     // --- Skill Button Logic (polished) ---
     function renderSkillButtons() {
-      const container = document.getElementById('skillButtonContainer');
-      container.innerHTML = '';
-      const petRoles = ['kiko', 'knox', 'nash'];
-      if (myRole === 'jack' || myRole === 'abby' || petRoles.includes(myRole)) {
-        container.style.display = 'none';
-        return;
+      const skillButtonContainer = document.getElementById('skillButtonContainer');
+      skillButtonContainer.innerHTML = '';
+      if (!gameState || !gameState.players) return;
+      const me = gameState.players.find(p => p.id === socket.id);
+      if (!me || !me.role) return;
+      const usedSkills = (gameState.usedActions && gameState.usedActions.skills && gameState.usedActions.skills[me.name]) || {};
+      let enabled = false;
+      if (me.role === 'Wind') {
+        enabled = windKennediSkillWindow && !usedSkills['mislead'];
+      } else if (me.role === 'Kennedi') {
+        enabled = windKennediSkillWindow && !usedSkills['protectingparty'];
+      } else if (me.role === 'Jack') {
+        enabled = !gameState.isDay && !usedSkills['molest'];
+      } else if (me.role === 'Michael') {
+        enabled = !usedSkills['findabby'];
+      } else if (me.role === 'Ker') {
+        enabled = !usedSkills['thechosenone'];
       }
-      container.style.display = 'block';
-      // Wind: Molest always at night, Mislead only during skill window
-      if (myRole === 'wind') {
-        if (!gameState.isDay) {
-          const molestBtn = document.createElement('button');
-          molestBtn.className = 'skill-btn';
-          molestBtn.textContent = 'Molest';
-          molestBtn.disabled = !!gameState.usedActions.skills[myName]?.molest;
-          molestBtn.onclick = () => socket.emit('gameAction', { action: 'useSkill', data: { skill: 'molest' }, playerName: myName });
-          container.appendChild(molestBtn);
+      skillButtonContainer.appendChild(createSkillButton(me.role, usedSkills[getSkillButtonLabel(me.role).toLowerCase().replace(/ /g, '')], enabled, () => {
+        if (me.role === 'Ker') {
+          showKerPopup();
+        } else {
+          socket.emit('useSkill', { skill: getSkillButtonLabel(me.role).toLowerCase().replace(/ /g, '') });
         }
-        if (gameState.windKennediSkillWindow && !gameState.usedActions.skills[myName]?.mislead) {
-          const misleadBtn = document.createElement('button');
-          misleadBtn.className = 'skill-btn';
-          misleadBtn.textContent = 'Mislead';
-          misleadBtn.onclick = () => socket.emit('gameAction', { action: 'useSkill', data: { skill: 'mislead' }, playerName: myName });
-          container.appendChild(misleadBtn);
-        }
-        return;
-      }
-      // Michael: Find Abby
-      if (myRole === 'michael') {
-        const findAbbyBtn = document.createElement('button');
-        findAbbyBtn.className = 'skill-btn';
-        findAbbyBtn.textContent = 'Find Abby';
-        findAbbyBtn.disabled = !!gameState.usedActions.skills[myName]?.findAbby;
-        findAbbyBtn.onclick = () => socket.emit('gameAction', { action: 'useSkill', data: { skill: 'findAbby' }, playerName: myName });
-        container.appendChild(findAbbyBtn);
-        return;
-      }
-      // Kennedi: Protecting Party (only during skill window)
-      if (myRole === 'kennedi' && gameState.windKennediSkillWindow && !gameState.usedActions.skills[myName]?.protectingParty) {
-        const protectBtn = document.createElement('button');
-        protectBtn.className = 'skill-btn';
-        protectBtn.textContent = 'Protecting Party';
-        protectBtn.onclick = () => socket.emit('gameAction', { action: 'useSkill', data: { skill: 'protectingParty' }, playerName: myName });
-        container.appendChild(protectBtn);
-        return;
-      }
-      // Ker: The Chosen One
-      if (myRole === 'ker' && !gameState.usedActions.skills[myName]?.theChosenOne) {
-        const chosenBtn = document.createElement('button');
-        chosenBtn.className = 'skill-btn';
-        chosenBtn.textContent = 'The Chosen One';
-        chosenBtn.onclick = () => handleKerSkill();
-        container.appendChild(chosenBtn);
-        return;
-      }
+      }));
     }
 
     // --- Love/Hate/Vote Button One-Time Use Logic ---
@@ -737,98 +707,21 @@
     socket.on('gameStateUpdate', (newGameState) => {
       console.log('[gameStateUpdate]', newGameState);
       gameState = newGameState;
-
-      // Update playerNames and roles from server state
-      playerNames = gameState.players.map(p => p.name);
-      shuffledRoles = gameState.players.map(p => p.role.toLowerCase());
-      myName = socket.myName || (window.myName ? window.myName : '');
-      myIndex = gameState.players.findIndex(p => p.id === socket.id || p.name === myName);
-      myRole = shuffledRoles[myIndex];
-
-      // Update UI based on game state
       if (gameState.players) {
         positionCardsInCircle(gameState.players);
-        renderRoleCards();
-        renderSkillButtons();
         updateHostOnlyButtons();
+        renderSkillButtons();
       }
-      
-      // Update day/night mode
-      document.body.classList.toggle('day-mode', gameState.isDay);
-      document.body.classList.toggle('night-mode', !gameState.isDay);
-      document.querySelector('.table').classList.toggle('day-mode', gameState.isDay);
-      document.querySelector('.table').classList.toggle('night-mode', !gameState.isDay);
-      
-      // Update counts
-      document.getElementById('partyCount').textContent = gameState.partyCount;
-      document.getElementById('scandalScore').textContent = gameState.scandalScore;
-      document.getElementById('closeKnotScore').textContent = gameState.closeKnotScore;
-      document.getElementById('voteCount').textContent = gameState.voteCount;
-      document.getElementById('loveCount').textContent = gameState.loveCount;
-      document.getElementById('hateCount').textContent = gameState.hateCount;
-      
-      // Update button states
-      updateButtonStates();
     });
 
-    // Update button states based on game state
-    function updateButtonStates() {
-      if (!gameState) return;
-      const me = gameState.players.find(p => p.id === socket.id);
-      if (!me) return;
-
-      // Update love/hate buttons ONLY if loveHateWindow is active
-      const loveBtn = document.getElementById('loveBtn');
-      const hateBtn = document.getElementById('hateBtn');
-      if (loveBtn && hateBtn) {
-        const canLoveHate = gameState.loveHateWindow && !gameState.usedActions.love[me.name] && !gameState.usedActions.hate[me.name];
-        loveBtn.disabled = !canLoveHate;
-        hateBtn.disabled = !canLoveHate;
-      }
-
-      // Update vote buttons ONLY if voteWindow is active
-      const voteYesBtn = document.getElementById('voteYesBtn');
-      const voteNoBtn = document.getElementById('voteNoBtn');
-      const voteSubmitBtn = document.getElementById('voteSubmitBtn');
-      if (voteYesBtn && voteNoBtn && voteSubmitBtn) {
-        const canVote = gameState.voteWindow && !gameState.usedActions.vote[me.name];
-        voteYesBtn.disabled = !canVote;
-        voteNoBtn.disabled = !canVote;
-        voteSubmitBtn.disabled = !canVote;
-      }
-
-      // Update skill buttons
-      const skillButtons = document.querySelectorAll('.skill-btn');
-      skillButtons.forEach(btn => {
-        const skill = btn.getAttribute('data-skill');
-        if (skill === 'molest') {
-          btn.disabled = gameState.isDay || gameState.usedActions.skills[me.name]?.[skill];
-        } else if (skill === 'mislead' || skill === 'protectingParty') {
-          btn.disabled = !gameState.windKennediSkillWindow || gameState.usedActions.skills[me.name]?.[skill];
-        } else {
-          btn.disabled = gameState.usedActions.skills[me.name]?.[skill];
-        }
-      });
-    }
-
-    // Handle UI messages
-    socket.on('uiMessage', (message) => {
-      if (!message) {
-        document.getElementById('uiMessage').style.display = 'none';
-        return;
-      }
-      
-      const uiMessage = document.getElementById('uiMessage');
-      uiMessage.textContent = message.text;
-      uiMessage.style.display = 'block';
-      
-      if (message.expiresAt) {
-        const duration = message.expiresAt - Date.now();
-        if (duration > 0) {
-          setTimeout(() => {
-            uiMessage.style.display = 'none';
-          }, duration);
-        }
+    // Handle initial game state
+    socket.on('initialGameState', (state) => {
+      console.log('[initialGameState]', state);
+      gameState = state;
+      if (gameState.players) {
+        positionCardsInCircle(gameState.players);
+        updateHostOnlyButtons();
+        renderSkillButtons();
       }
     });
 
@@ -978,7 +871,7 @@
       // Role info for tooltip
       const roleInfo = {
         michael: {name:'Michael', team:'Cheater', power:'Can see Wind\'s card. Can guess Abby for instant win'},
-        wind: {name:'Wind', team:'Cheater', power:'Can see Michael\'s card. Molest: +2 Scandal at night; Mislead: flip Love→Hate'},
+        wind: {name:'Wind', team:'Cheater', power:'Can see Michael\'s card. Molest: +2 Scandal; Mislead: flip Love→Hate'},
         jack: {name:'Jack', team:'Cheater', power:'Hidden from everyone except self'},
         abby: {name:'Abby', team:'Keeper', power:'Can see all Cheaters except Jack'},
         kennedi: {name:'Kennedi', team:'Keeper', power:'Can see own card. All Helpers count as Love'},
@@ -988,18 +881,15 @@
         nash: {name:'Nash', team:'Keeper (Pet)', power:'No special power'}
       };
 
-      // Helper functions for role visibility
-      function canSeeCard(viewerRole, viewerIndex, targetRole, targetIndex) {
-        if (viewerIndex === targetIndex) return true; // Always see own card
-        if (viewerRole === 'abby') return ['michael', 'wind'].includes(targetRole); // Abby sees all cheaters except Jack
-        if (viewerRole === 'michael') return targetRole === 'wind'; // Michael sees Wind
-        if (viewerRole === 'wind') return targetRole === 'michael'; // Wind sees Michael
-        // All others (Kennedi, Ker, Jack, Pets) see only their own card
-        return false;
-      }
-
+      // Show cards face-up based on role visibility rules
+      const isAbby = myRole === 'abby';
+      const isMichael = myRole === 'michael';
+      const isWind = myRole === 'wind';
+      
       // Calculate angles for players with equal spacing
-      const angles = Array.from({length: n}, (_, i) => (Math.PI / 2) + (i * (2 * Math.PI / n)));
+      const angles = Array.from({length: n}, (_, i) => {
+        return (Math.PI / 2) + (i * (2 * Math.PI / n));
+      });
 
       playerNames.forEach((name, i) => {
         const angle = angles[i];
@@ -1018,8 +908,15 @@
         if (i === myIndex) {
           // Everyone can see their own card
           shouldShowCard = true;
-        } else if (canSeeCard(myRole, myIndex, role, i)) {
-          shouldShowCard = true;
+        } else if (isAbby) {
+          // Abby can see all Cheaters except Jack
+          shouldShowCard = ['michael', 'wind'].includes(role);
+        } else if (isMichael) {
+          // Michael can see Wind's card
+          shouldShowCard = role === 'wind';
+        } else if (isWind) {
+          // Wind can see Michael's card
+          shouldShowCard = role === 'michael';
         }
         
         card.src = shouldShowCard ? roleImages[role] : backsideImg;
@@ -1050,9 +947,9 @@
 
     // Handle Ker's skill
     function handleKerSkill() {
-      const popup = document.createElement('div');
-      popup.className = 'ker-skill-dialog';
-      popup.innerHTML = `
+      const dialog = document.createElement('div');
+      dialog.className = 'ker-skill-dialog';
+      dialog.innerHTML = `
         <div class="dialog-content">
           <h3>The Chosen One</h3>
           <div class="input-section">
@@ -1067,24 +964,15 @@
           <button onclick="closeKerDialog()">Cancel</button>
         </div>
       `;
-      document.body.appendChild(popup);
-      document.getElementById('kerSubmit').onclick = function() {
-        const helper = document.getElementById('helperToSwap').value;
-        const nonHelper = document.getElementById('newHelper').value;
-        socket.emit('gameAction', { roomId, action: 'theChosenOne', data: { oldHelper: helper, newHelper: nonHelper }, playerName: me.name });
-        document.body.removeChild(popup);
-      };
-      document.getElementById('kerCancel').onclick = function() {
-        document.body.removeChild(popup);
-      };
+      document.body.appendChild(dialog);
     }
 
     function submitKerSwap() {
-      const helper = document.getElementById('helperToSwap').value;
-      const nonHelper = document.getElementById('newHelper').value;
-      if (helper && nonHelper) {
-        socket.emit('kerSwap', { helperToSwap: helper, newHelper: nonHelper });
-        showUIMessage(`Ker swap ${helper} helper to ${nonHelper} as new helper!`, 10000);
+      const helperToSwap = document.getElementById('helperToSwap').value;
+      const newHelper = document.getElementById('newHelper').value;
+      if (helperToSwap && newHelper) {
+        socket.emit('kerSwap', { helperToSwap, newHelper });
+        showUIMessage(`Ker swap ${helperToSwap} helper to ${newHelper} as new helper!`, 10000);
         closeKerDialog();
       }
     }
@@ -1229,65 +1117,71 @@
       hostControls.innerHTML = `
         <button class="host-button" onclick="toggleDayNight()">Toggle Day/Night</button>
         <button class="host-button" onclick="restartGame()">Restart Game</button>
-        <button class="host-button" onclick="takeLoveHateAction()">Take Action</button>
-        <button class="host-button" onclick="resetLoveHateCount()">Reset Count</button>
-        <button class="host-button" onclick="resetVote()">Reset Vote</button>
       `;
       document.body.appendChild(hostControls);
 
       const countControls = document.createElement('div');
       countControls.className = 'count-controls';
       countControls.innerHTML = `
-        <button class="count-button" onclick="updateCount('party', 1)">Party +1</button>
-        <button class="count-button" onclick="updateCount('party', -1)">Party -1</button>
-        <button class="count-button" onclick="updateCount('scandal', 1)">Scandal +1</button>
-        <button class="count-button" onclick="updateCount('scandal', -1)">Scandal -1</button>
-        <button class="count-button" onclick="updateCount('closeKnot', 1)">Close-Knot +1</button>
-        <button class="count-button" onclick="updateCount('closeKnot', -1)">Close-Knot -1</button>
-        <button class="count-button" onclick="updateCount('vote', 1)">Vote +1</button>
-        <button class="count-button" onclick="updateCount('vote', -1)">Vote -1</button>
+        <button class="count-button" onclick="updateLoveCount(1)">Love +1</button>
+        <button class="count-button" onclick="updateLoveCount(-1)">Love -1</button>
+        <button class="count-button" onclick="updateHateCount(1)">Hate +1</button>
+        <button class="count-button" onclick="updateHateCount(-1)">Hate -1</button>
+        <button class="count-button" onclick="updateScandal(1)">Scandal +1</button>
+        <button class="count-button" onclick="updateScandal(-1)">Scandal -1</button>
       `;
       document.body.appendChild(countControls);
     }
 
     function toggleDayNight() {
       if (!isHost) return;
-      socket.emit('gameAction', {
-        action: 'switchDayNight',
-        data: { isDay: !gameState.isDay }
-      });
+      const isNight = document.body.classList.toggle('night-mode');
+      document.querySelector('.table').classList.toggle('night-mode', isNight);
+      document.querySelectorAll('.role-card').forEach(card => card.classList.toggle('night-mode', isNight));
+      document.querySelectorAll('.player-name-label').forEach(label => label.classList.toggle('night-mode', isNight));
+      document.querySelectorAll('.host-button, .count-button').forEach(btn => btn.classList.toggle('night-mode', isNight));
+      socket.emit('toggleDayNight', isNight);
     }
 
     function restartGame() {
       if (!isHost) return;
-      socket.emit('gameAction', { action: 'restartGame' });
+      if (confirm('Are you sure you want to restart the game?')) {
+        socket.emit('restartGame');
+      }
     }
 
-    function takeLoveHateAction() {
+    function updateLoveCount(delta) {
       if (!isHost) return;
-      socket.emit('gameAction', { action: 'takeLoveHateAction' });
+      socket.emit('updateLoveCount', delta);
     }
 
-    function resetLoveHateCount() {
+    function updateHateCount(delta) {
       if (!isHost) return;
-      socket.emit('gameAction', { action: 'resetLoveHateCount' });
-      // Optimistically update UI
-      document.getElementById('loveCount').textContent = '0';
-      document.getElementById('hateCount').textContent = '0';
+      socket.emit('updateHateCount', delta);
     }
 
-    function resetVote() {
+    function updateScandal(delta) {
       if (!isHost) return;
-      socket.emit('gameAction', { action: 'resetVote' });
+      socket.emit('updateScandal', delta);
     }
 
-    function updateCount(type, delta) {
-      if (!isHost) return;
-      socket.emit('gameAction', {
-        action: 'updateCount',
-        data: { countType: type, delta }
-      });
-    }
+    // Socket event handlers
+    socket.on('toggleDayNight', (isNight) => {
+      document.body.classList.toggle('night-mode', isNight);
+      document.querySelector('.table').classList.toggle('night-mode', isNight);
+      document.querySelectorAll('.role-card').forEach(card => card.classList.toggle('night-mode', isNight));
+      document.querySelectorAll('.player-name-label').forEach(label => label.classList.toggle('night-mode', isNight));
+      document.querySelectorAll('.host-button, .count-button').forEach(btn => btn.classList.toggle('night-mode', isNight));
+    });
+
+    socket.on('gameRestarted', () => {
+      location.reload();
+    });
+
+    // Initialize host controls when the game starts
+    socket.on('gameStarted', () => {
+      initializeHostControls();
+    });
   </script>
 </body>
 </html>

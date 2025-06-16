@@ -75,31 +75,23 @@ async function initializeGameState(roomId, players) {
     roles: [],  // Will be populated during role distribution
     
     // UI State
-    isDay: false,  // Default to night mode
-    dayNightSwitchClicked: false,
+    isDay: true,  // Track day/night state for background
+    dayNightSwitchClicked: false,  // Track if switch button was clicked
     
     // Game Scores
-    partyCount: 0,
-    scandalScore: 0,
-    closeKnotScore: 0,
-    voteCount: 0,
-    loveCount: 0,
-    hateCount: 0,
+    partyCount: 0,  // Track number of parties completed
+    scandalScore: 0,  // Track scandal points
+    closeKnotScore: 0,  // Track close-knot points
+    voteCount: 0,  // Track number of votes cast
+    loveCount: 0,  // Track love card count
+    hateCount: 0,   // Track hate card count
     uiMessage: null,
-    
-    // Action States
     usedActions: {
       vote: {},
       love: {},
       hate: {},
       skills: {}
-    },
-    
-    // Skill States
-    skillPhase: false,
-    windKennediSkillWindow: false,
-    loveHateWindow: false,
-    voteWindow: false
+    }
   };
   
   await redis.hset(`room:${roomId}`, 'gameState', JSON.stringify(gameState));
@@ -140,18 +132,16 @@ async function resetGameState(roomId) {
   const room = await redis.hgetall(`room:${roomId}`);
   if (!room) return;
   const players = JSON.parse(room.players || '[]');
-  // Redistribute roles
-  const roles = distributeRoles(players.length);
   const gameState = {
-    players: players.map((p, index) => ({
+    players: players.map(p => ({
       id: p.id,
       name: p.name,
-      role: roles[index],
-      position: index,
+      role: null,
+      position: null,
       isHost: p.name === players[0].name
     })),
-    roles,
-    isDay: false,  // Default to night mode
+    roles: [],
+    isDay: false,
     partyCount: 0,
     scandalScore: 0,
     closeKnotScore: 0,
@@ -164,14 +154,11 @@ async function resetGameState(roomId) {
       love: {},
       hate: {},
       skills: {}
-    },
-    skillPhase: false,
-    windKennediSkillWindow: false,
-    loveHateWindow: false,
-    voteWindow: false
+    }
   };
   await updateGameState(roomId, gameState);
   io.to(roomId).emit('gameStateUpdate', gameState);
+  return gameState;
 }
 
 // Helper: Enable love/hate for eligible players
@@ -191,23 +178,40 @@ function canPlayerVote(gameState, playerName) {
   return !gameState.usedActions.vote[playerName];
 }
 
-// Helper: Can player love/hate?
-function canPlayerLoveHate(gameState, playerName, type) {
-  return !gameState.usedActions[type][playerName];
-}
-
 // Helper: Can player use skill?
 function canPlayerUseSkill(gameState, playerName, skill) {
-  return !((gameState.usedActions.skills[playerName] || {})[skill]);
+  const player = gameState.players.find(p => p.name === playerName);
+  if (!player) return false;
+  
+  // Check if skill is already used
+  if (gameState.usedActions.skills[playerName]?.[skill]) return false;
+  
+  // Role-specific skill checks
+  switch (skill) {
+    case 'molest':
+      return player.role === 'Jack' && !gameState.isDay;
+    case 'mislead':
+      return player.role === 'Wind';
+    case 'protectingparty':
+      return player.role === 'Kennedi';
+    case 'findabby':
+      return player.role === 'Michael';
+    case 'thechosenone':
+      return player.role === 'Ker';
+    default:
+      return false;
+  }
 }
 
 // Helper: Mark vote used
 function markVoteUsed(gameState, playerName) {
+  if (!gameState.usedActions.vote) gameState.usedActions.vote = {};
   gameState.usedActions.vote[playerName] = true;
 }
 
 // Helper: Mark love/hate used
 function markLoveHateUsed(gameState, playerName, type) {
+  if (!gameState.usedActions[type]) gameState.usedActions[type] = {};
   gameState.usedActions[type][playerName] = true;
 }
 
@@ -221,25 +225,23 @@ function markSkillUsed(gameState, playerName, skill) {
 function applySkillEffect(gameState, playerName, skill, extraData) {
   switch (skill) {
     case 'molest':
-      // Wind's molest: +2 scandalScore
       gameState.scandalScore += 2;
       break;
     case 'mislead':
-      // Wind's mislead: flip love/hate counts
+      // Flip love to hate
       const temp = gameState.loveCount;
       gameState.loveCount = gameState.hateCount;
       gameState.hateCount = temp;
       break;
-    case 'protectingParty':
-      // Kennedi's skill: convert all hate to love
-      gameState.loveCount += gameState.hateCount;
-      gameState.hateCount = 0;
+    case 'protectingparty':
+      // All helpers count as love
+      gameState.loveCount += gameState.players.filter(p => p.role === 'Helper').length;
       break;
-    case 'findAbby':
-      // Michael's skill: just send UI message
+    case 'findabby':
+      // Just show message, no effect on game state
       break;
-    case 'theChosenOne':
-      // Ker's skill: handled separately
+    case 'thechosenone':
+      // Helper swap is handled in the UI message
       break;
   }
 }
@@ -382,7 +384,7 @@ io.on('connection', (socket) => {
       case 'updateCount':
         if (!isHost) return;
         if ([
-          'party', 'scandal', 'closeKnot', 'vote', 'love', 'hate'
+          'party', 'scandal', 'closeKnot', 'vote'
         ].includes(data.countType)) {
           const key = data.countType + 'Count';
           gameState[key] += data.delta;
@@ -395,24 +397,32 @@ io.on('connection', (socket) => {
       case 'restartGame':
         if (!isHost) return;
         await broadcastUIMessage(roomId, 'The game restarts!', 5000);
-        setTimeout(() => resetGameState(roomId), 5000);
+        setTimeout(async () => {
+          const newGameState = await resetGameState(roomId);
+          // Reset all counts to 0
+          newGameState.partyCount = 0;
+          newGameState.scandalScore = 0;
+          newGameState.closeKnotScore = 0;
+          newGameState.voteCount = 0;
+          newGameState.loveCount = 0;
+          newGameState.hateCount = 0;
+          // Set to night mode
+          newGameState.isDay = false;
+          // Reset used actions
+          newGameState.usedActions = {
+            vote: {},
+            love: {},
+            hate: {},
+            skills: {}
+          };
+          await updateGameState(roomId, newGameState);
+          io.to(roomId).emit('gameStateUpdate', newGameState);
+        }, 5000);
         break;
 
       case 'takeLoveHateAction':
         if (!isHost) return;
-        gameState.loveHateWindow = true;
-        await updateGameState(roomId, gameState);
         await broadcastUIMessage(roomId, 'Host and helpers can do their love or hate action now!', 10000);
-        setTimeout(() => {
-          gameState.loveHateWindow = false;
-          gameState.windKennediSkillWindow = true;
-          updateGameState(roomId, gameState);
-          broadcastUIMessage(roomId, 'Wind and Kennedi are allowed to use their skills right now!', 10000);
-          setTimeout(() => {
-            gameState.windKennediSkillWindow = false;
-            updateGameState(roomId, gameState);
-          }, 10000);
-        }, 10000);
         break;
 
       case 'resetLoveHateCount':
@@ -420,6 +430,7 @@ io.on('connection', (socket) => {
         await broadcastUIMessage(roomId, 'The action count is reset!', 5000);
         gameState.loveCount = 0;
         gameState.hateCount = 0;
+        // Reset used love/hate actions
         gameState.usedActions.love = {};
         gameState.usedActions.hate = {};
         await updateGameState(roomId, gameState);
@@ -428,17 +439,15 @@ io.on('connection', (socket) => {
 
       case 'resetVote':
         if (!isHost) return;
-        gameState.voteWindow = true;
-        await updateGameState(roomId, gameState);
         await broadcastUIMessage(roomId, 'Every player can vote now!', 10000);
-        setTimeout(() => {
-          gameState.voteWindow = false;
-          updateGameState(roomId, gameState);
-        }, 10000);
+        // Reset used vote actions
+        gameState.usedActions.vote = {};
+        await updateGameState(roomId, gameState);
+        io.to(roomId).emit('gameStateUpdate', gameState);
         break;
 
       case 'vote':
-        if (!gameState.voteWindow || !canPlayerVote(gameState, playerName)) return;
+        if (!canPlayerVote(gameState, playerName)) return;
         gameState.voteCount += 1;
         markVoteUsed(gameState, playerName);
         await updateGameState(roomId, gameState);
@@ -446,7 +455,7 @@ io.on('connection', (socket) => {
         break;
 
       case 'playLoveHate':
-        if (!gameState.loveHateWindow || !canPlayerLoveHate(gameState, playerName, data.type)) return;
+        if (!canPlayerLoveHate(gameState, playerName, data.type)) return;
         if (data.type === 'love') gameState.loveCount += 1;
         if (data.type === 'hate') gameState.hateCount += 1;
         markLoveHateUsed(gameState, playerName, data.type);
@@ -456,11 +465,6 @@ io.on('connection', (socket) => {
 
       case 'useSkill':
         if (!canPlayerUseSkill(gameState, playerName, data.skill)) return;
-        const player = gameState.players.find(p => p.name === playerName);
-        // Check skill-specific conditions
-        if (data.skill === 'molest' && gameState.isDay) return; // Jack can only molest at night
-        if ((data.skill === 'mislead' || data.skill === 'protectingParty') && !gameState.windKennediSkillWindow) return;
-        // Apply skill effects
         applySkillEffect(gameState, playerName, data.skill, data.extraData);
         markSkillUsed(gameState, playerName, data.skill);
         if (data.skill === 'findAbby') {
