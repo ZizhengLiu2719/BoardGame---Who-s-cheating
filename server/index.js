@@ -230,8 +230,10 @@ io.on('connection', (socket) => {
 
   // Host creates a room
   socket.on('createRoom', async ({ roomId, password, maxPlayers, hostName, roomName }, callback) => {
+    console.log('[createRoom]', { roomId, password, maxPlayers, hostName, roomName });
     const exists = await redis.exists(`room:${roomId}`);
     if (exists) {
+      console.log('[createRoom] Room already exists:', roomId);
       return callback({ success: false, message: 'Room already exists.' });
     }
     const players = [{ id: socket.id, name: hostName }];
@@ -255,13 +257,16 @@ io.on('connection', (socket) => {
 
   // Player joins a room
   socket.on('joinRoom', async ({ roomId, playerName }, callback) => {
+    console.log('[joinRoom]', { roomId, playerName });
     const room = await redis.hgetall(`room:${roomId}`);
     if (!room) {
+      console.log('[joinRoom] Room not found:', roomId);
       return callback({ success: false, message: 'Room not found.' });
     }
 
     const players = JSON.parse(room.players || '[]');
     if (players.length >= room.maxPlayers) {
+      console.log('[joinRoom] Room is full:', roomId);
       return callback({ success: false, message: 'Room is full.' });
     }
 
@@ -282,6 +287,7 @@ io.on('connection', (socket) => {
       }));
       
       await updateGameState(roomId, gameState);
+      console.log('[initialGameState] Emitting for room:', roomId, gameState);
       io.to(roomId).emit('initialGameState', gameState);
     }
 
@@ -362,6 +368,7 @@ io.on('connection', (socket) => {
           gameState[key] += data.delta;
           if (gameState[key] < 0) gameState[key] = 0;
           await updateGameState(roomId, gameState);
+          console.log('[gameStateUpdate] Emitting for room:', roomId, gameState);
           io.to(roomId).emit('gameStateUpdate', gameState);
         }
         break;

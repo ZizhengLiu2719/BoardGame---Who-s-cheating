@@ -497,8 +497,14 @@
       hateBtn.disabled = true;
     });
 
+    // Debug: Log all socket events
+    socket.onAny((event, ...args) => {
+      console.log('[Socket Event]', event, ...args);
+    });
+
     // Handle game state updates
     socket.on('gameStateUpdate', (newGameState) => {
+      console.log('[gameStateUpdate]', newGameState);
       gameState = newGameState;
       if (gameState.players) {
         positionCardsInCircle(gameState.players);
@@ -508,6 +514,7 @@
 
     // Handle initial game state
     socket.on('initialGameState', (state) => {
+      console.log('[initialGameState]', state);
       gameState = state;
       if (gameState.players) {
         positionCardsInCircle(gameState.players);
