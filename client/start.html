@@ -6,16 +6,30 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="stylesheet" href="style.css">
   <style>
+    @import url('https://fonts.googleapis.com/css2?family=Gochi+Hand&display=swap');
     body {
       margin: 0; padding: 0;
-      font-family: 'Segoe Print', 'Comic Sans MS', Arial, cursive;
-      background: linear-gradient(120deg, #23202a 0%, #2d1c0b 30%, #22304a 80%, #1a2233 100%);
+      font-family: 'Gochi Hand', 'Segoe Print', 'Comic Sans MS', Arial, cursive;
+      background: radial-gradient(ellipse at 60% 40%, #2d1c0b 60%, #23202a 100%),
+                  linear-gradient(120deg, #23202a 0%, #2d1c0b 30%, #22304a 80%, #1a2233 100%);
       color: #5a4327;
       min-height: 100vh;
       transition: background 0.7s;
+      position: relative;
+      overflow-x: hidden;
+    }
+    body:before {
+      content: '';
+      position: fixed;
+      left: 0; top: 0; width: 100vw; height: 100vh;
+      pointer-events: none;
+      z-index: 0;
+      background: radial-gradient(ellipse at 50% 60%, rgba(255,255,220,0.08) 0%, rgba(0,0,0,0.45) 100%);
+      mix-blend-mode: multiply;
     }
     body.day-mode {
-      background: linear-gradient(120deg, #fffbe7 0%, #ffe7b2 40%, #ffdca8 80%, #ffe2c3 100%);
+      background: radial-gradient(ellipse at 60% 40%, #fffbe7 60%, #ffe7b2 100%),
+                  linear-gradient(120deg, #fffbe7 0%, #ffe7b2 40%, #ffdca8 80%, #ffe2c3 100%);
       color: #a07c4f;
     }
     .container {
@@ -27,6 +41,7 @@
       width: 100vw;
       box-sizing: border-box;
       padding: 32px 0 32px 0;
+      z-index: 1;
     }
     .left-panel, .right-panel {
       width: 320px;
@@ -36,6 +51,11 @@
       display: flex;
       flex-direction: column;
       gap: 32px;
+      background: rgba(255,251,231,0.92);
+      border-radius: 24px;
+      box-shadow: 0 4px 32px 0 #23202a33, 0 2px 0 #fffbe7 inset;
+      border: 2.5px solid #bfa16a;
+      padding: 18px 18px 18px 18px;
     }
     .center-panel {
       flex: 1;
@@ -45,27 +65,29 @@
       justify-content: flex-start;
       min-width: 400px;
       max-width: 900px;
+      z-index: 2;
     }
     .title-badge {
-      font-size: 2.1rem;
-      font-family: 'Caveat', 'Segoe Print', cursive;
+      font-size: 2.3rem;
+      font-family: 'Gochi Hand', 'Caveat', 'Segoe Print', cursive;
       font-weight: bold;
       background: linear-gradient(120deg,#23202a 60%,#6b5a3a 100%);
       color: #e2c391;
-      border-radius: 22px 18px 32px 18px/18px 32px 18px 32px;
-      border: 2.5px solid #7bb0e6;
-      box-shadow: 0 4px 18px 0 #23202a55, 0 2px 0 #fffbe7 inset;
-      padding: 18px 38px 14px 38px;
+      border-radius: 32px 22px 38px 22px/22px 38px 22px 38px;
+      border: 3.5px solid #7bb0e6;
+      box-shadow: 0 6px 24px 0 #23202a55, 0 2px 0 #fffbe7 inset;
+      padding: 22px 48px 18px 48px;
       margin-bottom: 18px;
       text-align: center;
-      letter-spacing: 1.5px;
-      min-width: 180px;
+      letter-spacing: 2px;
+      min-width: 200px;
       transition: all 0.3s;
+      text-shadow: 0 2px 8px #23202a44;
     }
     body.day-mode .title-badge {
       background: linear-gradient(120deg,#fffbe7 60%,#ffe7b2 100%);
       color: #e2a84f;
-      border: 2.5px solid #ffdca8;
+      border: 3.5px solid #ffdca8;
     }
     .score-box, .love-hate-box {
       background: #fffbe7ee;
@@ -73,17 +95,13 @@
       box-shadow: 0 2px 18px 0 #23202a22,0 2px 0 #fffbe7 inset;
       border: 2px solid #7bb0e6;
       padding: 18px 18px 14px 18px;
-      font-size: 1.08rem;
+      font-size: 1.13rem;
       color: #7a5a2f;
       margin-bottom: 12px;
       display: flex;
       flex-direction: column;
       gap: 12px;
-    }
-    body.day-mode .score-box, body.day-mode .love-hate-box {
-      background: #fffbe7;
-      color: #a07c4f;
-      border: 2px solid #ffdca8;
+      font-family: 'Gochi Hand', 'Segoe Print', cursive;
     }
     .score-row {
       display: flex;
@@ -94,7 +112,8 @@
     .score-label {
       flex: 1;
       font-weight: bold;
-      font-size: 1.08em;
+      font-size: 1.13em;
+      letter-spacing: 1px;
     }
     .score-controls {
       display: flex;
@@ -102,41 +121,50 @@
       gap: 4px;
     }
     .score-btn {
-      width: 32px; height: 32px;
-      border-radius: 8px;
-      border: 2px solid #e2c391;
-      background: #ffe7b2;
+      width: 36px; height: 36px;
+      border-radius: 12px;
+      border: 2.5px solid #e2c391;
+      background: linear-gradient(120deg,#ffe7b2 60%,#bfa16a 100%);
       color: #7a5a2f;
-      font-size: 1.2em;
+      font-size: 1.3em;
       font-weight: bold;
       cursor: pointer;
-      transition: background 0.2s, color 0.2s;
+      transition: background 0.2s, color 0.2s, box-shadow 0.2s;
+      box-shadow: 0 2px 8px #bfa16a33;
     }
     .score-btn:disabled {
       opacity: 0.5;
       cursor: not-allowed;
     }
     .score-value {
-      width: 32px;
+      width: 36px;
       text-align: center;
-      font-size: 1.15em;
+      font-size: 1.18em;
       font-weight: bold;
       color: #bfa16a;
+      background: #fffbe7cc;
+      border-radius: 8px;
+      border: 1.5px solid #e2c391;
+      box-shadow: 0 1px 4px #bfa16a22 inset;
     }
-    .action-btn, .reset-btn, .vote-btn {
+    .action-btn, .reset-btn, .vote-btn, .skill-btn {
       width: 100%;
       margin-top: 8px;
-      padding: 10px 0;
-      border-radius: 12px;
-      border: 2px solid #e2c391;
-      background: #ffe7b2;
+      padding: 12px 0;
+      border-radius: 16px;
+      border: 2.5px solid #e2c391;
+      background: linear-gradient(120deg,#ffe7b2 60%,#bfa16a 100%);
       color: #7a5a2f;
-      font-size: 1.1em;
+      font-size: 1.18em;
+      font-family: 'Gochi Hand', 'Segoe Print', cursive;
       font-weight: bold;
       cursor: pointer;
-      transition: background 0.2s, color 0.2s;
+      transition: background 0.2s, color 0.2s, box-shadow 0.2s;
+      box-shadow: 0 2px 8px #bfa16a33;
+      letter-spacing: 1px;
+      text-shadow: 0 1px 4px #fffbe7cc;
     }
-    .action-btn:disabled, .reset-btn:disabled, .vote-btn:disabled {
+    .action-btn:disabled, .reset-btn:disabled, .vote-btn:disabled, .skill-btn:disabled {
       opacity: 0.5;
       cursor: not-allowed;
     }
@@ -149,34 +177,39 @@
     .love-hate-label {
       flex: 1;
       font-weight: bold;
-      font-size: 1.08em;
+      font-size: 1.13em;
     }
     .love-hate-value {
-      width: 32px;
+      width: 36px;
       text-align: center;
-      font-size: 1.15em;
+      font-size: 1.18em;
       font-weight: bold;
       color: #e26a6a;
+      background: #fffbe7cc;
+      border-radius: 8px;
+      border: 1.5px solid #e2c391;
+      box-shadow: 0 1px 4px #e2c39122 inset;
     }
     .hate-value {
       color: #7a5a2f;
     }
     .circle-table-container {
       position: relative;
-      width: 480px;
-      height: 480px;
+      width: 520px;
+      height: 520px;
       margin: 0 auto 24px auto;
       display: flex;
       align-items: center;
       justify-content: center;
+      z-index: 2;
     }
     .circle-table {
-      width: 380px;
-      height: 380px;
+      width: 420px;
+      height: 420px;
       border-radius: 50%;
       background: radial-gradient(circle at 60% 40%, #6b5a3a 55%, #2d1c0b 100%);
-      border: 8px solid #bfa16a;
-      box-shadow: 0 12px 48px 0 #23202a, 0 0 0 24px #23202a33 inset, 0 0 0 8px #7bb0e633 inset;
+      border: 10px solid #bfa16a;
+      box-shadow: 0 16px 64px 0 #23202a, 0 0 0 32px #23202a33 inset, 0 0 0 12px #7bb0e633 inset;
       position: absolute;
       left: 50%; top: 50%;
       transform: translate(-50%, -50%);
@@ -184,31 +217,32 @@
     }
     body.day-mode .circle-table {
       background: radial-gradient(circle at 60% 40%, #fffbe7 60%, #ffe7b2 100%);
-      box-shadow: 0 16px 64px 0 #ffdca888, 0 0 0 24px #fffbe7cc inset, 0 0 0 8px #ffe7b2cc inset;
+      box-shadow: 0 20px 80px 0 #ffdca888, 0 0 0 32px #fffbe7cc inset, 0 0 0 12px #ffe7b2cc inset;
     }
     .role-cards-circle {
       position: absolute;
       left: 50%; top: 50%;
-      width: 480px; height: 480px;
+      width: 520px; height: 520px;
       transform: translate(-50%, -50%);
       pointer-events: none;
       z-index: 2;
     }
     .role-card {
       position: absolute;
-      width: 80px; height: 120px;
-      border-radius: 16px;
-      box-shadow: 0 6px 24px 0 rgba(90, 67, 39, 0.13);
-      border: 3px solid #e2c391;
+      width: 90px; height: 130px;
+      border-radius: 18px;
+      box-shadow: 0 8px 32px 0 rgba(90, 67, 39, 0.18);
+      border: 4px solid #e2c391;
       background: #fffbe7;
       object-fit: cover;
       pointer-events: auto;
       transition: transform 0.2s, box-shadow 0.2s;
       user-select: none;
+      filter: drop-shadow(0 2px 8px #23202a44);
     }
     .role-card.me {
-      box-shadow: 0 0 0 6px #bfa16a99, 0 6px 24px 0 rgba(90, 67, 39, 0.13);
-      border: 3.5px solid #7a5a2f;
+      box-shadow: 0 0 0 8px #bfa16a99, 0 8px 32px 0 rgba(90, 67, 39, 0.18);
+      border: 4.5px solid #7a5a2f;
       z-index: 10;
     }
     .player-name-label {
@@ -216,18 +250,42 @@
       left: 50%;
       top: 50%;
       transform: translate(-50%, -50%);
-      font-size: 1.02rem;
+      font-size: 1.13rem;
       color: #e2c391;
-      background: rgba(40,30,20,0.72);
-      border-radius: 8px;
-      border: 1.5px solid #7bb0e6;
-      padding: 4px 14px;
+      background: rgba(40,30,20,0.82);
+      border-radius: 10px;
+      border: 2px solid #7bb0e6;
+      padding: 6px 18px;
       white-space: nowrap;
       box-shadow: 0 2px 8px 0 #7bb0e644, 0 0 8px 0 #23202a99;
       pointer-events: none;
-      font-family: 'Caveat', 'Segoe Print', 'Comic Sans MS', cursive;
+      font-family: 'Gochi Hand', 'Caveat', 'Segoe Print', 'Comic Sans MS', cursive;
       font-style: italic;
       font-weight: 500;
+      letter-spacing: 1px;
+      text-shadow: 0 1px 4px #23202a99;
+    }
+    .skill-btn {
+      width: auto;
+      min-width: 120px;
+      margin: 0 8px;
+      padding: 10px 18px;
+      border-radius: 14px;
+      border: 2.5px solid #e2c391;
+      background: linear-gradient(120deg,#ffe7b2 60%,#bfa16a 100%);
+      color: #7a5a2f;
+      font-size: 1.13em;
+      font-family: 'Gochi Hand', 'Segoe Print', cursive;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background 0.2s, color 0.2s, box-shadow 0.2s;
+      box-shadow: 0 2px 8px #bfa16a33;
+      letter-spacing: 1px;
+      text-shadow: 0 1px 4px #fffbe7cc;
+    }
+    .skill-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
     }
     @media (max-width: 1200px) {
       .container { flex-direction: column; align-items: center; }
@@ -364,48 +422,28 @@
 
     // Function to position cards in a circle
     function positionCardsInCircle(players) {
-      roleCardsCircle.innerHTML = ''; // Clear existing cards
-      
-      const radius = 200; // Radius of the circle
-      const centerX = 240; // Center X of the circle
-      const centerY = 240; // Center Y of the circle
-      
+      roleCardsCircle.innerHTML = '';
+      const radius = 200;
+      const centerX = 240;
+      const centerY = 240;
       players.forEach((player, index) => {
         const angle = (index * 2 * Math.PI) / players.length;
         const x = centerX + radius * Math.cos(angle);
         const y = centerY + radius * Math.sin(angle);
-        
-        // Create card container
         const cardContainer = document.createElement('div');
-        cardContainer.style.cssText = `
-          position: absolute;
-          left: ${x}px;
-          top: ${y}px;
-          transform: translate(-50%, -50%);
-          width: 80px;
-          height: 120px;
-          transition: all 0.3s ease;
-        `;
-        
-        // Create role card
+        cardContainer.style.cssText = `position: absolute; left: ${x}px; top: ${y}px; transform: translate(-50%, -50%); width: 80px; height: 120px; transition: all 0.3s ease;`;
         const roleCard = document.createElement('img');
         roleCard.className = 'role-card';
         if (player.id === socket.id) {
           roleCard.classList.add('me');
-        }
-        
-        // Set card image based on role
-        if (player.role) {
-          roleCard.src = `/imgs/${player.role.toLowerCase()}.png`;
+          roleCard.src = `/imgs/${player.role ? player.role.toLowerCase() : 'backSide'}.png`;
         } else {
+          // Show backSide for other players
           roleCard.src = '/imgs/backSide.png';
         }
-        
-        // Create player name label
         const nameLabel = document.createElement('div');
         nameLabel.className = 'player-name-label';
         nameLabel.textContent = player.name;
-        
         cardContainer.appendChild(roleCard);
         cardContainer.appendChild(nameLabel);
         roleCardsCircle.appendChild(cardContainer);
@@ -428,9 +466,78 @@
       }
     }
 
-    // Handle love/hate actions
+    // --- UI Message-Driven Button States ---
+    let loveHateWindow = false;
+    let voteWindow = false;
+    let windKennediSkillWindow = false;
+
+    function setLoveHateWindow(enabled) {
+      loveHateWindow = enabled;
+      loveBtn.disabled = !enabled;
+      hateBtn.disabled = !enabled;
+    }
+    function setVoteWindow(enabled) {
+      voteWindow = enabled;
+      document.getElementById('voteYesBtn').disabled = !enabled;
+      document.getElementById('voteNoBtn').disabled = !enabled;
+      document.getElementById('voteSubmitBtn').disabled = !enabled;
+    }
+    function setWindKennediSkillWindow(enabled) {
+      windKennediSkillWindow = enabled;
+      renderSkillButtons();
+    }
+
+    // --- Listen for UI Messages to Control Button States ---
+    socket.on('uiMessage', (message) => {
+      if (message) {
+        showUIMessage(message.text, 10000);
+        if (message.text.includes('Host and helpers can do their love or hate action now!')) {
+          setLoveHateWindow(true);
+          setTimeout(() => setLoveHateWindow(false), 10000);
+        }
+        if (message.text.includes('Wind and Kennedi are allowed to use their skills right now!')) {
+          setWindKennediSkillWindow(true);
+          setTimeout(() => setWindKennediSkillWindow(false), 10000);
+        }
+        if (message.text.includes('Every player can vote now!')) {
+          setVoteWindow(true);
+          setTimeout(() => setVoteWindow(false), 10000);
+        }
+      }
+    });
+
+    // --- Skill Button Logic (polished) ---
+    function renderSkillButtons() {
+      const skillButtonContainer = document.getElementById('skillButtonContainer');
+      skillButtonContainer.innerHTML = '';
+      if (!gameState || !gameState.players) return;
+      const me = gameState.players.find(p => p.id === socket.id);
+      if (!me || !me.role) return;
+      const usedSkills = (gameState.usedActions && gameState.usedActions.skills && gameState.usedActions.skills[me.name]) || {};
+      let enabled = false;
+      if (me.role === 'Wind') {
+        enabled = windKennediSkillWindow && !usedSkills['mislead'];
+      } else if (me.role === 'Kennedi') {
+        enabled = windKennediSkillWindow && !usedSkills['protectingparty'];
+      } else if (me.role === 'Jack') {
+        enabled = !gameState.isDay && !usedSkills['molest'];
+      } else if (me.role === 'Michael') {
+        enabled = !usedSkills['findabby'];
+      } else if (me.role === 'Ker') {
+        enabled = !usedSkills['thechosenone'];
+      }
+      skillButtonContainer.appendChild(createSkillButton(me.role, usedSkills[getSkillButtonLabel(me.role).toLowerCase().replace(/ /g, '')], enabled, () => {
+        if (me.role === 'Ker') {
+          showKerPopup();
+        } else {
+          socket.emit('useSkill', { skill: getSkillButtonLabel(me.role).toLowerCase().replace(/ /g, '') });
+        }
+      }));
+    }
+
+    // --- Love/Hate/Vote Button One-Time Use Logic ---
     loveBtn.addEventListener('click', () => {
-      if (!loveBtn.disabled) {
+      if (!loveBtn.disabled && loveHateWindow) {
         tempLoveCount++;
         loveCount.textContent = tempLoveCount;
         loveBtn.disabled = true;
@@ -438,15 +545,35 @@
         socket.emit('loveHateAction', { type: 'love', count: tempLoveCount });
       }
     });
-
     hateBtn.addEventListener('click', () => {
-      if (!hateBtn.disabled) {
+      if (!hateBtn.disabled && loveHateWindow) {
         tempHateCount++;
         hateCount.textContent = tempHateCount;
         loveBtn.disabled = true;
         hateBtn.disabled = true;
         socket.emit('loveHateAction', { type: 'hate', count: tempHateCount });
       }
+    });
+    document.getElementById('voteYesBtn').addEventListener('click', () => {
+      if (!voteWindow) return;
+      document.getElementById('voteYesBtn').disabled = true;
+      document.getElementById('voteNoBtn').disabled = true;
+      document.getElementById('voteSubmitBtn').disabled = true;
+      // Implement vote logic here
+    });
+    document.getElementById('voteNoBtn').addEventListener('click', () => {
+      if (!voteWindow) return;
+      document.getElementById('voteYesBtn').disabled = true;
+      document.getElementById('voteNoBtn').disabled = true;
+      document.getElementById('voteSubmitBtn').disabled = true;
+      // Implement vote logic here
+    });
+    document.getElementById('voteSubmitBtn').addEventListener('click', () => {
+      if (!voteWindow) return;
+      document.getElementById('voteYesBtn').disabled = true;
+      document.getElementById('voteNoBtn').disabled = true;
+      document.getElementById('voteSubmitBtn').disabled = true;
+      // Implement vote logic here
     });
 
     // Handle skill buttons
@@ -469,17 +596,6 @@
     }
 
     // Socket event listeners
-    socket.on('uiMessage', (message) => {
-      if (message) {
-        showUIMessage(message.text, 10000);
-        if (message.text.includes('Wind and Kennedi')) {
-          isSkillPhase = true;
-          if (windSkillBtn) windSkillBtn.disabled = false;
-          if (kennediSkillBtn) kennediSkillBtn.disabled = false;
-        }
-      }
-    });
-
     socket.on('updateLoveHateCount', ({ love, hate }) => {
       loveCount.textContent = love;
       hateCount.textContent = hate;
@@ -509,6 +625,7 @@
       if (gameState.players) {
         positionCardsInCircle(gameState.players);
         updateHostOnlyButtons();
+        renderSkillButtons();
       }
     });
 
@@ -519,6 +636,7 @@
       if (gameState.players) {
         positionCardsInCircle(gameState.players);
         updateHostOnlyButtons();
+        renderSkillButtons();
       }
     });
 
@@ -565,6 +683,7 @@
       });
     }
 
+    // --- Host-Only Controls and Default State ---
     function updateHostOnlyButtons() {
       if (!gameState || !gameState.players) return;
       const me = gameState.players.find(p => p.id === socket.id);
@@ -572,7 +691,60 @@
       document.querySelectorAll('.host-only').forEach(btn => {
         btn.disabled = !isHost;
       });
+      // Only host can switch day/night
+      const toggleStageBtn = document.getElementById('toggleStageBtn');
+      if (toggleStageBtn) toggleStageBtn.disabled = !isHost;
     }
+
+    // --- Skill Buttons ---
+    function createSkillButton(role, used, enabled, onClick) {
+      const btn = document.createElement('button');
+      btn.className = 'skill-btn';
+      btn.textContent = getSkillButtonLabel(role);
+      btn.disabled = !enabled || used;
+      btn.style.margin = '0 8px';
+      btn.onclick = onClick;
+      return btn;
+    }
+    function getSkillButtonLabel(role) {
+      switch (role) {
+        case 'Wind': return 'Mislead';
+        case 'Kennedi': return 'Protecting Party';
+        case 'Michael': return 'Find Abby';
+        case 'Ker': return 'The Chosen One';
+        case 'Jack': return 'Molest';
+        default: return 'Skill';
+      }
+    }
+
+    // --- Ker's Popup ---
+    function showKerPopup() {
+      const popup = document.createElement('div');
+      popup.style.cssText = 'position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:#fffbe7;border:2px solid #e2c391;padding:24px;z-index:2000;border-radius:16px;box-shadow:0 2px 18px #23202a22;';
+      popup.innerHTML = `<b>The Chosen One</b><br><br>Pick the helper to swap:<br><input id="kerHelper" style="width:180px;"><br><br>Pick the non-helper candidate:<br><input id="kerNonHelper" style="width:180px;"><br><br><button id="kerSubmit">Submit</button> <button id="kerCancel">Cancel</button>`;
+      document.body.appendChild(popup);
+      document.getElementById('kerSubmit').onclick = function() {
+        const helper = document.getElementById('kerHelper').value;
+        const nonHelper = document.getElementById('kerNonHelper').value;
+        socket.emit('gameAction', { roomId, action: 'theChosenOne', data: { oldHelper: helper, newHelper: nonHelper }, playerName: me.name });
+        document.body.removeChild(popup);
+      };
+      document.getElementById('kerCancel').onclick = function() {
+        document.body.removeChild(popup);
+      };
+    }
+
+    // --- Default State on Load ---
+    document.addEventListener('DOMContentLoaded', () => {
+      document.body.classList.remove('day-mode'); // Night mode by default
+      // Set all counts to 0
+      document.querySelectorAll('.score-value').forEach(el => el.textContent = '0');
+      loveCount.textContent = '0';
+      hateCount.textContent = '0';
+      // Disable all action buttons by default
+      document.querySelectorAll('.action-btn, .reset-btn, .vote-btn').forEach(btn => btn.disabled = true);
+      // Skill buttons will be rendered by renderSkillButtons
+    });
   </script>
 </body>
 </html>
