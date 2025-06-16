@@ -87,7 +87,8 @@
     function openTestRoom(event) {
       event.preventDefault();
 
-      const testRoomId = 'TEST123';
+      // Generate a random 5-digit room ID for each test
+      const testRoomId = String(Math.floor(Math.random() * 100000)).padStart(5, '0');
       const testPassword = 'test123';
       const testRoomName = 'Test Room';
       const testPlayers = [
