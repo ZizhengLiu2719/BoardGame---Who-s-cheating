@@ -34,6 +34,196 @@ async function deleteRoom(roomId) {
   await redis.del(`room:${roomId}`);
 }
 
+// Role distribution
+function distributeRoles(playerCount) {
+  const roles = [];
+  
+  // Define role pools based on player count
+  if (playerCount === 6) {
+    // 2 Cheaters, 4 Keepers (including 2 Pets)
+    roles.push('Michael', 'Wind', 'Abby', 'Kennedi', 'Kiko', 'Knox');
+  } else if (playerCount === 7) {
+    // 2 Cheaters, 5 Keepers (including 3 Pets)
+    roles.push('Michael', 'Wind', 'Abby', 'Kennedi', 'Kiko', 'Knox', 'Nash');
+  } else if (playerCount === 8) {
+    // 3 Cheaters, 5 Keepers (including 2 Pets)
+    roles.push('Michael', 'Jack', 'Wind', 'Abby', 'Kennedi', 'Ker', 'Kiko', 'Knox');
+  } else if (playerCount === 9) {
+    // 3 Cheaters, 6 Keepers (including 3 Pets)
+    roles.push('Michael', 'Jack', 'Wind', 'Abby', 'Kennedi', 'Ker', 'Kiko', 'Knox', 'Nash');
+  }
+  
+  // Shuffle the roles
+  for (let i = roles.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [roles[i], roles[j]] = [roles[j], roles[i]];
+  }
+  
+  return roles;
+}
+
+// Game state management
+async function initializeGameState(roomId, players) {
+  const gameState = {
+    players: players.map(p => ({
+      id: p.id,
+      name: p.name,
+      role: null,  // Will be assigned during role distribution
+      position: null,  // Will be assigned during setup
+      isHost: p.name === players[0].name
+    })),
+    roles: [],  // Will be populated during role distribution
+    
+    // UI State
+    isDay: true,  // Track day/night state for background
+    dayNightSwitchClicked: false,  // Track if switch button was clicked
+    
+    // Game Scores
+    partyCount: 0,  // Track number of parties completed
+    scandalScore: 0,  // Track scandal points
+    closeKnotScore: 0,  // Track close-knot points
+    voteCount: 0,  // Track number of votes cast
+    loveCount: 0,  // Track love card count
+    hateCount: 0,   // Track hate card count
+    uiMessage: null,
+    usedActions: {
+      vote: {},
+      love: {},
+      hate: {},
+      skills: {}
+    }
+  };
+  
+  await redis.hset(`room:${roomId}`, 'gameState', JSON.stringify(gameState));
+  return gameState;
+}
+
+async function getGameState(roomId) {
+  const room = await redis.hgetall(`room:${roomId}`);
+  if (!room || !room.gameState) return null;
+  return JSON.parse(room.gameState);
+}
+
+async function updateGameState(roomId, gameState) {
+  await redis.hset(`room:${roomId}`, 'gameState', JSON.stringify(gameState));
+}
+
+// Helper: Broadcast UI message with expiration
+async function broadcastUIMessage(roomId, text, durationMs) {
+  const gameState = await getGameState(roomId);
+  const expiresAt = durationMs > 0 ? Date.now() + durationMs : null;
+  gameState.uiMessage = { text, expiresAt };
+  await updateGameState(roomId, gameState);
+  io.to(roomId).emit('uiMessage', gameState.uiMessage);
+  if (durationMs > 0) {
+    setTimeout(async () => {
+      const gs = await getGameState(roomId);
+      if (gs && gs.uiMessage && gs.uiMessage.expiresAt === expiresAt) {
+        gs.uiMessage = null;
+        await updateGameState(roomId, gs);
+        io.to(roomId).emit('uiMessage', null);
+      }
+    }, durationMs);
+  }
+}
+
+// Helper: Reset game state to default
+async function resetGameState(roomId) {
+  const room = await redis.hgetall(`room:${roomId}`);
+  if (!room) return;
+  const players = JSON.parse(room.players || '[]');
+  const gameState = {
+    players: players.map(p => ({
+      id: p.id,
+      name: p.name,
+      role: null,
+      position: null,
+      isHost: p.name === players[0].name
+    })),
+    roles: [],
+    isDay: false,
+    partyCount: 0,
+    scandalScore: 0,
+    closeKnotScore: 0,
+    voteCount: 0,
+    loveCount: 0,
+    hateCount: 0,
+    uiMessage: null,
+    usedActions: {
+      vote: {},
+      love: {},
+      hate: {},
+      skills: {}
+    }
+  };
+  await updateGameState(roomId, gameState);
+  io.to(roomId).emit('gameStateUpdate', gameState);
+}
+
+// Helper: Enable love/hate for eligible players
+function enableLoveHateForEligiblePlayers(roomId) {
+  // This is a client-side responsibility, but you can broadcast a state change if needed
+  // For now, just broadcast the UI message
+}
+
+// Helper: Enable vote for all
+function enableVoteForAll(roomId) {
+  // This is a client-side responsibility, but you can broadcast a state change if needed
+  // For now, just broadcast the UI message
+}
+
+// Helper: Can player vote?
+function canPlayerVote(gameState, playerName) {
+  return !gameState.usedActions.vote[playerName];
+}
+
+// Helper: Can player love/hate?
+function canPlayerLoveHate(gameState, playerName, type) {
+  return !gameState.usedActions[type][playerName];
+}
+
+// Helper: Can player use skill?
+function canPlayerUseSkill(gameState, playerName, skill) {
+  return !((gameState.usedActions.skills[playerName] || {})[skill]);
+}
+
+// Helper: Mark vote used
+function markVoteUsed(gameState, playerName) {
+  gameState.usedActions.vote[playerName] = true;
+}
+
+// Helper: Mark love/hate used
+function markLoveHateUsed(gameState, playerName, type) {
+  gameState.usedActions[type][playerName] = true;
+}
+
+// Helper: Mark skill used
+function markSkillUsed(gameState, playerName, skill) {
+  if (!gameState.usedActions.skills[playerName]) gameState.usedActions.skills[playerName] = {};
+  gameState.usedActions.skills[playerName][skill] = true;
+}
+
+// Helper: Apply skill effect
+function applySkillEffect(gameState, playerName, skill, extraData) {
+  switch (skill) {
+    case 'mislead':
+      // Wind's molest: +2 scandalScore
+      gameState.scandalScore += 2;
+      break;
+    case 'protectingParty':
+      // Kennedi's skill: check rules for effect
+      // Example: add 3 to loveCount
+      gameState.loveCount += 3;
+      break;
+    case 'findAbby':
+      // Michael's skill: just send UI message
+      break;
+    case 'theChosenOne':
+      // Ker's skill: handled separately
+      break;
+  }
+}
+
 // Socket.IO connection handler
 io.on('connection', (socket) => {
   console.log('A user connected:', socket.id);
@@ -120,9 +310,115 @@ io.on('connection', (socket) => {
     const players = JSON.parse(room.players || '[]');
     const readyStates = JSON.parse(room.readyStates || '{}');
     const allReady = players.length === Number(room.maxPlayers) && players.every(p => readyStates[p.name]);
+    
     if (allReady) {
-      io.to(roomId).emit('startGame');
-      // TODO: Add further game logic here
+      // Initialize game state
+      const gameState = await initializeGameState(roomId, players);
+      
+      // Emit game start with initial state
+      io.to(roomId).emit('startGame', { gameState });
+      
+      // Start role distribution
+      const roles = distributeRoles(players.length);
+      gameState.roles = roles;
+      await updateGameState(roomId, gameState);
+      
+      // Assign roles to players
+      players.forEach((player, index) => {
+        gameState.players[index].role = roles[index];
+        gameState.players[index].position = index;
+      });
+      
+      await updateGameState(roomId, gameState);
+      io.to(roomId).emit('gameStateUpdate', gameState);
+    }
+  });
+
+  // Main gameAction handler
+  socket.on('gameAction', async ({ roomId, action, data, playerName }) => {
+    const gameState = await getGameState(roomId);
+    if (!gameState) return;
+    const isHost = gameState.players.find(p => p.name === playerName)?.isHost;
+
+    switch (action) {
+      case 'switchDayNight':
+        if (!isHost) return;
+        gameState.isDay = data.isDay;
+        await updateGameState(roomId, gameState);
+        io.to(roomId).emit('gameStateUpdate', gameState);
+        break;
+
+      case 'updateCount':
+        if (!isHost) return;
+        if ([
+          'party', 'scandal', 'closeKnot', 'vote'
+        ].includes(data.countType)) {
+          const key = data.countType + 'Count';
+          gameState[key] += data.delta;
+          if (gameState[key] < 0) gameState[key] = 0;
+          await updateGameState(roomId, gameState);
+          io.to(roomId).emit('gameStateUpdate', gameState);
+        }
+        break;
+
+      case 'restartGame':
+        if (!isHost) return;
+        await broadcastUIMessage(roomId, 'The game restarts!', 5000);
+        setTimeout(() => resetGameState(roomId), 5000);
+        break;
+
+      case 'takeLoveHateAction':
+        if (!isHost) return;
+        await broadcastUIMessage(roomId, 'Host and helpers can do their love or hate action now!', 10000);
+        break;
+
+      case 'resetLoveHateCount':
+        if (!isHost) return;
+        await broadcastUIMessage(roomId, 'The action count is reset!', 5000);
+        gameState.loveCount = 0;
+        gameState.hateCount = 0;
+        await updateGameState(roomId, gameState);
+        io.to(roomId).emit('gameStateUpdate', gameState);
+        break;
+
+      case 'resetVote':
+        if (!isHost) return;
+        await broadcastUIMessage(roomId, 'Every player can vote now!', 10000);
+        break;
+
+      case 'vote':
+        if (!canPlayerVote(gameState, playerName)) return;
+        gameState.voteCount += 1;
+        markVoteUsed(gameState, playerName);
+        await updateGameState(roomId, gameState);
+        io.to(roomId).emit('gameStateUpdate', gameState);
+        break;
+
+      case 'playLoveHate':
+        if (!canPlayerLoveHate(gameState, playerName, data.type)) return;
+        if (data.type === 'love') gameState.loveCount += 1;
+        if (data.type === 'hate') gameState.hateCount += 1;
+        markLoveHateUsed(gameState, playerName, data.type);
+        await updateGameState(roomId, gameState);
+        io.to(roomId).emit('gameStateUpdate', gameState);
+        break;
+
+      case 'useSkill':
+        if (!canPlayerUseSkill(gameState, playerName, data.skill)) return;
+        applySkillEffect(gameState, playerName, data.skill, data.extraData);
+        markSkillUsed(gameState, playerName, data.skill);
+        if (data.skill === 'findAbby') {
+          await broadcastUIMessage(roomId, 'Michael thinks he has found Abby now!', 5000);
+        }
+        await updateGameState(roomId, gameState);
+        io.to(roomId).emit('gameStateUpdate', gameState);
+        break;
+
+      case 'theChosenOne':
+        if (playerName !== 'Ker') return;
+        await broadcastUIMessage(roomId, `Ker swap ${data.oldHelper} helper to ${data.newHelper} as new helper!`, 10000);
+        // Optionally update helpers in gameState if you track them
+        break;
     }
   });
 

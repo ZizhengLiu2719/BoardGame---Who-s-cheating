@@ -80,7 +80,32 @@
       <a href="character.html" class="ghibli-btn"><span>Character Introduction</span></a>
       <a href="hosting.html" class="ghibli-btn"><span>Host a Game</span></a>
       <a href="joining.html" class="ghibli-btn"><span>Join a Game</span></a>
+      <a href="start.html" class="ghibli-btn" style="background: linear-gradient(100deg, #e2c391 80%, #bfa16a 100%); color: #fffbe7; border-color: #7a5a2f;" onclick="openTestRoom(event)"><span>Test Room</span></a>
     </div>
   </div>
+  <script>
+    function openTestRoom(event) {
+      event.preventDefault();
+      
+      // Test room configuration
+      const testRoomId = 'TEST123';
+      const testPassword = 'test123';
+      const testRoomName = 'Test Room';
+      const testPlayers = [
+        'Test Player 1',
+        'Test Player 2',
+        'Test Player 3',
+        'Test Player 4',
+        'Test Player 5',
+        'Test Player 6'
+      ];
+
+      // Open 6 tabs with different test players
+      testPlayers.forEach((playerName, index) => {
+        const url = `start.html?roomId=${testRoomId}&password=${testPassword}&name=${encodeURIComponent(playerName)}&roomname=${encodeURIComponent(testRoomName)}${index === 0 ? '&host=1' : ''}`;
+        window.open(url, `testPlayer${index + 1}`);
+      });
+    }
+  </script>
 </body>
 </html>
