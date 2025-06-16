@@ -9,28 +9,18 @@
     @import url('https://fonts.googleapis.com/css2?family=Gochi+Hand&display=swap');
     body {
       margin: 0; padding: 0;
-      font-family: 'Gochi Hand', 'Segoe Print', 'Comic Sans MS', Arial, cursive;
-      background: radial-gradient(ellipse at 60% 40%, #2d1c0b 60%, #23202a 100%),
-                  linear-gradient(120deg, #23202a 0%, #2d1c0b 30%, #22304a 80%, #1a2233 100%);
-      color: #5a4327;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #1a1a2e;
+      color: #e2e2e2;
       min-height: 100vh;
-      transition: background 0.7s;
-      position: relative;
-      overflow-x: hidden;
-    }
-    body:before {
-      content: '';
-      position: fixed;
-      left: 0; top: 0; width: 100vw; height: 100vh;
-      pointer-events: none;
-      z-index: 0;
-      background: radial-gradient(ellipse at 50% 60%, rgba(255,255,220,0.08) 0%, rgba(0,0,0,0.45) 100%);
-      mix-blend-mode: multiply;
+      transition: background 0.5s ease;
     }
     body.day-mode {
-      background: radial-gradient(ellipse at 60% 40%, #fffbe7 60%, #ffe7b2 100%),
-                  linear-gradient(120deg, #fffbe7 0%, #ffe7b2 40%, #ffdca8 80%, #ffe2c3 100%);
-      color: #a07c4f;
+      background: linear-gradient(135deg, #f8f4e3 0%, #e8d5b5 100%);
+      color: #2c2c2c;
+    }
+    body.night-mode {
+      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
     }
     .container {
       display: flex;
@@ -229,41 +219,37 @@
     }
     .role-card {
       position: absolute;
-      width: 90px; height: 130px;
-      border-radius: 18px;
-      box-shadow: 0 8px 32px 0 rgba(90, 67, 39, 0.18);
-      border: 4px solid #e2c391;
+      width: 90px; height: 135px;
+      border-radius: 12px;
+      box-shadow: 0 6px 24px rgba(0, 0, 0, 0.15);
+      border: 2px solid #e2c391;
       background: #fffbe7;
       object-fit: cover;
-      pointer-events: auto;
-      transition: transform 0.2s, box-shadow 0.2s;
-      user-select: none;
-      filter: drop-shadow(0 2px 8px #23202a44);
+      transition: all 0.3s ease;
     }
     .role-card.me {
-      box-shadow: 0 0 0 8px #bfa16a99, 0 8px 32px 0 rgba(90, 67, 39, 0.18);
-      border: 4.5px solid #7a5a2f;
-      z-index: 10;
+      border: 3px solid #7a5a2f;
+      box-shadow: 0 0 0 4px rgba(191, 161, 106, 0.3);
+    }
+    .role-card.me.night-mode {
+      border-color: #7bb0e6;
+      box-shadow: 0 0 0 4px rgba(123, 176, 230, 0.3);
     }
     .player-name-label {
       position: absolute;
-      left: 50%;
-      top: 50%;
-      transform: translate(-50%, -50%);
-      font-size: 1.13rem;
+      padding: 6px 12px;
+      background: rgba(40, 30, 20, 0.85);
       color: #e2c391;
-      background: rgba(40,30,20,0.82);
-      border-radius: 10px;
-      border: 2px solid #7bb0e6;
-      padding: 6px 18px;
-      white-space: nowrap;
-      box-shadow: 0 2px 8px 0 #7bb0e644, 0 0 8px 0 #23202a99;
-      pointer-events: none;
-      font-family: 'Gochi Hand', 'Caveat', 'Segoe Print', 'Comic Sans MS', cursive;
-      font-style: italic;
+      border-radius: 6px;
+      font-size: 0.9rem;
       font-weight: 500;
-      letter-spacing: 1px;
-      text-shadow: 0 1px 4px #23202a99;
+      white-space: nowrap;
+      pointer-events: none;
+      transition: all 0.3s ease;
+    }
+    .player-name-label.night-mode {
+      background: rgba(26, 26, 46, 0.85);
+      color: #7bb0e6;
     }
     .skill-btn {
       width: auto;
@@ -293,6 +279,105 @@
       .center-panel { min-width: 320px; }
       .circle-table-container, .role-cards-circle { width: 98vw; height: 98vw; min-width: 200px; min-height: 200px; }
       .circle-table { width: 60vw; height: 60vw; min-width: 200px; min-height: 200px; }
+    }
+    .game-container {
+      position: relative;
+      width: 100vw;
+      height: 100vh;
+      overflow: hidden;
+    }
+    .table {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 480px;
+      height: 480px;
+      background: rgba(255, 251, 231, 0.95);
+      border-radius: 50%;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+      border: 3px solid #e2c391;
+      transition: all 0.3s ease;
+    }
+    .table.night-mode {
+      background: rgba(40, 40, 60, 0.95);
+      border-color: #7bb0e6;
+      box-shadow: 0 8px 32px rgba(123, 176, 230, 0.2);
+    }
+    .host-controls {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      z-index: 100;
+    }
+    .host-button {
+      padding: 10px 20px;
+      border: none;
+      border-radius: 8px;
+      background: rgba(255, 251, 231, 0.9);
+      color: #2c2c2c;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+    .host-button:hover {
+      background: #e2c391;
+      transform: translateY(-2px);
+    }
+    .host-button.night-mode {
+      background: rgba(40, 40, 60, 0.9);
+      color: #e2e2e2;
+    }
+    .count-controls {
+      position: fixed;
+      left: 20px;
+      top: 50%;
+      transform: translateY(-50%);
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+      z-index: 100;
+    }
+    .count-button {
+      padding: 8px 16px;
+      border: none;
+      border-radius: 6px;
+      background: rgba(255, 251, 231, 0.9);
+      color: #2c2c2c;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+    .count-button:hover {
+      background: #e2c391;
+      transform: translateY(-2px);
+    }
+    .count-button.night-mode {
+      background: rgba(40, 40, 60, 0.9);
+      color: #e2e2e2;
+    }
+    .ui-message {
+      position: fixed;
+      top: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      padding: 12px 24px;
+      background: rgba(255, 251, 231, 0.95);
+      color: #2c2c2c;
+      border-radius: 8px;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+      font-weight: 500;
+      z-index: 1000;
+      transition: all 0.3s ease;
+    }
+    .ui-message.night-mode {
+      background: rgba(40, 40, 60, 0.95);
+      color: #e2e2e2;
     }
   </style>
   <script src="/socket.io/socket.io.js"></script>
@@ -622,21 +707,91 @@
     socket.on('gameStateUpdate', (newGameState) => {
       console.log('[gameStateUpdate]', newGameState);
       gameState = newGameState;
+      
+      // Update UI based on game state
       if (gameState.players) {
         positionCardsInCircle(gameState.players);
         updateHostOnlyButtons();
         renderSkillButtons();
       }
+      
+      // Update day/night mode
+      document.body.classList.toggle('day-mode', gameState.isDay);
+      document.body.classList.toggle('night-mode', !gameState.isDay);
+      document.querySelector('.table').classList.toggle('day-mode', gameState.isDay);
+      document.querySelector('.table').classList.toggle('night-mode', !gameState.isDay);
+      
+      // Update counts
+      document.getElementById('partyCount').textContent = gameState.partyCount;
+      document.getElementById('scandalScore').textContent = gameState.scandalScore;
+      document.getElementById('closeKnotScore').textContent = gameState.closeKnotScore;
+      document.getElementById('voteCount').textContent = gameState.voteCount;
+      document.getElementById('loveCount').textContent = gameState.loveCount;
+      document.getElementById('hateCount').textContent = gameState.hateCount;
+      
+      // Update button states
+      updateButtonStates();
     });
 
-    // Handle initial game state
-    socket.on('initialGameState', (state) => {
-      console.log('[initialGameState]', state);
-      gameState = state;
-      if (gameState.players) {
-        positionCardsInCircle(gameState.players);
-        updateHostOnlyButtons();
-        renderSkillButtons();
+    // Update button states based on game state
+    function updateButtonStates() {
+      if (!gameState) return;
+      
+      const me = gameState.players.find(p => p.id === socket.id);
+      if (!me) return;
+      
+      // Update love/hate buttons
+      const loveBtn = document.getElementById('loveBtn');
+      const hateBtn = document.getElementById('hateBtn');
+      if (loveBtn && hateBtn) {
+        const canLoveHate = gameState.loveHateWindow && !gameState.usedActions.love[me.name] && !gameState.usedActions.hate[me.name];
+        loveBtn.disabled = !canLoveHate;
+        hateBtn.disabled = !canLoveHate;
+      }
+      
+      // Update vote buttons
+      const voteYesBtn = document.getElementById('voteYesBtn');
+      const voteNoBtn = document.getElementById('voteNoBtn');
+      const voteSubmitBtn = document.getElementById('voteSubmitBtn');
+      if (voteYesBtn && voteNoBtn && voteSubmitBtn) {
+        const canVote = gameState.voteWindow && !gameState.usedActions.vote[me.name];
+        voteYesBtn.disabled = !canVote;
+        voteNoBtn.disabled = !canVote;
+        voteSubmitBtn.disabled = !canVote;
+      }
+      
+      // Update skill buttons
+      const skillButtons = document.querySelectorAll('.skill-btn');
+      skillButtons.forEach(btn => {
+        const skill = btn.getAttribute('data-skill');
+        if (skill === 'molest') {
+          btn.disabled = gameState.isDay || gameState.usedActions.skills[me.name]?.[skill];
+        } else if (skill === 'mislead' || skill === 'protectingParty') {
+          btn.disabled = !gameState.windKennediSkillWindow || gameState.usedActions.skills[me.name]?.[skill];
+        } else {
+          btn.disabled = gameState.usedActions.skills[me.name]?.[skill];
+        }
+      });
+    }
+
+    // Handle UI messages
+    socket.on('uiMessage', (message) => {
+      if (!message) {
+        document.getElementById('uiMessage').style.display = 'none';
+        return;
+      }
+      
+      const uiMessage = document.getElementById('uiMessage');
+      uiMessage.textContent = message.text;
+      uiMessage.style.display = 'block';
+      
+      if (message.expiresAt) {
+        const duration = message.expiresAt - Date.now();
+        if (duration > 0) {
+          setTimeout(() => {
+            uiMessage.style.display = 'none';
+          }, duration);
+        }
       }
     });
 
@@ -1022,6 +1177,72 @@
       }
     `;
     document.head.appendChild(style);
+
+    // Host controls
+    function initializeHostControls() {
+      if (!isHost) return;
+
+      const hostControls = document.createElement('div');
+      hostControls.className = 'host-controls';
+      hostControls.innerHTML = `
+        <button class="host-button" onclick="toggleDayNight()">Toggle Day/Night</button>
+        <button class="host-button" onclick="restartGame()">Restart Game</button>
+        <button class="host-button" onclick="takeLoveHateAction()">Take Action</button>
+        <button class="host-button" onclick="resetLoveHateCount()">Reset Count</button>
+        <button class="host-button" onclick="resetVote()">Reset Vote</button>
+      `;
+      document.body.appendChild(hostControls);
+
+      const countControls = document.createElement('div');
+      countControls.className = 'count-controls';
+      countControls.innerHTML = `
+        <button class="count-button" onclick="updateCount('party', 1)">Party +1</button>
+        <button class="count-button" onclick="updateCount('party', -1)">Party -1</button>
+        <button class="count-button" onclick="updateCount('scandal', 1)">Scandal +1</button>
+        <button class="count-button" onclick="updateCount('scandal', -1)">Scandal -1</button>
+        <button class="count-button" onclick="updateCount('closeKnot', 1)">Close-Knot +1</button>
+        <button class="count-button" onclick="updateCount('closeKnot', -1)">Close-Knot -1</button>
+        <button class="count-button" onclick="updateCount('vote', 1)">Vote +1</button>
+        <button class="count-button" onclick="updateCount('vote', -1)">Vote -1</button>
+      `;
+      document.body.appendChild(countControls);
+    }
+
+    function toggleDayNight() {
+      if (!isHost) return;
+      socket.emit('gameAction', {
+        action: 'switchDayNight',
+        data: { isDay: !gameState.isDay }
+      });
+    }
+
+    function restartGame() {
+      if (!isHost) return;
+      socket.emit('gameAction', { action: 'restartGame' });
+    }
+
+    function takeLoveHateAction() {
+      if (!isHost) return;
+      socket.emit('gameAction', { action: 'takeLoveHateAction' });
+    }
+
+    function resetLoveHateCount() {
+      if (!isHost) return;
+      socket.emit('gameAction', { action: 'resetLoveHateCount' });
+    }
+
+    function resetVote() {
+      if (!isHost) return;
+      socket.emit('gameAction', { action: 'resetVote' });
+    }
+
+    function updateCount(type, delta) {
+      if (!isHost) return;
+      socket.emit('gameAction', {
+        action: 'updateCount',
+        data: { countType: type, delta }
+      });
+    }
   </script>
 </body>
 </html>
