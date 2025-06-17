@@ -1670,6 +1670,8 @@
       }
       
       createVoiceChatUI() {
+        console.log('[VoiceChat] Creating voice chat UI...');
+        
         const voiceChatContainer = document.createElement('div');
         voiceChatContainer.className = 'voice-chat-container';
         voiceChatContainer.innerHTML = `
@@ -1687,9 +1689,18 @@
         `;
         
         document.body.appendChild(voiceChatContainer);
+        console.log('[VoiceChat] Voice chat UI created and added to DOM');
         
         const muteBtn = document.getElementById('muteButton');
-        muteBtn.addEventListener('click', () => this.toggleMute());
+        if (muteBtn) {
+          console.log('[VoiceChat] Mute button found, adding click listener');
+          muteBtn.addEventListener('click', () => {
+            console.log('[VoiceChat] Mute button clicked!');
+            this.toggleMute();
+          });
+        } else {
+          console.error('[VoiceChat] Mute button not found!');
+        }
         
         // Add Font Awesome for icons if not already present
         if (!document.querySelector('link[href*="font-awesome"]')) {
@@ -1697,29 +1708,47 @@
           fontAwesome.rel = 'stylesheet';
           fontAwesome.href = 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css';
           document.head.appendChild(fontAwesome);
+          console.log('[VoiceChat] Font Awesome added');
         }
+        
+        // Make sure the container is visible
+        voiceChatContainer.style.display = 'block';
+        voiceChatContainer.style.visibility = 'visible';
+        voiceChatContainer.style.opacity = '1';
+        
+        console.log('[VoiceChat] Voice chat UI setup complete');
       }
       
       toggleMute() {
+        console.log('[VoiceChat] toggleMute called, current state:', this.isMuted);
+        
         this.isMuted = !this.isMuted;
+        console.log('[VoiceChat] New mute state:', this.isMuted);
         
         // Update local stream
         if (this.localStream) {
           this.localStream.getTracks().forEach(track => {
             track.enabled = !this.isMuted;
+            console.log('[VoiceChat] Audio track enabled:', !this.isMuted);
           });
+        } else {
+          console.warn('[VoiceChat] No local stream available');
         }
         
         // Update button appearance
         const muteBtn = document.getElementById('muteButton');
-        const btnText = muteBtn.querySelector('.btn-text');
-        
-        if (this.isMuted) {
-          muteBtn.className = 'voice-btn mute';
-          muteBtn.innerHTML = '<i class="fas fa-microphone-slash"></i><span class="btn-text">Muted</span>';
+        if (muteBtn) {
+          if (this.isMuted) {
+            muteBtn.className = 'voice-btn mute';
+            muteBtn.innerHTML = '<i class="fas fa-microphone-slash"></i><span class="btn-text">Muted</span>';
+            console.log('[VoiceChat] Button updated to muted state');
+          } else {
+            muteBtn.className = 'voice-btn unmute';
+            muteBtn.innerHTML = '<i class="fas fa-microphone"></i><span class="btn-text">Speaking</span>';
+            console.log('[VoiceChat] Button updated to speaking state');
+          }
         } else {
-          muteBtn.className = 'voice-btn unmute';
-          muteBtn.innerHTML = '<i class="fas fa-microphone"></i><span class="btn-text">Speaking</span>';
+          console.error('[VoiceChat] Mute button not found for update');
         }
         
         // Notify server
@@ -1728,6 +1757,7 @@
           playerName: this.playerName, 
           isMuted: this.isMuted 
         });
+        console.log('[VoiceChat] Mute state sent to server');
         
         // Update status
         this.updateStatus(this.isMuted ? 'Muted' : 'Speaking');
@@ -2039,6 +2069,36 @@
     // Voice chat instance
     let voiceChat = null;
 
+    // Initialize voice chat immediately for testing (you can remove this later)
+    function initializeVoiceChatNow() {
+      if (!voiceChat && roomId && myName) {
+        console.log('[VoiceChat] Initializing voice chat immediately...');
+        voiceChat = new VoiceChat(roomId, myName);
+      }
+    }
+
+    // Add a manual trigger button for testing (you can remove this later)
+    function addVoiceChatTestButton() {
+      const testButton = document.createElement('button');
+      testButton.textContent = '🎤 Enable Voice Chat';
+      testButton.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        z-index: 9999;
+        padding: 10px 15px;
+        background: #007bff;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 14px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+      `;
+      testButton.onclick = initializeVoiceChatNow;
+      document.body.appendChild(testButton);
+    }
+
     // Initialize voice chat when game starts
     socket.on('startGame', ({ gameState }) => {
       // Initialize voice chat after game starts
@@ -2048,6 +2108,11 @@
         }
       }, 1000);
     });
+
+    // Add test button immediately for testing
+    setTimeout(() => {
+      addVoiceChatTestButton();
+    }, 2000);
 
     // Cleanup on disconnect
     window.addEventListener('beforeunload', () => {
