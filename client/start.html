@@ -511,6 +511,13 @@
       const radius = 200;
       const centerX = 240;
       const centerY = 240;
+      
+      // Find the current player
+      const me = players.find(p => p.id === socket.id);
+      if (!me) return;
+      
+      console.log('[Role Visibility Debug] Current player:', me.name, 'Role:', me.role);
+      
       players.forEach((player, index) => {
         const angle = (index * 2 * Math.PI) / players.length;
         const x = centerX + radius * Math.cos(angle);
@@ -519,13 +526,44 @@
         cardContainer.style.cssText = `position: absolute; left: ${x}px; top: ${y}px; transform: translate(-50%, -50%); width: 80px; height: 120px; transition: all 0.3s ease;`;
         const roleCard = document.createElement('img');
         roleCard.className = 'role-card';
+        
+        // Determine if this card should be visible based on role-based rules
+        let shouldShowCard = false;
+        
         if (player.id === socket.id) {
-          roleCard.classList.add('me');
-          roleCard.src = `/imgs/${player.role ? player.role.toLowerCase() : 'backSide'}.png`;
+          // Everyone can see their own card
+          shouldShowCard = true;
         } else {
-          // Show backSide for other players
+          // Role-based visibility rules
+          const myRole = me.role ? me.role.toLowerCase() : '';
+          const playerRole = player.role ? player.role.toLowerCase() : '';
+          
+          if (myRole === 'abby') {
+            // Abby can see Michael and Wind's cards only
+            shouldShowCard = (playerRole === 'michael' || playerRole === 'wind');
+          } else if (myRole === 'michael' || myRole === 'wind') {
+            // Michael and Wind can see each other's cards
+            shouldShowCard = (playerRole === 'michael' || playerRole === 'wind');
+          } else {
+            // All other roles (Kennedi, Ker, Jack, Kiko, Knox, Nash) can only see their own card
+            shouldShowCard = false;
+          }
+        }
+        
+        console.log(`[Role Visibility Debug] ${me.name} (${me.role}) can see ${player.name} (${player.role}): ${shouldShowCard}`);
+        
+        // Set the card image based on visibility
+        if (shouldShowCard && player.role) {
+          roleCard.src = `/imgs/${player.role.toLowerCase()}.png`;
+        } else {
           roleCard.src = '/imgs/backSide.png';
         }
+        
+        // Add 'me' class for styling if it's the current player's card
+        if (player.id === socket.id) {
+          roleCard.classList.add('me');
+        }
+        
         const nameLabel = document.createElement('div');
         nameLabel.className = 'player-name-label';
         nameLabel.textContent = player.name;
