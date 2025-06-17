@@ -287,7 +287,7 @@ io.on('connection', (socket) => {
     }
 
     const players = JSON.parse(room.players || '[]');
-    if (players.length >= room.maxPlayers) {
+    if (players.length >= parseInt(room.maxPlayers)) {
       console.log('[joinRoom] Room is full:', roomId);
       return callback({ success: false, message: 'Room is full.' });
     }
