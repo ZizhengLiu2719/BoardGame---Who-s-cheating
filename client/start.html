@@ -910,61 +910,83 @@
     });
 
     function renderRoleCards() {
-      if (!gameState || !gameState.players) return;
       const container = document.getElementById('roleCardsCircle');
       container.innerHTML = '';
-      const players = gameState.players;
-      const n = players.length;
+      const n = playerNames.length;
       const radius = 240;
-      const me = players.find(p => p.id === socket.id);
-      if (!me) return;
-      const myRoleLower = me.role ? me.role.toLowerCase() : '';
+      
+      // Role info for tooltip
+      const roleInfo = {
+        michael: {name:'Michael', team:'Cheater', power:'Can see Wind\'s card. Can guess Abby for instant win'},
+        wind: {name:'Wind', team:'Cheater', power:'Can see Michael\'s card. Molest: +2 Scandal; Mislead: flip Love→Hate'},
+        jack: {name:'Jack', team:'Cheater', power:'Hidden from everyone except self'},
+        abby: {name:'Abby', team:'Keeper', power:'Can see Michael and Wind'},
+        kennedi: {name:'Kennedi', team:'Keeper', power:'Can see own card. All Helpers count as Love'},
+        ker: {name:'Ker', team:'Keeper', power:'Can see own card. Can swap one Helper'},
+        kiko: {name:'Kiko', team:'Keeper (Pet)', power:'No special power'},
+        knox: {name:'Knox', team:'Keeper (Pet)', power:'No special power'},
+        nash: {name:'Nash', team:'Keeper (Pet)', power:'No special power'}
+      };
+
+      // Lowercase role for comparison
+      const myRoleLower = myRole ? myRole.toLowerCase() : '';
+      
       // Calculate angles for players with equal spacing
       const angles = Array.from({length: n}, (_, i) => {
         return (Math.PI / 2) + (i * (2 * Math.PI / n));
       });
-      players.forEach((player, i) => {
+
+      playerNames.forEach((name, i) => {
         const angle = angles[i];
         const x = radius * Math.cos(angle);
         const y = radius * Math.sin(angle);
+        
         const card = document.createElement('img');
-        card.className = 'role-card' + (player.id === socket.id ? ' me' : '');
+        card.className = 'role-card' + (i === myIndex ? ' me' : '');
         card.style.left = `calc(50% + ${x}px - 45px)`;
         card.style.top = `calc(50% + ${y}px - 67.5px)`;
+        
         // Show card face-up based on role-specific rules
-        const role = player.role ? player.role.toLowerCase() : '';
+        const role = shuffledRoles[i];
+        const roleLower = role ? role.toLowerCase() : '';
         let shouldShowCard = false;
-        if (player.id === socket.id) {
+
+        if (i === myIndex) {
+          // Everyone can see their own card
           shouldShowCard = true;
         } else if (myRoleLower === 'abby') {
-          shouldShowCard = (role === 'michael' || role === 'wind');
+          // Abby can see Michael and Wind's cards only
+          shouldShowCard = (roleLower === 'michael' || roleLower === 'wind');
         } else if (myRoleLower === 'michael' || myRoleLower === 'wind') {
-          shouldShowCard = (role === 'michael' || role === 'wind');
+          // Michael and Wind can see each other's cards
+          shouldShowCard = (roleLower === 'michael' || roleLower === 'wind');
         } else {
+          // All other roles (Jack, Kennedi, Ker, Kiko, Knox, Nash) can only see their own card
           shouldShowCard = false;
         }
+
         card.src = shouldShowCard ? roleImages[role] : backsideImg;
         card.alt = shouldShowCard ? role : 'Hidden';
         container.appendChild(card);
+
         // Add role intro tooltip for myself only
-        if (player.id === socket.id) {
+        if (i === myIndex) {
           const tooltip = document.createElement('div');
           tooltip.className = 'role-intro-tooltip';
           const info = roleInfo[myRoleLower];
-          if (info) {
-            tooltip.innerHTML = `<div class='role-title'>${info.name} (${info.team})</div><div><b>Power:</b> ${info.power}</div>`;
-            card.addEventListener('mouseenter',()=>{tooltip.classList.add('active');});
-            card.addEventListener('mouseleave',()=>{tooltip.classList.remove('active');});
-            container.appendChild(tooltip);
-          }
+          tooltip.innerHTML = `<div class='role-title'>${info.name} (${info.team})</div><div><b>Power:</b> ${info.power}</div>`;
+          card.addEventListener('mouseenter',()=>{tooltip.classList.add('active');});
+          card.addEventListener('mouseleave',()=>{tooltip.classList.remove('active');});
+          container.appendChild(tooltip);
         }
+
         // Add player name label with adjusted positioning
         const nameLabel = document.createElement('div');
         nameLabel.className = 'player-name-label';
         const nameOffsetY = y > 0 ? 100 : -100;
         nameLabel.style.left = `calc(50% + ${x}px)`;
         nameLabel.style.top = `calc(50% + ${y + nameOffsetY}px)`;
-        nameLabel.textContent = player.name;
+        nameLabel.textContent = name;
         container.appendChild(nameLabel);
       });
     }
