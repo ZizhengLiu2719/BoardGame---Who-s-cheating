@@ -258,8 +258,9 @@ io.on('connection', (socket) => {
       console.log('[createRoom] Room already exists:', roomId);
       return callback({ success: false, message: 'Room already exists.' });
     }
-    const players = [{ id: socket.id, name: hostName }];
-    const readyStates = { [hostName]: false };
+    // Don't add host to player list yet - they will join like any other player
+    const players = [];
+    const readyStates = {};
     await redis.hmset(`room:${roomId}`,
       'password', password,
       'maxPlayers', maxPlayers,

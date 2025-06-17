@@ -299,7 +299,7 @@
     // Listen for startGame event
     socket.on('startGame', () => {
       // Redirect to start.html with roomId, name, and password
-      const url = `start.html?roomId=${encodeURIComponent(roomId)}&name=${encodeURIComponent(myName)}&password=${encodeURIComponent(roomPassword)}`;
+      const url = `start.html?roomId=${encodeURIComponent(roomId)}&name=${encodeURIComponent(myName)}&password=${encodeURIComponent(roomPassword)}${isHost ? '&createRoom=1' : ''}`;
       window.location.href = url;
     });
   </script>
