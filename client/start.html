@@ -639,26 +639,13 @@
         socket.emit('loveHateAction', { type: 'hate', count: tempHateCount });
       }
     });
-    document.getElementById('voteYesBtn').addEventListener('click', () => {
-      if (!voteWindow) return;
-      document.getElementById('voteYesBtn').disabled = true;
-      document.getElementById('voteNoBtn').disabled = true;
-      document.getElementById('voteSubmitBtn').disabled = true;
-      // Implement vote logic here
-    });
-    document.getElementById('voteNoBtn').addEventListener('click', () => {
-      if (!voteWindow) return;
-      document.getElementById('voteYesBtn').disabled = true;
-      document.getElementById('voteNoBtn').disabled = true;
-      document.getElementById('voteSubmitBtn').disabled = true;
-      // Implement vote logic here
-    });
     document.getElementById('voteSubmitBtn').addEventListener('click', () => {
       if (!voteWindow) return;
       document.getElementById('voteYesBtn').disabled = true;
       document.getElementById('voteNoBtn').disabled = true;
       document.getElementById('voteSubmitBtn').disabled = true;
-      // Implement vote logic here
+      // Emit vote action to server
+      socket.emit('gameAction', { roomId, action: 'vote', playerName: myName });
     });
 
     // Handle skill buttons
