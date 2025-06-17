@@ -511,6 +511,12 @@
       const radius = 200;
       const centerX = 240;
       const centerY = 240;
+      
+      // Find current player's role
+      const currentPlayer = players.find(p => p.id === socket.id);
+      const myRole = currentPlayer ? currentPlayer.role : null;
+      const myRoleLower = myRole ? myRole.toLowerCase() : '';
+      
       players.forEach((player, index) => {
         const angle = (index * 2 * Math.PI) / players.length;
         const x = centerX + radius * Math.cos(angle);
@@ -519,13 +525,33 @@
         cardContainer.style.cssText = `position: absolute; left: ${x}px; top: ${y}px; transform: translate(-50%, -50%); width: 80px; height: 120px; transition: all 0.3s ease;`;
         const roleCard = document.createElement('img');
         roleCard.className = 'role-card';
+        
+        // Role visibility logic
+        let shouldShowCard = false;
+        const playerRoleLower = player.role ? player.role.toLowerCase() : '';
+        
         if (player.id === socket.id) {
+          // Everyone can see their own card
+          shouldShowCard = true;
           roleCard.classList.add('me');
+        } else if (myRoleLower === 'abby') {
+          // Abby can see Michael and Wind's cards only
+          shouldShowCard = (playerRoleLower === 'michael' || playerRoleLower === 'wind');
+        } else if (myRoleLower === 'michael' || myRoleLower === 'wind') {
+          // Michael and Wind can see each other's cards
+          shouldShowCard = (playerRoleLower === 'michael' || playerRoleLower === 'wind');
+        } else {
+          // All other roles (Jack, Kennedi, Ker, Kiko, Knox, Nash) can only see their own card
+          shouldShowCard = false;
+        }
+        
+        // Set card image based on visibility
+        if (shouldShowCard) {
           roleCard.src = `/imgs/${player.role ? player.role.toLowerCase() : 'backSide'}.png`;
         } else {
-          // Show backSide for other players
           roleCard.src = '/imgs/backSide.png';
         }
+        
         const nameLabel = document.createElement('div');
         nameLabel.className = 'player-name-label';
         nameLabel.textContent = player.name;
