@@ -968,6 +968,7 @@
       hateCount.textContent = hate;
     });
     socket.on('gameStateUpdate', (newGameState) => {
+      gameState = newGameState;
       console.log('[gameStateUpdate]', newGameState);
       
       // Check if this is a restart (all scores are 0 and isDay is false)
@@ -992,8 +993,6 @@
           resetAllButtonStates();
         }
       }
-      
-      gameState = newGameState;
       
       // Update score displays
       if (gameState.partyCount !== undefined) {

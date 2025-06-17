@@ -64,13 +64,15 @@ function distributeRoles(playerCount) {
 
 // Game state management
 async function initializeGameState(roomId, players) {
+  const room = await redis.hgetall(`room:${roomId}`);
+  const hostName = room && room.hostName ? room.hostName : (players[0]?.name || '');
   const gameState = {
     players: players.map(p => ({
       id: p.id,
       name: p.name,
       role: null,  // Will be assigned during role distribution
       position: null,  // Will be assigned during setup
-      isHost: p.name === players[0].name
+      isHost: p.name === hostName
     })),
     roles: [],  // Will be populated during role distribution
     
@@ -136,13 +138,14 @@ async function resetGameState(roomId) {
   // Redistribute roles randomly
   const roles = distributeRoles(players.length);
   
+  const hostName = room && room.hostName ? room.hostName : (players[0]?.name || '');
   const gameState = {
     players: players.map((p, index) => ({
       id: p.id,
       name: p.name,
       role: roles[index], // Assign new random role
       position: index,
-      isHost: p.name === players[0].name
+      isHost: p.name === hostName
     })),
     roles: roles, // Store the new role distribution
     isDay: false,
@@ -273,7 +276,8 @@ io.on('connection', (socket) => {
       'maxPlayers', maxPlayers,
       'roomName', roomName || '',
       'players', JSON.stringify(players),
-      'readyStates', JSON.stringify(readyStates)
+      'readyStates', JSON.stringify(readyStates),
+      'hostName', hostName // Store host name for later host assignment
     );
     socket.join(roomId);
     callback({ success: true });
@@ -380,6 +384,7 @@ io.on('connection', (socket) => {
     
     if (allReady) {
       // Initialize game state
+      const hostName = room && room.hostName ? room.hostName : (players[0]?.name || '');
       const gameState = await initializeGameState(roomId, players);
       
       // Emit game start with initial state
@@ -394,6 +399,7 @@ io.on('connection', (socket) => {
       players.forEach((player, index) => {
         gameState.players[index].role = roles[index];
         gameState.players[index].position = index;
+        gameState.players[index].isHost = player.name === hostName;
       });
       
       await updateGameState(roomId, gameState);
