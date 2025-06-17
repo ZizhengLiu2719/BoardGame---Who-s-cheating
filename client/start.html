@@ -601,6 +601,7 @@
 
     // --- Listen for UI Messages to Control Button States ---
     socket.on('uiMessage', (message) => {
+      console.log('[uiMessage received]', message);
       if (message) {
         showUIMessage(message.text, 10000);
         if (message.text.includes('Host and helpers can do their action right now')) {
@@ -672,7 +673,7 @@
     if (windSkillBtn) {
       windSkillBtn.addEventListener('click', () => {
         if (!windSkillBtn.disabled && isSkillPhase) {
-          socket.emit('useSkill', { skill: 'mislead' });
+          socket.emit('gameAction', { roomId, action: 'useSkill', data: { skill: 'mislead' }, playerName: myName });
           windSkillBtn.disabled = true;
         }
       });
@@ -681,7 +682,7 @@
     if (kennediSkillBtn) {
       kennediSkillBtn.addEventListener('click', () => {
         if (!kennediSkillBtn.disabled && isSkillPhase) {
-          socket.emit('useSkill', { skill: 'protectingParty' });
+          socket.emit('gameAction', { roomId, action: 'useSkill', data: { skill: 'protectingparty' }, playerName: myName });
           kennediSkillBtn.disabled = true;
         }
       });
@@ -870,7 +871,7 @@
         molestBtn.onclick = function() {
           if (molestBtn.disabled) return;
           molestBtn.disabled = true;
-          socket.emit('useSkill', { skill: 'molest' });
+          socket.emit('gameAction', { roomId, action: 'useSkill', data: { skill: 'molest' }, playerName: myName });
         };
         skillButtonContainer.appendChild(molestBtn);
         // Mislead: only enabled during skill window, one-time
@@ -881,7 +882,7 @@
         misleadBtn.onclick = function() {
           if (misleadBtn.disabled) return;
           misleadBtn.disabled = true;
-          socket.emit('useSkill', { skill: 'mislead' });
+          socket.emit('gameAction', { roomId, action: 'useSkill', data: { skill: 'mislead' }, playerName: myName });
         };
         skillButtonContainer.appendChild(misleadBtn);
         return;
@@ -895,7 +896,7 @@
         abbyBtn.onclick = function() {
           if (abbyBtn.disabled) return;
           abbyBtn.disabled = true;
-          socket.emit('useSkill', { skill: 'findabby' });
+          socket.emit('gameAction', { roomId, action: 'useSkill', data: { skill: 'findabby' }, playerName: myName });
         };
         skillButtonContainer.appendChild(abbyBtn);
         return;
@@ -909,7 +910,7 @@
         protectBtn.onclick = function() {
           if (protectBtn.disabled) return;
           protectBtn.disabled = true;
-          socket.emit('useSkill', { skill: 'protectingparty' });
+          socket.emit('gameAction', { roomId, action: 'useSkill', data: { skill: 'protectingparty' }, playerName: myName });
         };
         skillButtonContainer.appendChild(protectBtn);
         return;
@@ -939,7 +940,7 @@
       document.getElementById('kerSubmit').onclick = function() {
         const helper = document.getElementById('kerHelper').value;
         const nonHelper = document.getElementById('kerNonHelper').value;
-        socket.emit('gameAction', { roomId, action: 'theChosenOne', data: { oldHelper: helper, newHelper: nonHelper }, playerName: me.name });
+        socket.emit('gameAction', { roomId, action: 'theChosenOne', data: { oldHelper: helper, newHelper: nonHelper }, playerName: myName });
         document.body.removeChild(popup);
       };
       document.getElementById('kerCancel').onclick = function() {
@@ -1098,7 +1099,7 @@
       const helperToSwap = document.getElementById('helperToSwap').value;
       const newHelper = document.getElementById('newHelper').value;
       if (helperToSwap && newHelper) {
-        socket.emit('kerSwap', { helperToSwap, newHelper });
+        socket.emit('gameAction', { roomId, action: 'theChosenOne', data: { oldHelper: helperToSwap, newHelper: newHelper }, playerName: myName });
         showUIMessage(`Ker swap ${helperToSwap} helper to ${newHelper} as new helper!`, 10000);
         closeKerDialog();
       }
@@ -1157,26 +1158,27 @@
     // Handle Wind's molest skill
     function handleWindMolest() {
       if (!isSkillPhase) return;
-      socket.emit('updateScandal', 2);
+      socket.emit('gameAction', { roomId, action: 'useSkill', data: { skill: 'molest' }, playerName: myName });
       if (windSkillBtn) windSkillBtn.disabled = true;
     }
 
     // Handle Wind's mislead skill
     function handleWindMislead() {
       if (!isSkillPhase) return;
-      // Implementation for flipping Love to Hate
+      socket.emit('gameAction', { roomId, action: 'useSkill', data: { skill: 'mislead' }, playerName: myName });
       if (windSkillBtn) windSkillBtn.disabled = true;
     }
 
     // Handle Kennedi's protect skill
     function handleKennediProtect() {
       if (!isSkillPhase) return;
-      // Implementation for making all Helpers count as Love
+      socket.emit('gameAction', { roomId, action: 'useSkill', data: { skill: 'protectingparty' }, playerName: myName });
       if (kennediSkillBtn) kennediSkillBtn.disabled = true;
     }
 
     // Handle Michael's find Abby skill
     function handleMichaelFindAbby() {
+      socket.emit('gameAction', { roomId, action: 'useSkill', data: { skill: 'findabby' }, playerName: myName });
       if (michaelSkillBtn) michaelSkillBtn.disabled = true;
     }
 
