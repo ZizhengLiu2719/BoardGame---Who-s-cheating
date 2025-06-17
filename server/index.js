@@ -287,6 +287,12 @@ io.on('connection', (socket) => {
     }
 
     const players = JSON.parse(room.players || '[]');
+    // Prevent duplicate player names
+    const existingPlayer = players.find(p => p.name === playerName);
+    if (existingPlayer) {
+      console.log('[joinRoom] Duplicate player name:', playerName);
+      return callback({ success: false, message: 'Player name already exists in this room.' });
+    }
     if (players.length >= parseInt(room.maxPlayers)) {
       console.log('[joinRoom] Room is full:', roomId);
       return callback({ success: false, message: 'Room is full.' });
