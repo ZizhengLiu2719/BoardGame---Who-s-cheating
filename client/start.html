@@ -379,6 +379,257 @@
       background: rgba(40, 40, 60, 0.95);
       color: #e2e2e2;
     }
+
+    /* Voice Chat Styles */
+    .voice-chat-container {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      z-index: 1000;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+      background: rgba(255, 255, 255, 0.95);
+      padding: 15px;
+      border-radius: 15px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      min-width: 200px;
+    }
+
+    .voice-controls {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .voice-btn {
+      padding: 12px 20px;
+      border: none;
+      border-radius: 25px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      min-width: 120px;
+      justify-content: center;
+    }
+
+    .voice-btn.mute {
+      background: #dc3545;
+      color: white;
+    }
+
+    .voice-btn.mute:hover {
+      background: #c82333;
+      transform: translateY(-2px);
+      box-shadow: 0 6px 16px rgba(220, 53, 69, 0.3);
+    }
+
+    .voice-btn.unmute {
+      background: #28a745;
+      color: white;
+    }
+
+    .voice-btn.unmute:hover {
+      background: #218838;
+      transform: translateY(-2px);
+      box-shadow: 0 6px 16px rgba(40, 167, 69, 0.3);
+    }
+
+    .voice-btn:active {
+      transform: translateY(0);
+    }
+
+    .voice-status {
+      font-size: 12px;
+      color: #666;
+      text-align: center;
+      font-weight: 500;
+    }
+
+    .audio-level {
+      width: 4px;
+      height: 30px;
+      background: #e9ecef;
+      border-radius: 2px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .level-bar {
+      position: absolute;
+      bottom: 0;
+      width: 100%;
+      background: #6c757d;
+      transition: all 0.1s ease;
+      border-radius: 2px;
+    }
+
+    .level-bar.active {
+      background: #28a745;
+      animation: pulse 1s infinite;
+    }
+
+    @keyframes pulse {
+      0% { opacity: 1; }
+      50% { opacity: 0.7; }
+      100% { opacity: 1; }
+    }
+
+    .participants-list {
+      max-height: 150px;
+      overflow-y: auto;
+      width: 100%;
+      margin-top: 10px;
+    }
+
+    .participant {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 5px 10px;
+      border-radius: 8px;
+      font-size: 12px;
+      color: #495057;
+      background: rgba(0, 0, 0, 0.05);
+      margin-bottom: 2px;
+    }
+
+    .participant.me {
+      background: rgba(40, 167, 69, 0.1);
+      color: #28a745;
+      font-weight: 600;
+    }
+
+    .participant i {
+      font-size: 10px;
+      color: #6c757d;
+    }
+
+    .participant.me i {
+      color: #28a745;
+    }
+
+    .mute-indicator {
+      font-size: 10px;
+      color: #6c757d;
+      font-style: italic;
+    }
+
+    .connection-status {
+      margin-left: auto;
+      font-size: 10px;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .connection-status.connected {
+      color: #28a745;
+    }
+
+    .connection-status.connecting {
+      color: #ffc107;
+    }
+
+    .connection-status.disconnected {
+      color: #6c757d;
+    }
+
+    .connection-status.failed {
+      color: #dc3545;
+    }
+
+    .connection-status.unknown {
+      color: #6c757d;
+    }
+
+    .connection-status i {
+      font-size: 8px;
+    }
+
+    .voice-error {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background: #f8d7da;
+      color: #721c24;
+      padding: 12px 16px;
+      border-radius: 8px;
+      border: 1px solid #f5c6cb;
+      z-index: 1001;
+      max-width: 300px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+
+    .error-message {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 14px;
+    }
+
+    .error-close {
+      background: none;
+      border: none;
+      color: #721c24;
+      cursor: pointer;
+      padding: 2px;
+      border-radius: 3px;
+      margin-left: auto;
+    }
+
+    .error-close:hover {
+      background: rgba(114, 28, 36, 0.1);
+    }
+
+    /* Responsive design */
+    @media (max-width: 768px) {
+      .voice-chat-container {
+        bottom: 10px;
+        right: 10px;
+        left: 10px;
+        min-width: auto;
+      }
+      
+      .voice-controls {
+        flex-direction: column;
+        gap: 8px;
+      }
+      
+      .voice-btn {
+        width: 100%;
+        min-width: auto;
+      }
+    }
+
+    /* Dark mode support */
+    @media (prefers-color-scheme: dark) {
+      .voice-chat-container {
+        background: rgba(33, 37, 41, 0.95);
+        border-color: rgba(255, 255, 255, 0.1);
+      }
+      
+      .voice-status {
+        color: #adb5bd;
+      }
+      
+      .participant {
+        background: rgba(255, 255, 255, 0.05);
+        color: #dee2e6;
+      }
+      
+      .participant.me {
+        background: rgba(40, 167, 69, 0.2);
+      }
+    }
   </style>
   <script src="/socket.io/socket.io.js"></script>
 </head>
@@ -1334,6 +1585,602 @@
         }
       });
     }
+
+    // --- Voice Chat Implementation ---
+    
+    class VoiceChat {
+      constructor(roomId, playerName) {
+        this.roomId = roomId;
+        this.playerName = playerName;
+        this.localStream = null;
+        this.peerConnections = {};
+        this.isMuted = true;
+        this.isInitialized = false;
+        this.audioContext = null;
+        this.analyser = null;
+        this.audioLevelInterval = null;
+        
+        this.init();
+      }
+      
+      async init() {
+        try {
+          // Check if browser supports WebRTC
+          if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+            throw new Error('WebRTC not supported in this browser');
+          }
+          
+          // Check if running on HTTPS (required for getUserMedia)
+          if (location.protocol !== 'https:' && location.hostname !== 'localhost') {
+            throw new Error('Voice chat requires HTTPS (except on localhost)');
+          }
+          
+          // Get microphone access
+          this.localStream = await navigator.mediaDevices.getUserMedia({ 
+            audio: {
+              echoCancellation: true,
+              noiseSuppression: true,
+              autoGainControl: true,
+              sampleRate: 48000,
+              channelCount: 1
+            }, 
+            video: false 
+          });
+          
+          // Create audio context for level monitoring
+          this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
+          this.analyser = this.audioContext.createAnalyser();
+          this.analyser.fftSize = 256;
+          this.analyser.smoothingTimeConstant = 0.8;
+          
+          const source = this.audioContext.createMediaStreamSource(this.localStream);
+          source.connect(this.analyser);
+          
+          // Create UI
+          this.createVoiceChatUI();
+          
+          // Join voice chat
+          socket.emit('voiceChat:join', { roomId: this.roomId, playerName: this.playerName });
+          
+          this.isInitialized = true;
+          console.log('Voice chat initialized successfully');
+          
+          // Start audio level monitoring
+          this.startAudioLevelMonitoring();
+          
+          // Start connection quality monitoring
+          this.startConnectionQualityMonitoring();
+          
+          // Start participants list updates
+          this.startParticipantsListUpdates();
+          
+        } catch (error) {
+          console.error('Failed to initialize voice chat:', error);
+          this.showMicrophoneError(error.message);
+        }
+      }
+      
+      startParticipantsListUpdates() {
+        // Update participants list every 2 seconds to show connection status
+        setInterval(() => {
+          if (this.isInitialized) {
+            socket.emit('voiceChat:getParticipants', { roomId: this.roomId });
+          }
+        }, 2000);
+      }
+      
+      createVoiceChatUI() {
+        const voiceChatContainer = document.createElement('div');
+        voiceChatContainer.className = 'voice-chat-container';
+        voiceChatContainer.innerHTML = `
+          <div class="voice-controls">
+            <button id="muteButton" class="voice-btn mute">
+              <i class="fas fa-microphone-slash"></i>
+              <span class="btn-text">Muted</span>
+            </button>
+            <div class="audio-level" id="audioLevel">
+              <div class="level-bar"></div>
+            </div>
+          </div>
+          <div class="voice-status" id="voiceStatus">Voice Chat Ready</div>
+          <div class="participants-list" id="participantsList"></div>
+        `;
+        
+        document.body.appendChild(voiceChatContainer);
+        
+        const muteBtn = document.getElementById('muteButton');
+        muteBtn.addEventListener('click', () => this.toggleMute());
+        
+        // Add Font Awesome for icons if not already present
+        if (!document.querySelector('link[href*="font-awesome"]')) {
+          const fontAwesome = document.createElement('link');
+          fontAwesome.rel = 'stylesheet';
+          fontAwesome.href = 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css';
+          document.head.appendChild(fontAwesome);
+        }
+      }
+      
+      toggleMute() {
+        this.isMuted = !this.isMuted;
+        
+        // Update local stream
+        if (this.localStream) {
+          this.localStream.getTracks().forEach(track => {
+            track.enabled = !this.isMuted;
+          });
+        }
+        
+        // Update button appearance
+        const muteBtn = document.getElementById('muteButton');
+        const btnText = muteBtn.querySelector('.btn-text');
+        
+        if (this.isMuted) {
+          muteBtn.className = 'voice-btn mute';
+          muteBtn.innerHTML = '<i class="fas fa-microphone-slash"></i><span class="btn-text">Muted</span>';
+        } else {
+          muteBtn.className = 'voice-btn unmute';
+          muteBtn.innerHTML = '<i class="fas fa-microphone"></i><span class="btn-text">Speaking</span>';
+        }
+        
+        // Notify server
+        socket.emit('voiceChat:toggleMute', { 
+          roomId: this.roomId, 
+          playerName: this.playerName, 
+          isMuted: this.isMuted 
+        });
+        
+        // Update status
+        this.updateStatus(this.isMuted ? 'Muted' : 'Speaking');
+      }
+      
+      startAudioLevelMonitoring() {
+        if (!this.analyser) return;
+        
+        const dataArray = new Uint8Array(this.analyser.frequencyBinCount);
+        
+        this.audioLevelInterval = setInterval(() => {
+          if (this.isMuted) return;
+          
+          this.analyser.getByteFrequencyData(dataArray);
+          const average = dataArray.reduce((a, b) => a + b) / dataArray.length;
+          const level = Math.min(average / 128, 1); // Normalize to 0-1
+          
+          this.updateAudioLevel(level);
+        }, 100);
+      }
+      
+      startConnectionQualityMonitoring() {
+        setInterval(() => {
+          if (!this.peerConnections) return;
+          
+          Object.entries(this.peerConnections).forEach(([playerName, connection]) => {
+            if (connection.connectionState === 'connected') {
+              const stats = connection.getStats();
+              stats.then(results => {
+                results.forEach(report => {
+                  if (report.type === 'inbound-rtp' && report.mediaType === 'audio') {
+                    const packetLoss = report.packetsLost || 0;
+                    const packetsReceived = report.packetsReceived || 0;
+                    const lossRate = packetsReceived > 0 ? packetLoss / packetsReceived : 0;
+                    
+                    if (lossRate > 0.1) { // More than 10% packet loss
+                      console.warn(`[VoiceChat] High packet loss for ${playerName}: ${(lossRate * 100).toFixed(1)}%`);
+                      this.updateStatus(`Poor connection with ${playerName}`);
+                    }
+                  }
+                });
+              });
+            }
+          });
+        }, 5000); // Check every 5 seconds
+      }
+      
+      updateAudioLevel(level) {
+        const levelBar = document.querySelector('.level-bar');
+        if (levelBar) {
+          levelBar.style.height = `${level * 100}%`;
+          levelBar.style.backgroundColor = level > 0.5 ? '#28a745' : '#6c757d';
+        }
+      }
+      
+      updateStatus(status) {
+        const statusElement = document.getElementById('voiceStatus');
+        if (statusElement) {
+          statusElement.textContent = status;
+        }
+      }
+      
+      updateParticipantsList(participants) {
+        const listElement = document.getElementById('participantsList');
+        if (listElement) {
+          listElement.innerHTML = participants.map(name => 
+            `<div class="participant ${name === this.playerName ? 'me' : ''}">
+              <i class="fas fa-user"></i>
+              <span>${name}</span>
+              ${name === this.playerName ? '<span class="mute-indicator">(You)</span>' : ''}
+              ${this.getConnectionStatus(name)}
+            </div>`
+          ).join('');
+        }
+      }
+      
+      getConnectionStatus(playerName) {
+        if (playerName === this.playerName) return '';
+        
+        const connection = this.peerConnections[playerName];
+        if (!connection) return '<span class="connection-status connecting">Connecting...</span>';
+        
+        switch (connection.connectionState) {
+          case 'connected':
+            return '<span class="connection-status connected"><i class="fas fa-circle"></i></span>';
+          case 'connecting':
+            return '<span class="connection-status connecting"><i class="fas fa-spinner fa-spin"></i></span>';
+          case 'disconnected':
+            return '<span class="connection-status disconnected"><i class="fas fa-circle"></i></span>';
+          case 'failed':
+            return '<span class="connection-status failed"><i class="fas fa-exclamation-triangle"></i></span>';
+          default:
+            return '<span class="connection-status unknown"><i class="fas fa-question-circle"></i></span>';
+        }
+      }
+      
+      async createPeerConnection(targetPlayer) {
+        try {
+          const peerConnection = new RTCPeerConnection({
+            iceServers: [
+              { urls: 'stun:stun.l.google.com:19302' },
+              { urls: 'stun:stun1.l.google.com:19302' },
+              { urls: 'stun:stun2.l.google.com:19302' },
+              { urls: 'stun:stun3.l.google.com:19302' },
+              { urls: 'stun:stun4.l.google.com:19302' }
+            ],
+            iceCandidatePoolSize: 10,
+            bundlePolicy: 'max-bundle',
+            rtcpMuxPolicy: 'require'
+          });
+          
+          // Add local stream
+          if (this.localStream) {
+            this.localStream.getTracks().forEach(track => {
+              peerConnection.addTrack(track, this.localStream);
+            });
+          }
+          
+          // Handle incoming audio
+          peerConnection.ontrack = (event) => {
+            console.log('[VoiceChat] Received audio track from:', targetPlayer);
+            const audioElement = this.getOrCreateAudioElement(targetPlayer);
+            audioElement.srcObject = event.streams[0];
+            audioElement.play().catch(e => console.log('Auto-play prevented:', e));
+          };
+          
+          // ICE candidate handling
+          peerConnection.onicecandidate = (event) => {
+            if (event.candidate) {
+              socket.emit('voiceChat:iceCandidate', {
+                roomId: this.roomId,
+                targetPlayer: targetPlayer,
+                candidate: event.candidate
+              });
+            }
+          };
+          
+          // Connection state changes
+          peerConnection.onconnectionstatechange = () => {
+            console.log('[VoiceChat] Connection state changed for', targetPlayer, ':', peerConnection.connectionState);
+            
+            switch (peerConnection.connectionState) {
+              case 'connected':
+                this.updateStatus(`Connected to ${targetPlayer}`);
+                break;
+              case 'disconnected':
+                this.updateStatus(`Disconnected from ${targetPlayer}`);
+                break;
+              case 'failed':
+                console.log('[VoiceChat] Connection failed, retrying...');
+                this.retryConnection(targetPlayer);
+                break;
+              case 'closed':
+                console.log('[VoiceChat] Connection closed for', targetPlayer);
+                break;
+            }
+          };
+          
+          // ICE connection state changes
+          peerConnection.oniceconnectionstatechange = () => {
+            console.log('[VoiceChat] ICE connection state for', targetPlayer, ':', peerConnection.iceConnectionState);
+            
+            if (peerConnection.iceConnectionState === 'failed') {
+              console.log('[VoiceChat] ICE connection failed, retrying...');
+              this.retryConnection(targetPlayer);
+            }
+          };
+          
+          // ICE gathering state changes
+          peerConnection.onicegatheringstatechange = () => {
+            console.log('[VoiceChat] ICE gathering state for', targetPlayer, ':', peerConnection.iceGatheringState);
+          };
+          
+          this.peerConnections[targetPlayer] = peerConnection;
+          
+          // Create and send offer with timeout
+          const offerPromise = peerConnection.createOffer();
+          const timeoutPromise = new Promise((_, reject) => 
+            setTimeout(() => reject(new Error('Offer creation timeout')), 10000)
+          );
+          
+          const offer = await Promise.race([offerPromise, timeoutPromise]);
+          await peerConnection.setLocalDescription(offer);
+          
+          socket.emit('voiceChat:offer', {
+            roomId: this.roomId,
+            targetPlayer: targetPlayer,
+            offer: offer
+          });
+          
+          return peerConnection;
+        } catch (error) {
+          console.error('[VoiceChat] Failed to create peer connection:', error);
+          this.updateStatus(`Failed to connect to ${targetPlayer}`);
+          
+          // Retry after a delay
+          setTimeout(() => {
+            if (!this.peerConnections[targetPlayer]) {
+              this.createPeerConnection(targetPlayer);
+            }
+          }, 3000);
+        }
+      }
+      
+      async retryConnection(targetPlayer) {
+        if (this.peerConnections[targetPlayer]) {
+          this.peerConnections[targetPlayer].close();
+          delete this.peerConnections[targetPlayer];
+        }
+        
+        setTimeout(() => {
+          this.createPeerConnection(targetPlayer);
+        }, 1000);
+      }
+      
+      getOrCreateAudioElement(playerName) {
+        let audioElement = document.getElementById(`audio-${playerName}`);
+        if (!audioElement) {
+          audioElement = document.createElement('audio');
+          audioElement.id = `audio-${playerName}`;
+          audioElement.autoplay = true;
+          audioElement.volume = 0.7;
+          audioElement.style.display = 'none';
+          document.body.appendChild(audioElement);
+        }
+        return audioElement;
+      }
+      
+      showMicrophoneError(message) {
+        const errorDiv = document.createElement('div');
+        errorDiv.className = 'voice-error';
+        errorDiv.innerHTML = `
+          <div class="error-message">
+            <i class="fas fa-exclamation-triangle"></i>
+            <span>${message || 'Microphone access denied. Voice chat unavailable.'}</span>
+            <button onclick="this.parentElement.parentElement.remove()" class="error-close">
+              <i class="fas fa-times"></i>
+            </button>
+          </div>
+        `;
+        document.body.appendChild(errorDiv);
+        
+        // Auto-remove after 10 seconds
+        setTimeout(() => {
+          if (errorDiv.parentElement) {
+            errorDiv.remove();
+          }
+        }, 10000);
+      }
+      
+      cleanup() {
+        console.log('[VoiceChat] Cleaning up voice chat...');
+        
+        // Stop audio level monitoring
+        if (this.audioLevelInterval) {
+          clearInterval(this.audioLevelInterval);
+        }
+        
+        // Stop connection quality monitoring
+        if (this.connectionQualityInterval) {
+          clearInterval(this.connectionQualityInterval);
+        }
+        
+        // Stop participants list updates
+        if (this.participantsUpdateInterval) {
+          clearInterval(this.participantsUpdateInterval);
+        }
+        
+        // Stop local stream
+        if (this.localStream) {
+          this.localStream.getTracks().forEach(track => track.stop());
+        }
+        
+        // Close audio context
+        if (this.audioContext && this.audioContext.state !== 'closed') {
+          this.audioContext.close();
+        }
+        
+        // Close peer connections
+        Object.values(this.peerConnections).forEach(pc => {
+          if (pc && pc.connectionState !== 'closed') {
+            pc.close();
+          }
+        });
+        
+        // Remove audio elements
+        document.querySelectorAll('[id^="audio-"]').forEach(el => el.remove());
+        
+        // Remove UI
+        const voiceChatContainer = document.querySelector('.voice-chat-container');
+        if (voiceChatContainer) {
+          voiceChatContainer.remove();
+        }
+        
+        // Remove error messages
+        document.querySelectorAll('.voice-error').forEach(el => el.remove());
+        
+        // Notify server
+        socket.emit('voiceChat:leave', { roomId: this.roomId, playerName: this.playerName });
+        
+        // Reset state
+        this.isInitialized = false;
+        this.peerConnections = {};
+        
+        console.log('[VoiceChat] Cleanup complete');
+      }
+    }
+
+    // Voice chat instance
+    let voiceChat = null;
+
+    // Initialize voice chat when game starts
+    socket.on('startGame', ({ gameState }) => {
+      // Initialize voice chat after game starts
+      setTimeout(() => {
+        if (!voiceChat) {
+          voiceChat = new VoiceChat(roomId, myName);
+        }
+      }, 1000);
+    });
+
+    // Cleanup on disconnect
+    window.addEventListener('beforeunload', () => {
+      if (voiceChat) {
+        voiceChat.cleanup();
+      }
+    });
+
+    // Handle voice chat events
+    socket.on('voiceChat:playerJoined', ({ playerName }) => {
+      console.log('[VoiceChat] Player joined:', playerName);
+      if (voiceChat && playerName !== myName) {
+        voiceChat.createPeerConnection(playerName);
+      }
+    });
+
+    socket.on('voiceChat:playerLeft', ({ playerName }) => {
+      console.log('[VoiceChat] Player left:', playerName);
+      if (voiceChat) {
+        // Remove audio element
+        const audioElement = document.getElementById(`audio-${playerName}`);
+        if (audioElement) {
+          audioElement.remove();
+        }
+        
+        // Close connection
+        if (voiceChat.peerConnections[playerName]) {
+          voiceChat.peerConnections[playerName].close();
+          delete voiceChat.peerConnections[playerName];
+        }
+      }
+    });
+
+    socket.on('voiceChat:playerMuteChanged', ({ playerName, isMuted }) => {
+      console.log('[VoiceChat] Player mute changed:', playerName, isMuted);
+      // Update UI to show mute status for other players
+      if (voiceChat) {
+        voiceChat.updateStatus(`${playerName} ${isMuted ? 'muted' : 'unmuted'}`);
+      }
+    });
+
+    socket.on('voiceChat:participantsList', ({ participants }) => {
+      console.log('[VoiceChat] Participants list:', participants);
+      if (voiceChat) {
+        voiceChat.updateParticipantsList(participants);
+        
+        // Create connections for existing participants
+        participants.forEach(participantName => {
+          if (participantName !== myName && !voiceChat.peerConnections[participantName]) {
+            voiceChat.createPeerConnection(participantName);
+          }
+        });
+      }
+    });
+
+    // WebRTC signaling events
+    socket.on('voiceChat:offer', async ({ from, offer, roomId }) => {
+      console.log('[VoiceChat] Received offer from:', from);
+      if (voiceChat && roomId === voiceChat.roomId) {
+        try {
+          const peerConnection = new RTCPeerConnection({
+            iceServers: [
+              { urls: 'stun:stun.l.google.com:19302' },
+              { urls: 'stun:stun1.l.google.com:19302' },
+              { urls: 'stun:stun2.l.google.com:19302' },
+              { urls: 'stun:stun3.l.google.com:19302' },
+              { urls: 'stun:stun4.l.google.com:19302' }
+            ]
+          });
+          
+          // Add local stream
+          if (voiceChat.localStream) {
+            voiceChat.localStream.getTracks().forEach(track => {
+              peerConnection.addTrack(track, voiceChat.localStream);
+            });
+          }
+          
+          // Handle incoming audio
+          peerConnection.ontrack = (event) => {
+            const audioElement = voiceChat.getOrCreateAudioElement(from);
+            audioElement.srcObject = event.streams[0];
+            audioElement.play().catch(e => console.log('Auto-play prevented:', e));
+          };
+          
+          // ICE candidate handling
+          peerConnection.onicecandidate = (event) => {
+            if (event.candidate) {
+              socket.emit('voiceChat:iceCandidate', {
+                roomId: voiceChat.roomId,
+                targetPlayer: from,
+                candidate: event.candidate
+              });
+            }
+          };
+          
+          voiceChat.peerConnections[from] = peerConnection;
+          
+          // Set remote description and create answer
+          await peerConnection.setRemoteDescription(offer);
+          const answer = await peerConnection.createAnswer();
+          await peerConnection.setLocalDescription(answer);
+          
+          socket.emit('voiceChat:answer', {
+            roomId: voiceChat.roomId,
+            targetPlayer: from,
+            answer: answer
+          });
+        } catch (error) {
+          console.error('[VoiceChat] Failed to handle offer:', error);
+        }
+      }
+    });
+
+    socket.on('voiceChat:answer', async ({ from, answer, roomId }) => {
+      console.log('[VoiceChat] Received answer from:', from);
+      if (voiceChat && roomId === voiceChat.roomId && voiceChat.peerConnections[from]) {
+        try {
+          await voiceChat.peerConnections[from].setRemoteDescription(answer);
+        } catch (error) {
+          console.error('[VoiceChat] Failed to set remote description:', error);
+        }
+      }
+    });
+
+    socket.on('voiceChat:iceCandidate', async ({ from, candidate, roomId }) => {
+      if (voiceChat && roomId === voiceChat.roomId && voiceChat.peerConnections[from]) {
+        try {
+          await voiceChat.peerConnections[from].addIceCandidate(candidate);
+        } catch (error) {
+          console.error('[VoiceChat] Failed to add ICE candidate:', error);
+        }
+      }
+    });
   </script>
 </body>
 </html>

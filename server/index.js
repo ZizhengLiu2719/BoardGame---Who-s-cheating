@@ -243,6 +243,9 @@ function applySkillEffect(gameState, playerName, skill, extraData) {
 // --- Action/Skill Phase State ---
 const actionPhaseState = {};
 
+// --- Voice Chat State Management ---
+const voiceChatState = {};
+
 // Socket.IO connection handler
 io.on('connection', (socket) => {
   console.log('A user connected:', socket.id);
@@ -641,8 +644,140 @@ io.on('connection', (socket) => {
     console.log('[resolveActionPhase] Resolution complete');
   }
 
+  // --- Voice Chat Event Handlers ---
+  
+  // Player joins voice chat
+  socket.on('voiceChat:join', async ({ roomId, playerName }) => {
+    console.log('[voiceChat:join]', { roomId, playerName });
+    
+    if (!voiceChatState[roomId]) {
+      voiceChatState[roomId] = {
+        participants: {},
+        audioSessions: {}
+      };
+    }
+    
+    voiceChatState[roomId].participants[playerName] = {
+      socketId: socket.id,
+      isMuted: true, // Start muted by default
+      audioStream: null,
+      joinedAt: Date.now()
+    };
+    
+    // Notify other players in room
+    socket.to(roomId).emit('voiceChat:playerJoined', { playerName });
+    
+    // Send current participants to the joining player
+    const participants = Object.keys(voiceChatState[roomId].participants);
+    socket.emit('voiceChat:participantsList', { participants });
+    
+    console.log('[voiceChat:join] Player joined voice chat:', { roomId, playerName, totalParticipants: participants.length });
+  });
+
+  // Player leaves voice chat
+  socket.on('voiceChat:leave', async ({ roomId, playerName }) => {
+    console.log('[voiceChat:leave]', { roomId, playerName });
+    
+    if (voiceChatState[roomId]?.participants[playerName]) {
+      delete voiceChatState[roomId].participants[playerName];
+      
+      // Clean up room if empty
+      if (Object.keys(voiceChatState[roomId].participants).length === 0) {
+        delete voiceChatState[roomId];
+      }
+      
+      // Notify other players
+      socket.to(roomId).emit('voiceChat:playerLeft', { playerName });
+      
+      console.log('[voiceChat:leave] Player left voice chat:', { roomId, playerName });
+    }
+  });
+
+  // Player toggles mute
+  socket.on('voiceChat:toggleMute', async ({ roomId, playerName, isMuted }) => {
+    console.log('[voiceChat:toggleMute]', { roomId, playerName, isMuted });
+    
+    if (voiceChatState[roomId]?.participants[playerName]) {
+      voiceChatState[roomId].participants[playerName].isMuted = isMuted;
+      
+      // Notify other players
+      socket.to(roomId).emit('voiceChat:playerMuteChanged', { playerName, isMuted });
+      
+      console.log('[voiceChat:toggleMute] Player mute changed:', { roomId, playerName, isMuted });
+    }
+  });
+
+  // WebRTC signaling - Offer
+  socket.on('voiceChat:offer', ({ roomId, targetPlayer, offer }) => {
+    console.log('[voiceChat:offer]', { roomId, targetPlayer });
+    
+    const targetSocketId = voiceChatState[roomId]?.participants[targetPlayer]?.socketId;
+    if (targetSocketId) {
+      socket.to(targetSocketId).emit('voiceChat:offer', { 
+        from: socket.id, 
+        offer,
+        roomId 
+      });
+    }
+  });
+
+  // WebRTC signaling - Answer
+  socket.on('voiceChat:answer', ({ roomId, targetPlayer, answer }) => {
+    console.log('[voiceChat:answer]', { roomId, targetPlayer });
+    
+    const targetSocketId = voiceChatState[roomId]?.participants[targetPlayer]?.socketId;
+    if (targetSocketId) {
+      socket.to(targetSocketId).emit('voiceChat:answer', { 
+        from: socket.id, 
+        answer,
+        roomId 
+      });
+    }
+  });
+
+  // WebRTC signaling - ICE Candidate
+  socket.on('voiceChat:iceCandidate', ({ roomId, targetPlayer, candidate }) => {
+    const targetSocketId = voiceChatState[roomId]?.participants[targetPlayer]?.socketId;
+    if (targetSocketId) {
+      socket.to(targetSocketId).emit('voiceChat:iceCandidate', { 
+        from: socket.id, 
+        candidate,
+        roomId 
+      });
+    }
+  });
+
+  // Get voice chat participants
+  socket.on('voiceChat:getParticipants', ({ roomId }) => {
+    const participants = voiceChatState[roomId]?.participants || {};
+    const participantList = Object.keys(participants);
+    socket.emit('voiceChat:participantsList', { participants: participantList });
+  });
+
   // Handle disconnect
   socket.on('disconnect', async () => {
+    console.log('User disconnected:', socket.id);
+    
+    // Clean up voice chat state
+    for (const [roomId, roomState] of Object.entries(voiceChatState)) {
+      for (const [playerName, participant] of Object.entries(roomState.participants)) {
+        if (participant.socketId === socket.id) {
+          delete roomState.participants[playerName];
+          
+          // Clean up room if empty
+          if (Object.keys(roomState.participants).length === 0) {
+            delete voiceChatState[roomId];
+          } else {
+            // Notify other players
+            io.to(roomId).emit('voiceChat:playerLeft', { playerName });
+          }
+          
+          console.log('[voiceChat:disconnect] Cleaned up voice chat for:', { roomId, playerName });
+          break;
+        }
+      }
+    }
+    
     // Find all rooms (scan keys)
     const keys = await redis.keys('room:*');
     for (const key of keys) {
@@ -678,7 +813,6 @@ io.on('connection', (socket) => {
         break;
       }
     }
-    console.log('User disconnected:', socket.id);
   });
 });
 
