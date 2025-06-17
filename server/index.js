@@ -265,9 +265,9 @@ io.on('connection', (socket) => {
       console.log('[createRoom] Room already exists:', roomId);
       return callback({ success: false, message: 'Room already exists.' });
     }
-    // Don't add host to player list yet - they will join like any other player
-    const players = [];
-    const readyStates = {};
+    // Add host to player list immediately
+    const players = [{ id: socket.id, name: hostName }];
+    const readyStates = { [hostName]: false };
     await redis.hmset(`room:${roomId}`,
       'password', password,
       'maxPlayers', maxPlayers,
@@ -286,47 +286,53 @@ io.on('connection', (socket) => {
   });
 
   // Player joins a room
-  socket.on('joinRoom', async ({ roomId, playerName }, callback) => {
+  socket.on('joinRoom', async ({ roomId, password, playerName }, callback) => {
     console.log('[joinRoom]', { roomId, playerName });
     const room = await redis.hgetall(`room:${roomId}`);
     if (!room) {
       console.log('[joinRoom] Room not found:', roomId);
       return callback({ success: false, message: 'Room not found.' });
     }
-
-    const players = JSON.parse(room.players || '[]');
-    // Prevent duplicate player names
-    const existingPlayer = players.find(p => p.name === playerName);
+    // Password check
+    if (room.password && password !== room.password) {
+      console.log('[joinRoom] Incorrect password for room:', roomId);
+      return callback({ success: false, message: 'Incorrect room password.' });
+    }
+    let players = JSON.parse(room.players || '[]');
+    // Allow rejoin if same name and same socket id (refresh)
+    let existingPlayer = players.find(p => p.name === playerName);
     if (existingPlayer) {
-      console.log('[joinRoom] Duplicate player name:', playerName);
-      return callback({ success: false, message: 'Player name already exists in this room.' });
+      if (existingPlayer.id === socket.id) {
+        // Already joined with this socket, allow
+        socket.join(roomId);
+        return callback({ success: true });
+      } else {
+        // Name taken by another socket
+        console.log('[joinRoom] Duplicate player name:', playerName);
+        return callback({ success: false, message: 'Player name already exists in this room.' });
+      }
     }
     if (players.length >= parseInt(room.maxPlayers)) {
       console.log('[joinRoom] Room is full:', roomId);
       return callback({ success: false, message: 'Room is full.' });
     }
-
     // Add new player
     players.push({ id: socket.id, name: playerName });
     await setPlayerList(roomId, players);
     socket.join(roomId);
-
     // If this is the last player, distribute roles
     if (players.length === parseInt(room.maxPlayers)) {
       const roles = distributeRoles(players.length);
       const gameState = await initializeGameState(roomId, players);
-      
       // Assign roles to players
       gameState.players = gameState.players.map((player, index) => ({
         ...player,
         role: roles[index]
       }));
-      
       await updateGameState(roomId, gameState);
       console.log('[initialGameState] Emitting for room:', roomId, gameState);
       io.to(roomId).emit('initialGameState', gameState);
     }
-
     callback({ success: true });
     io.to(roomId).emit('playerListUpdate', {
       players: players.map(p => p.name),
