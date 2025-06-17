@@ -920,7 +920,7 @@
         michael: {name:'Michael', team:'Cheater', power:'Can see Wind\'s card. Can guess Abby for instant win'},
         wind: {name:'Wind', team:'Cheater', power:'Can see Michael\'s card. Molest: +2 Scandal; Mislead: flip Love→Hate'},
         jack: {name:'Jack', team:'Cheater', power:'Hidden from everyone except self'},
-        abby: {name:'Abby', team:'Keeper', power:'Can see all Cheaters except Jack'},
+        abby: {name:'Abby', team:'Keeper', power:'Can see Michael and Wind'},
         kennedi: {name:'Kennedi', team:'Keeper', power:'Can see own card. All Helpers count as Love'},
         ker: {name:'Ker', team:'Keeper', power:'Can see own card. Can swap one Helper'},
         kiko: {name:'Kiko', team:'Keeper (Pet)', power:'No special power'},
@@ -928,10 +928,8 @@
         nash: {name:'Nash', team:'Keeper (Pet)', power:'No special power'}
       };
 
-      // Show cards face-up based on role visibility rules
-      const isAbby = myRole === 'abby';
-      const isMichael = myRole === 'michael';
-      const isWind = myRole === 'wind';
+      // Lowercase role for comparison
+      const myRoleLower = myRole ? myRole.toLowerCase() : '';
       
       // Calculate angles for players with equal spacing
       const angles = Array.from({length: n}, (_, i) => {
@@ -950,22 +948,23 @@
         
         // Show card face-up based on role-specific rules
         const role = shuffledRoles[i];
+        const roleLower = role ? role.toLowerCase() : '';
         let shouldShowCard = false;
-        
+
         if (i === myIndex) {
           // Everyone can see their own card
           shouldShowCard = true;
-        } else if (isAbby) {
-          // Abby can see all Cheaters except Jack
-          shouldShowCard = ['michael', 'wind'].includes(role);
-        } else if (isMichael) {
-          // Michael can see Wind's card
-          shouldShowCard = role === 'wind';
-        } else if (isWind) {
-          // Wind can see Michael's card
-          shouldShowCard = role === 'michael';
+        } else if (myRoleLower === 'abby') {
+          // Abby can see Michael and Wind's cards only
+          shouldShowCard = (roleLower === 'michael' || roleLower === 'wind');
+        } else if (myRoleLower === 'michael' || myRoleLower === 'wind') {
+          // Michael and Wind can see each other's cards
+          shouldShowCard = (roleLower === 'michael' || roleLower === 'wind');
+        } else {
+          // All other roles (Jack, Kennedi, Ker, Kiko, Knox, Nash) can only see their own card
+          shouldShowCard = false;
         }
-        
+
         card.src = shouldShowCard ? roleImages[role] : backsideImg;
         card.alt = shouldShowCard ? role : 'Hidden';
         container.appendChild(card);
@@ -974,7 +973,7 @@
         if (i === myIndex) {
           const tooltip = document.createElement('div');
           tooltip.className = 'role-intro-tooltip';
-          const info = roleInfo[myRole];
+          const info = roleInfo[myRoleLower];
           tooltip.innerHTML = `<div class='role-title'>${info.name} (${info.team})</div><div><b>Power:</b> ${info.power}</div>`;
           card.addEventListener('mouseenter',()=>{tooltip.classList.add('active');});
           card.addEventListener('mouseleave',()=>{tooltip.classList.remove('active');});
