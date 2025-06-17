@@ -682,7 +682,7 @@
     if (kennediSkillBtn) {
       kennediSkillBtn.addEventListener('click', () => {
         if (!kennediSkillBtn.disabled && isSkillPhase) {
-          socket.emit('gameAction', { roomId, action: 'useSkill', data: { skill: 'protectingparty' }, playerName: myName });
+          socket.emit('useSkill', { skill: 'protectingparty' });
           kennediSkillBtn.disabled = true;
         }
       });
@@ -882,7 +882,8 @@
         misleadBtn.onclick = function() {
           if (misleadBtn.disabled) return;
           misleadBtn.disabled = true;
-          socket.emit('gameAction', { roomId, action: 'useSkill', data: { skill: 'mislead' }, playerName: myName });
+          // Use direct useSkill event for skill window skills
+          socket.emit('useSkill', { skill: 'mislead' });
         };
         skillButtonContainer.appendChild(misleadBtn);
         return;
@@ -910,7 +911,8 @@
         protectBtn.onclick = function() {
           if (protectBtn.disabled) return;
           protectBtn.disabled = true;
-          socket.emit('gameAction', { roomId, action: 'useSkill', data: { skill: 'protectingparty' }, playerName: myName });
+          // Use direct useSkill event for skill window skills
+          socket.emit('useSkill', { skill: 'protectingparty' });
         };
         skillButtonContainer.appendChild(protectBtn);
         return;
@@ -1165,14 +1167,14 @@
     // Handle Wind's mislead skill
     function handleWindMislead() {
       if (!isSkillPhase) return;
-      socket.emit('gameAction', { roomId, action: 'useSkill', data: { skill: 'mislead' }, playerName: myName });
+      socket.emit('useSkill', { skill: 'mislead' });
       if (windSkillBtn) windSkillBtn.disabled = true;
     }
 
     // Handle Kennedi's protect skill
     function handleKennediProtect() {
       if (!isSkillPhase) return;
-      socket.emit('gameAction', { roomId, action: 'useSkill', data: { skill: 'protectingparty' }, playerName: myName });
+      socket.emit('useSkill', { skill: 'protectingparty' });
       if (kennediSkillBtn) kennediSkillBtn.disabled = true;
     }
 

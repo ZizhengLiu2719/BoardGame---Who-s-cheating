@@ -226,14 +226,10 @@ function applySkillEffect(gameState, playerName, skill, extraData) {
       gameState.scandalScore += 2;
       break;
     case 'mislead':
-      // Flip love to hate
-      const temp = gameState.loveCount;
-      gameState.loveCount = gameState.hateCount;
-      gameState.hateCount = temp;
+      // Effect will be applied during resolution phase, not here
       break;
     case 'protectingparty':
-      // All helpers count as love (for now, just +3 as per rules)
-      gameState.loveCount += 3;
+      // Effect will be applied during resolution phase, not here
       break;
     case 'findabby':
       // Just show message, no effect on game state
@@ -496,15 +492,6 @@ io.on('connection', (socket) => {
         io.to(roomId).emit('gameStateUpdate', gameState);
         break;
 
-      case 'playLoveHate':
-        if (!canPlayerLoveHate(gameState, playerName, data.type)) return;
-        if (data.type === 'love') gameState.loveCount += 1;
-        if (data.type === 'hate') gameState.hateCount += 1;
-        markLoveHateUsed(gameState, playerName, data.type);
-        await updateGameState(roomId, gameState);
-        io.to(roomId).emit('gameStateUpdate', gameState);
-        break;
-
       case 'useSkill':
         console.log('[useSkill] Received skill action:', { playerName, skill: data.skill });
         if (!canPlayerUseSkill(gameState, playerName, data.skill)) {
@@ -565,13 +552,19 @@ io.on('connection', (socket) => {
     const player = gameState.players.find(p => p.id === socket.id);
     if (!player) return;
     if (!actionPhaseState[roomId] || actionPhaseState[roomId].phase !== 2) return;
+    
+    console.log('[useSkill socket] Player using skill:', { playerName: player.name, skill });
+    
     // Only allow Wind and Kennedi to use their skills during skill window
     if (player.role === 'Wind' && skill === 'mislead') {
       actionPhaseState[roomId].windUsed = true;
+      console.log('[useSkill socket] Wind used Mislead');
     }
     if (player.role === 'Kennedi' && skill === 'protectingparty') {
       actionPhaseState[roomId].kennediUsed = true;
+      console.log('[useSkill socket] Kennedi used Protecting Party');
     }
+    
     // Mark skill as used in gameState (so button disables)
     markSkillUsed(gameState, player.name, skill);
     await updateGameState(roomId, gameState);
@@ -594,30 +587,58 @@ io.on('connection', (socket) => {
     if (!state) return;
     const gameState = await getGameState(roomId);
     if (!gameState) return;
-    // Tally love/hate
+    
+    console.log('[resolveActionPhase] Starting resolution with state:', state);
+    
+    // Calculate base love/hate counts from clicks
     let love = Object.keys(state.loveClicks).length;
     let hate = Object.keys(state.hateClicks).length;
-    // Apply skills
-    if (state.windUsed) {
-      // Wind's Mislead: convert one love to hate (if any love exists)
+    
+    console.log('[resolveActionPhase] Base counts - Love:', love, 'Hate:', hate);
+    console.log('[resolveActionPhase] Skills used - Wind:', state.windUsed, 'Kennedi:', state.kennediUsed);
+    
+    // Apply skills in correct order (Wind's skill takes precedence if both are used)
+    if (state.windUsed && state.kennediUsed) {
+      // Both skills used - Wind's skill wins
+      console.log('[resolveActionPhase] Both skills used - Wind takes precedence');
       if (love > 0) {
         love -= 1;
         hate += 1;
+        console.log('[resolveActionPhase] Wind Mislead applied: Love ->', love, 'Hate ->', hate);
+      }
+    } else if (state.windUsed) {
+      // Only Wind used Mislead: convert one love to hate (if any love exists)
+      console.log('[resolveActionPhase] Only Wind used Mislead');
+      if (love > 0) {
+        love -= 1;
+        hate += 1;
+        console.log('[resolveActionPhase] Wind Mislead applied: Love ->', love, 'Hate ->', hate);
       }
     } else if (state.kennediUsed) {
-      // Kennedi's Protecting the Party: all hate becomes love
-      love += hate;
-      hate = 0;
+      // Only Kennedi used Protecting Party: all hate becomes love
+      console.log('[resolveActionPhase] Only Kennedi used Protecting Party');
+      if (hate > 0) {
+        love += hate;
+        hate = 0;
+        console.log('[resolveActionPhase] Kennedi Protecting Party applied: Love ->', love, 'Hate ->', hate);
+      }
     }
-    // If both used, Wind's skill wins (already handled by order)
+    
+    // Update the game state with final counts
     gameState.loveCount = love;
     gameState.hateCount = hate;
+    
+    console.log('[resolveActionPhase] Final counts - Love:', love, 'Hate:', hate);
+    
     await updateGameState(roomId, gameState);
     io.to(roomId).emit('gameStateUpdate', gameState);
+    
     // Reset phase state
     clearTimeout(state.skillWindowTimer);
     clearTimeout(state.resolveTimer);
     delete actionPhaseState[roomId];
+    
+    console.log('[resolveActionPhase] Resolution complete');
   }
 
   // Handle disconnect
