@@ -821,7 +821,7 @@
         
         const nameLabel = document.createElement('div');
         nameLabel.className = 'player-name-label';
-        nameLabel.textContent = player.name;
+        nameLabel.textContent = player.name + (player.isHost ? ' (Host)' : '');
         cardContainer.appendChild(roleCard);
         cardContainer.appendChild(nameLabel);
         roleCardsCircle.appendChild(cardContainer);

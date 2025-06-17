@@ -408,6 +408,8 @@ io.on('connection', (socket) => {
       
       await updateGameState(roomId, gameState);
       io.to(roomId).emit('gameStateUpdate', gameState);
+      // Also emit as initialGameState to ensure all clients get the correct state
+      io.to(roomId).emit('initialGameState', gameState);
     }
   });
 
