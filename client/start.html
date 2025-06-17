@@ -850,6 +850,48 @@
     let windKennediSkillWindow = false;
     let loveHateClickedThisRound = false;
 
+    // Function to reset all button states to initial disabled state
+    function resetAllButtonStates() {
+      console.log('[resetAllButtonStates] Resetting all button states to initial disabled state');
+      
+      // Clear any ongoing timers
+      if (window.loveHateTimer) {
+        clearTimeout(window.loveHateTimer);
+        window.loveHateTimer = null;
+      }
+      if (window.voteTimer) {
+        clearTimeout(window.voteTimer);
+        window.voteTimer = null;
+      }
+      if (window.skillWindowTimer) {
+        clearTimeout(window.skillWindowTimer);
+        window.skillWindowTimer = null;
+      }
+      
+      // Reset love/hate buttons
+      loveHateWindow = false;
+      loveHateClickedThisRound = false;
+      loveBtn.disabled = true;
+      hateBtn.disabled = true;
+      
+      // Reset vote buttons
+      voteWindow = false;
+      const voteYesBtn = document.getElementById('voteYesBtn');
+      const voteNoBtn = document.getElementById('voteNoBtn');
+      const voteSubmitBtn = document.getElementById('voteSubmitBtn');
+      if (voteYesBtn) voteYesBtn.disabled = true;
+      if (voteNoBtn) voteNoBtn.disabled = true;
+      if (voteSubmitBtn) voteSubmitBtn.disabled = true;
+      
+      // Reset skill window state
+      windKennediSkillWindow = false;
+      
+      // Re-render skill buttons (they will be disabled based on new game state)
+      renderSkillButtons();
+      
+      console.log('[resetAllButtonStates] All button states reset');
+    }
+
     function setLoveHateWindow(enabled) {
       loveHateWindow = enabled;
       loveBtn.disabled = !enabled || loveHateClickedThisRound;
@@ -874,13 +916,13 @@
         if (message.text.includes('Host and helpers can do their action right now')) {
           loveHateClickedThisRound = false;
           setLoveHateWindow(true);
-          setTimeout(() => setLoveHateWindow(false), 10000);
+          window.loveHateTimer = setTimeout(() => setLoveHateWindow(false), 10000);
         }
         if (message.text.includes('Host and helpers please take your action, and Wind and Kennedi can use their skills now!')) {
           setLoveHateWindow(true);
           setWindKennediSkillWindow(true);
           renderSkillButtons();
-          setTimeout(() => {
+          window.skillWindowTimer = setTimeout(() => {
             setLoveHateWindow(false);
             setWindKennediSkillWindow(false);
             renderSkillButtons();
@@ -888,7 +930,7 @@
         }
         if (message.text.includes('Every player can vote now!')) {
           setVoteWindow(true);
-          setTimeout(() => setVoteWindow(false), 10000);
+          window.voteTimer = setTimeout(() => setVoteWindow(false), 10000);
         }
         renderSkillButtons();
       }
@@ -926,54 +968,31 @@
       hateCount.textContent = hate;
     });
     socket.on('gameStateUpdate', (newGameState) => {
-      gameState = newGameState;
-      if (gameState.loveCount !== undefined) {
-        loveCount.textContent = gameState.loveCount;
-      }
-      if (gameState.hateCount !== undefined) {
-        hateCount.textContent = gameState.hateCount;
-      }
-      renderSkillButtons();
-    });
-
-    // Handle skill buttons
-    if (windSkillBtn) {
-      windSkillBtn.addEventListener('click', () => {
-        if (!windSkillBtn.disabled && isSkillPhase) {
-          socket.emit('gameAction', { roomId, action: 'useSkill', data: { skill: 'mislead' }, playerName: myName });
-          windSkillBtn.disabled = true;
-        }
-      });
-    }
-
-    if (kennediSkillBtn) {
-      kennediSkillBtn.addEventListener('click', () => {
-        if (!kennediSkillBtn.disabled && isSkillPhase) {
-          socket.emit('useSkill', { skill: 'protectingparty' });
-          kennediSkillBtn.disabled = true;
-        }
-      });
-    }
-
-    // Socket event listeners
-    socket.on('enableLoveHate', () => {
-      loveBtn.disabled = false;
-      hateBtn.disabled = false;
-    });
-
-    socket.on('disableLoveHate', () => {
-      loveBtn.disabled = true;
-      hateBtn.disabled = true;
-    });
-
-    // Debug: Log all socket events
-    socket.onAny((event, ...args) => {
-      console.log('[Socket Event]', event, ...args);
-    });
-
-    // Handle game state updates
-    socket.on('gameStateUpdate', (newGameState) => {
       console.log('[gameStateUpdate]', newGameState);
+      
+      // Check if this is a restart (all scores are 0 and isDay is false)
+      const isRestart = newGameState.partyCount === 0 && 
+                       newGameState.scandalScore === 0 && 
+                       newGameState.closeKnotScore === 0 && 
+                       newGameState.voteCount === 0 && 
+                       newGameState.loveCount === 0 && 
+                       newGameState.hateCount === 0 && 
+                       newGameState.isDay === false;
+      
+      // Log role changes if this is a restart
+      if (gameState && newGameState && gameState.players && newGameState.players) {
+        const oldRoles = gameState.players.map(p => ({ name: p.name, role: p.role }));
+        const newRoles = newGameState.players.map(p => ({ name: p.name, role: p.role }));
+        console.log('[gameStateUpdate] Role changes:', { oldRoles, newRoles });
+        
+        // If roles have changed, this is definitely a restart
+        const rolesChanged = JSON.stringify(oldRoles) !== JSON.stringify(newRoles);
+        if (rolesChanged || isRestart) {
+          console.log('[gameStateUpdate] Restart detected, resetting button states');
+          resetAllButtonStates();
+        }
+      }
+      
       gameState = newGameState;
       
       // Update score displays
@@ -1010,6 +1029,41 @@
         updateHostOnlyButtons();
         renderSkillButtons();
       }
+    });
+
+    // Handle skill buttons
+    if (windSkillBtn) {
+      windSkillBtn.addEventListener('click', () => {
+        if (!windSkillBtn.disabled && isSkillPhase) {
+          socket.emit('gameAction', { roomId, action: 'useSkill', data: { skill: 'mislead' }, playerName: myName });
+          windSkillBtn.disabled = true;
+        }
+      });
+    }
+
+    if (kennediSkillBtn) {
+      kennediSkillBtn.addEventListener('click', () => {
+        if (!kennediSkillBtn.disabled && isSkillPhase) {
+          socket.emit('useSkill', { skill: 'protectingparty' });
+          kennediSkillBtn.disabled = true;
+        }
+      });
+    }
+
+    // Socket event listeners
+    socket.on('enableLoveHate', () => {
+      loveBtn.disabled = false;
+      hateBtn.disabled = false;
+    });
+
+    socket.on('disableLoveHate', () => {
+      loveBtn.disabled = true;
+      hateBtn.disabled = true;
+    });
+
+    // Debug: Log all socket events
+    socket.onAny((event, ...args) => {
+      console.log('[Socket Event]', event, ...args);
     });
 
     // Handle initial game state
@@ -1540,7 +1594,7 @@
     function restartGame() {
       if (!isHost) return;
       if (confirm('Are you sure you want to restart the game?')) {
-        socket.emit('restartGame');
+        socket.emit('gameAction', { roomId, action: 'restartGame', data: {}, playerName: myName });
       }
     }
 

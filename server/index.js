@@ -132,15 +132,19 @@ async function resetGameState(roomId) {
   const room = await redis.hgetall(`room:${roomId}`);
   if (!room) return;
   const players = JSON.parse(room.players || '[]');
+  
+  // Redistribute roles randomly
+  const roles = distributeRoles(players.length);
+  
   const gameState = {
-    players: players.map(p => ({
+    players: players.map((p, index) => ({
       id: p.id,
       name: p.name,
-      role: null,
-      position: null,
+      role: roles[index], // Assign new random role
+      position: index,
       isHost: p.name === players[0].name
     })),
-    roles: [],
+    roles: roles, // Store the new role distribution
     isDay: false,
     partyCount: 0,
     scandalScore: 0,
@@ -425,16 +429,27 @@ io.on('connection', (socket) => {
         if (!isHost) return;
         await broadcastUIMessage(roomId, 'The game restarts!', 5000);
         setTimeout(async () => {
+          // Clear any ongoing action phase state
+          if (actionPhaseState[roomId]) {
+            clearTimeout(actionPhaseState[roomId].skillWindowTimer);
+            clearTimeout(actionPhaseState[roomId].resolveTimer);
+            delete actionPhaseState[roomId];
+          }
+          
+          // Reset game state with new role distribution
           const newGameState = await resetGameState(roomId);
-          // Reset all counts to 0
+          
+          // Ensure all counts are reset to 0
           newGameState.partyCount = 0;
           newGameState.scandalScore = 0;
           newGameState.closeKnotScore = 0;
           newGameState.voteCount = 0;
           newGameState.loveCount = 0;
           newGameState.hateCount = 0;
+          
           // Set to night mode
           newGameState.isDay = false;
+          
           // Reset used actions
           newGameState.usedActions = {
             vote: {},
@@ -442,8 +457,15 @@ io.on('connection', (socket) => {
             hate: {},
             skills: {}
           };
+          
+          // Update and broadcast the new game state
           await updateGameState(roomId, newGameState);
           io.to(roomId).emit('gameStateUpdate', newGameState);
+          
+          // Inform players that roles have been redistributed
+          await broadcastUIMessage(roomId, 'Game restarted! Roles have been redistributed randomly.', 8000);
+          
+          console.log('[restartGame] Game restarted with new roles:', newGameState.players.map(p => ({ name: p.name, role: p.role })));
         }, 5000);
         break;
 
