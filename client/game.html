@@ -299,7 +299,8 @@
     // Listen for startGame event
     socket.on('startGame', () => {
       // Redirect to start.html with roomId, name, and password
-      const url = `start.html?roomId=${encodeURIComponent(roomId)}&name=${encodeURIComponent(myName)}&password=${encodeURIComponent(roomPassword)}${isHost ? '&createRoom=1' : ''}`;
+      // Only the host should have createRoom=1, other players should just join
+      const url = `start.html?roomId=${encodeURIComponent(roomId)}&name=${encodeURIComponent(myName)}&password=${encodeURIComponent(roomPassword)}&roomname=${encodeURIComponent(roomName)}&maxPlayers=${maxPlayers}${isHost ? '&createRoom=1' : ''}`;
       window.location.href = url;
     });
   </script>

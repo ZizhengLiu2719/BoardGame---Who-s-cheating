@@ -295,12 +295,32 @@ io.on('connection', (socket) => {
     }
 
     const players = JSON.parse(room.players || '[]');
-    // Prevent duplicate player names
-    const existingPlayer = players.find(p => p.name === playerName);
-    if (existingPlayer) {
-      console.log('[joinRoom] Duplicate player name:', playerName);
-      return callback({ success: false, message: 'Player name already exists in this room.' });
+    
+    // Check if player already exists in the room (reconnection scenario)
+    const existingPlayerIndex = players.findIndex(p => p.name === playerName);
+    if (existingPlayerIndex !== -1) {
+      // Player exists, update their socket ID (reconnection)
+      console.log('[joinRoom] Player reconnecting:', playerName);
+      players[existingPlayerIndex].id = socket.id;
+      // Clean up disconnected state
+      delete players[existingPlayerIndex].disconnectedAt;
+      await setPlayerList(roomId, players);
+      socket.join(roomId);
+      
+      // Send current game state if available
+      const gameState = await getGameState(roomId);
+      if (gameState) {
+        socket.emit('initialGameState', gameState);
+      }
+      
+      callback({ success: true });
+      io.to(roomId).emit('playerListUpdate', {
+        players: players.map(p => p.name),
+        roomName: room.roomName
+      });
+      return;
     }
+    
     if (players.length >= parseInt(room.maxPlayers)) {
       console.log('[joinRoom] Room is full:', roomId);
       return callback({ success: false, message: 'Room is full.' });
@@ -876,7 +896,8 @@ io.on('connection', (socket) => {
       }
     }
     
-    // Find all rooms (scan keys)
+    // Find all rooms (scan keys) - but don't immediately remove players
+    // Give them a grace period to reconnect (for page transitions)
     const keys = await redis.keys('room:*');
     for (const key of keys) {
       const roomId = key.split(':')[1];
@@ -886,28 +907,49 @@ io.on('connection', (socket) => {
       const idx = players.findIndex(p => p.id === socket.id);
       if (idx !== -1) {
         const playerName = players[idx].name;
-        players.splice(idx, 1);
-        delete readyStates[playerName];
-        if (players.length === 0) {
-          // Add a 5-second delay before deleting the room
-          setTimeout(async () => {
-            const checkRoom = await redis.hgetall(`room:${roomId}`);
-            const checkPlayers = JSON.parse(checkRoom.players || '[]');
-            if (checkPlayers.length === 0) {
-              await deleteRoom(roomId);
-              console.log('Room deleted after delay:', roomId);
+        
+        // Mark player as disconnected but keep them in the room for a grace period
+        players[idx].disconnectedAt = Date.now();
+        players[idx].id = null; // Clear socket ID to indicate disconnected state
+        
+        await setPlayerList(roomId, players);
+        
+        // Schedule removal after 30 seconds if they don't reconnect
+        setTimeout(async () => {
+          const currentRoom = await redis.hgetall(`room:${roomId}`);
+          if (currentRoom) {
+            const currentPlayers = JSON.parse(currentRoom.players || '[]');
+            const playerStillDisconnected = currentPlayers.find(p => 
+              p.name === playerName && p.id === null && 
+              p.disconnectedAt && (Date.now() - p.disconnectedAt) > 30000
+            );
+            
+            if (playerStillDisconnected) {
+              // Remove the player after grace period
+              const updatedPlayers = currentPlayers.filter(p => p.name !== playerName);
+              const updatedReadyStates = JSON.parse(currentRoom.readyStates || '{}');
+              delete updatedReadyStates[playerName];
+              
+              if (updatedPlayers.length === 0) {
+                // Room is empty, delete it
+                await deleteRoom(roomId);
+                console.log('Room deleted after grace period:', roomId);
+              } else {
+                // Update room with remaining players
+                await setPlayerList(roomId, updatedPlayers);
+                await redis.hset(`room:${roomId}`, 'readyStates', JSON.stringify(updatedReadyStates));
+                io.to(roomId).emit('playerListUpdate', {
+                  players: updatedPlayers.map(p => p.name),
+                  roomName: currentRoom.roomName,
+                  password: currentRoom.password,
+                  readyStates: updatedReadyStates
+                });
+                console.log('Player removed after grace period:', { roomId, playerName });
+              }
             }
-          }, 5000);
-        } else {
-          await setPlayerList(roomId, players);
-          await redis.hset(`room:${roomId}`, 'readyStates', JSON.stringify(readyStates));
-          io.to(roomId).emit('playerListUpdate', {
-            players: players.map(p => p.name),
-            roomName: room.roomName,
-            password: room.password,
-            readyStates: readyStates
-          });
-        }
+          }
+        }, 30000); // 30 second grace period
+        
         break;
       }
     }

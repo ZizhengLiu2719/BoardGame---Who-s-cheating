@@ -1129,9 +1129,19 @@
       // Host: create the room first, then join
       socket.emit('createRoom', { roomId, password, maxPlayers, hostName: myName, roomName }, (res) => {
         if (res.success) {
+          // Room created successfully, now join it
           socket.emit('joinRoom', { roomId, playerName: myName }, (res2) => {
             if (!res2.success) {
               alert(res2.message || 'Failed to join room.');
+              window.location.href = 'joining.html';
+            }
+          });
+        } else if (res.message && res.message.includes('already exists')) {
+          // Room already exists, just join it
+          console.log('Room already exists, joining existing room...');
+          socket.emit('joinRoom', { roomId, playerName: myName }, (res2) => {
+            if (!res2.success) {
+              alert(res2.message || 'Failed to join existing room.');
               window.location.href = 'joining.html';
             }
           });
