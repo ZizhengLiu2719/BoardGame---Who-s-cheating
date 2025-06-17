@@ -932,6 +932,148 @@
 
     // --- Ker's Popup ---
     function showKerPopup() {
+      const popup = document.createElement('div');
+      popup.style.cssText = 'position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:#fffbe7;border:2px solid #e2c391;padding:24px;z-index:2000;border-radius:16px;box-shadow:0 2px 18px #23202a22;';
+      popup.innerHTML = `<b>The Chosen One</b><br><br>Pick the helper to swap:<br><input id="kerHelper" style="width:180px;"><br><br>Pick the non-helper candidate:<br><input id="kerNonHelper" style="width:180px;"><br><br><button id="kerSubmit">Submit</button> <button id="kerCancel">Cancel</button>`;
+      document.body.appendChild(popup);
+      document.getElementById('kerSubmit').onclick = function() {
+        const helper = document.getElementById('kerHelper').value;
+        const nonHelper = document.getElementById('kerNonHelper').value;
+        socket.emit('gameAction', { roomId, action: 'theChosenOne', data: { oldHelper: helper, newHelper: nonHelper }, playerName: me.name });
+        document.body.removeChild(popup);
+      };
+      document.getElementById('kerCancel').onclick = function() {
+        document.body.removeChild(popup);
+      };
+    }
+
+    // --- Default State on Load ---
+    document.addEventListener('DOMContentLoaded', () => {
+      document.body.classList.remove('day-mode'); // Night mode by default
+      // Set all counts to 0
+      document.querySelectorAll('.score-value').forEach(el => el.textContent = '0');
+      loveCount.textContent = '0';
+      hateCount.textContent = '0';
+      // Disable all action buttons by default
+      document.querySelectorAll('.action-btn, .reset-btn, .vote-btn').forEach(btn => btn.disabled = true);
+      // Skill buttons will be rendered by renderSkillButtons
+
+      // --- Host-Only Button Event Listeners ---
+      const hostBtnMap = [
+        { id: 'partyPlusBtn', action: { action: 'updateCount', data: { countType: 'party', delta: 1 } } },
+        { id: 'partyMinusBtn', action: { action: 'updateCount', data: { countType: 'party', delta: -1 } } },
+        { id: 'scandalPlusBtn', action: { action: 'updateCount', data: { countType: 'scandal', delta: 1 } } },
+        { id: 'scandalMinusBtn', action: { action: 'updateCount', data: { countType: 'scandal', delta: -1 } } },
+        { id: 'closeKnotPlusBtn', action: { action: 'updateCount', data: { countType: 'closeKnot', delta: 1 } } },
+        { id: 'closeKnotMinusBtn', action: { action: 'updateCount', data: { countType: 'closeKnot', delta: -1 } } },
+        { id: 'votePlusBtn', action: { action: 'updateCount', data: { countType: 'vote', delta: 1 } } },
+        { id: 'voteMinusBtn', action: { action: 'updateCount', data: { countType: 'vote', delta: -1 } } },
+        { id: 'takeActionBtn', action: { action: 'takeLoveHateAction', data: {} } },
+        { id: 'resetLoveHateBtn', action: { action: 'resetLoveHateCount', data: {} } },
+        { id: 'resetVoteBtn', action: { action: 'resetVote', data: {} } },
+        { id: 'restartBtn', action: { action: 'restartGame', data: {} } },
+        { id: 'toggleStageBtn', action: { action: 'switchDayNight', data: {} }, isToggle: true }
+      ];
+      hostBtnMap.forEach(({ id, action, isToggle }) => {
+        const btn = document.getElementById(id);
+        if (btn) {
+          btn.addEventListener('click', () => {
+            if (id === 'toggleStageBtn') {
+              // Toggle day/night
+              const isDay = !document.body.classList.contains('day-mode');
+              socket.emit('gameAction', { roomId, action: 'switchDayNight', data: { isDay }, playerName: myName });
+            } else {
+              socket.emit('gameAction', { roomId, ...action, playerName: myName });
+            }
+          });
+        }
+      });
+    });
+
+    function renderRoleCards() {
+      const container = document.getElementById('roleCardsCircle');
+      container.innerHTML = '';
+      const n = playerNames.length;
+      const radius = 240;
+      
+      // Role info for tooltip
+      const roleInfo = {
+        michael: {name:'Michael', team:'Cheater', power:'Can see Wind\'s card. Can guess Abby for instant win'},
+        wind: {name:'Wind', team:'Cheater', power:'Can see Michael\'s card. Molest: +2 Scandal; Mislead: flip Love→Hate'},
+        jack: {name:'Jack', team:'Cheater', power:'Hidden from everyone except self'},
+        abby: {name:'Abby', team:'Keeper', power:'Can see Michael and Wind'},
+        kennedi: {name:'Kennedi', team:'Keeper', power:'Can see own card. All Helpers count as Love'},
+        ker: {name:'Ker', team:'Keeper', power:'Can see own card. Can swap one Helper'},
+        kiko: {name:'Kiko', team:'Keeper (Pet)', power:'No special power'},
+        knox: {name:'Knox', team:'Keeper (Pet)', power:'No special power'},
+        nash: {name:'Nash', team:'Keeper (Pet)', power:'No special power'}
+      };
+
+      // Lowercase role for comparison
+      const myRoleLower = myRole ? myRole.toLowerCase() : '';
+      
+      // Calculate angles for players with equal spacing
+      const angles = Array.from({length: n}, (_, i) => {
+        return (Math.PI / 2) + (i * (2 * Math.PI / n));
+      });
+
+      playerNames.forEach((name, i) => {
+        const angle = angles[i];
+        const x = radius * Math.cos(angle);
+        const y = radius * Math.sin(angle);
+        
+        const card = document.createElement('img');
+        card.className = 'role-card' + (i === myIndex ? ' me' : '');
+        card.style.left = `calc(50% + ${x}px - 45px)`;
+        card.style.top = `calc(50% + ${y}px - 67.5px)`;
+        
+        // Show card face-up based on role-specific rules
+        const role = shuffledRoles[i];
+        const roleLower = role ? role.toLowerCase() : '';
+        let shouldShowCard = false;
+
+        if (i === myIndex) {
+          // Everyone can see their own card
+          shouldShowCard = true;
+        } else if (myRoleLower === 'abby') {
+          // Abby can see Michael and Wind's cards only
+          shouldShowCard = (roleLower === 'michael' || roleLower === 'wind');
+        } else if (myRoleLower === 'michael' || myRoleLower === 'wind') {
+          // Michael and Wind can see each other's cards
+          shouldShowCard = (roleLower === 'michael' || roleLower === 'wind');
+        } else {
+          // All other roles (Jack, Kennedi, Ker, Kiko, Knox, Nash) can only see their own card
+          shouldShowCard = false;
+        }
+
+        card.src = shouldShowCard ? roleImages[role] : backsideImg;
+        card.alt = shouldShowCard ? role : 'Hidden';
+        container.appendChild(card);
+
+        // Add role intro tooltip for myself only
+        if (i === myIndex) {
+          const tooltip = document.createElement('div');
+          tooltip.className = 'role-intro-tooltip';
+          const info = roleInfo[myRoleLower];
+          tooltip.innerHTML = `<div class='role-title'>${info.name} (${info.team})</div><div><b>Power:</b> ${info.power}</div>`;
+          card.addEventListener('mouseenter',()=>{tooltip.classList.add('active');});
+          card.addEventListener('mouseleave',()=>{tooltip.classList.remove('active');});
+          container.appendChild(tooltip);
+        }
+
+        // Add player name label with adjusted positioning
+        const nameLabel = document.createElement('div');
+        nameLabel.className = 'player-name-label';
+        const nameOffsetY = y > 0 ? 100 : -100;
+        nameLabel.style.left = `calc(50% + ${x}px)`;
+        nameLabel.style.top = `calc(50% + ${y + nameOffsetY}px)`;
+        nameLabel.textContent = name;
+        container.appendChild(nameLabel);
+      });
+    }
+
+    // Handle Ker's skill
+    function handleKerSkill() {
       const dialog = document.createElement('div');
       dialog.className = 'ker-skill-dialog';
       dialog.innerHTML = `
@@ -956,12 +1098,8 @@
       const helperToSwap = document.getElementById('helperToSwap').value;
       const newHelper = document.getElementById('newHelper').value;
       if (helperToSwap && newHelper) {
-        socket.emit('gameAction', { 
-          roomId: window.roomId, 
-          action: 'theChosenOne', 
-          data: { oldHelper: helperToSwap, newHelper: newHelper },
-          playerName: window.myName 
-        });
+        socket.emit('kerSwap', { helperToSwap, newHelper });
+        showUIMessage(`Ker swap ${helperToSwap} helper to ${newHelper} as new helper!`, 10000);
         closeKerDialog();
       }
     }
@@ -969,6 +1107,81 @@
     function closeKerDialog() {
       const dialog = document.querySelector('.ker-skill-dialog');
       if (dialog) dialog.remove();
+    }
+
+    // Handle Wind and Kennedi's skill phase
+    function handleLoveHate(action) {
+      if (isSkillPhase) return;
+      
+      if (action === 'love') {
+        tempLoveCount++;
+      } else {
+        tempHateCount++;
+      }
+      
+      // Disable love/hate buttons after use
+      document.getElementById('loveBtn').disabled = true;
+      document.getElementById('hateBtn').disabled = true;
+      
+      // Enable Wind and Kennedi's skills
+      isSkillPhase = true;
+      if (windSkillBtn) windSkillBtn.disabled = false;
+      if (kennediSkillBtn) kennediSkillBtn.disabled = false;
+      
+      showUIMessage("Wind and Kennedi are allowed to use their skills right now!", 10000);
+      
+      // After 10 seconds, disable skills and apply temp counts
+      setTimeout(() => {
+        isSkillPhase = false;
+        if (windSkillBtn) windSkillBtn.disabled = true;
+        if (kennediSkillBtn) kennediSkillBtn.disabled = true;
+        
+        // Apply the temporary counts
+        if (tempLoveCount > 0) {
+          socket.emit('updateLoveCount', tempLoveCount);
+        }
+        if (tempHateCount > 0) {
+          socket.emit('updateHateCount', tempHateCount);
+        }
+        
+        // Reset temp counts
+        tempLoveCount = 0;
+        tempHateCount = 0;
+        
+        // Re-enable love/hate buttons
+        document.getElementById('loveBtn').disabled = false;
+        document.getElementById('hateBtn').disabled = false;
+      }, 10000);
+    }
+
+    // Handle Wind's molest skill
+    function handleWindMolest() {
+      if (!isSkillPhase) return;
+      socket.emit('updateScandal', 2);
+      showUIMessage("Wind used Molest! Scandal +2", 5000);
+      if (windSkillBtn) windSkillBtn.disabled = true;
+    }
+
+    // Handle Wind's mislead skill
+    function handleWindMislead() {
+      if (!isSkillPhase) return;
+      // Implementation for flipping Love to Hate
+      showUIMessage("Wind used Mislead! Flipped Love to Hate", 5000);
+      if (windSkillBtn) windSkillBtn.disabled = true;
+    }
+
+    // Handle Kennedi's protect skill
+    function handleKennediProtect() {
+      if (!isSkillPhase) return;
+      // Implementation for making all Helpers count as Love
+      showUIMessage("Kennedi used Protect! All Helpers count as Love", 5000);
+      if (kennediSkillBtn) kennediSkillBtn.disabled = true;
+    }
+
+    // Handle Michael's find Abby skill
+    function handleMichaelFindAbby() {
+      showUIMessage("Michael thinks he has found Abby now!", 5000);
+      if (michaelSkillBtn) michaelSkillBtn.disabled = true;
     }
 
     // Add CSS for Ker's skill dialog
@@ -1021,49 +1234,6 @@
       }
     `;
     document.head.appendChild(style);
-
-    // --- Default State on Load ---
-    document.addEventListener('DOMContentLoaded', () => {
-      document.body.classList.remove('day-mode'); // Night mode by default
-      // Set all counts to 0
-      document.querySelectorAll('.score-value').forEach(el => el.textContent = '0');
-      loveCount.textContent = '0';
-      hateCount.textContent = '0';
-      // Disable all action buttons by default
-      document.querySelectorAll('.action-btn, .reset-btn, .vote-btn').forEach(btn => btn.disabled = true);
-      // Skill buttons will be rendered by renderSkillButtons
-
-      // --- Host-Only Button Event Listeners ---
-      const hostBtnMap = [
-        { id: 'partyPlusBtn', action: { action: 'updateCount', data: { countType: 'party', delta: 1 } } },
-        { id: 'partyMinusBtn', action: { action: 'updateCount', data: { countType: 'party', delta: -1 } } },
-        { id: 'scandalPlusBtn', action: { action: 'updateCount', data: { countType: 'scandal', delta: 1 } } },
-        { id: 'scandalMinusBtn', action: { action: 'updateCount', data: { countType: 'scandal', delta: -1 } } },
-        { id: 'closeKnotPlusBtn', action: { action: 'updateCount', data: { countType: 'closeKnot', delta: 1 } } },
-        { id: 'closeKnotMinusBtn', action: { action: 'updateCount', data: { countType: 'closeKnot', delta: -1 } } },
-        { id: 'votePlusBtn', action: { action: 'updateCount', data: { countType: 'vote', delta: 1 } } },
-        { id: 'voteMinusBtn', action: { action: 'updateCount', data: { countType: 'vote', delta: -1 } } },
-        { id: 'takeActionBtn', action: { action: 'takeLoveHateAction', data: {} } },
-        { id: 'resetLoveHateBtn', action: { action: 'resetLoveHateCount', data: {} } },
-        { id: 'resetVoteBtn', action: { action: 'resetVote', data: {} } },
-        { id: 'restartBtn', action: { action: 'restartGame', data: {} } },
-        { id: 'toggleStageBtn', action: { action: 'switchDayNight', data: {} }, isToggle: true }
-      ];
-      hostBtnMap.forEach(({ id, action, isToggle }) => {
-        const btn = document.getElementById(id);
-        if (btn) {
-          btn.addEventListener('click', () => {
-            if (id === 'toggleStageBtn') {
-              // Toggle day/night
-              const isDay = !document.body.classList.contains('day-mode');
-              socket.emit('gameAction', { roomId: window.roomId, action: 'switchDayNight', data: { isDay }, playerName: window.myName });
-            } else {
-              socket.emit('gameAction', { roomId: window.roomId, ...action, playerName: window.myName });
-            }
-          });
-        }
-      });
-    });
 
     // Host controls
     function initializeHostControls() {
