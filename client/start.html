@@ -707,6 +707,36 @@
     socket.on('gameStateUpdate', (newGameState) => {
       console.log('[gameStateUpdate]', newGameState);
       gameState = newGameState;
+      
+      // Update score displays
+      if (gameState.partyCount !== undefined) {
+        document.getElementById('partyCount').textContent = gameState.partyCount;
+      }
+      if (gameState.scandalScore !== undefined) {
+        document.getElementById('scandalScore').textContent = gameState.scandalScore;
+      }
+      if (gameState.closeKnotScore !== undefined) {
+        document.getElementById('closeKnotScore').textContent = gameState.closeKnotScore;
+      }
+      if (gameState.voteCount !== undefined) {
+        document.getElementById('voteCount').textContent = gameState.voteCount;
+      }
+      if (gameState.loveCount !== undefined) {
+        loveCount.textContent = gameState.loveCount;
+      }
+      if (gameState.hateCount !== undefined) {
+        hateCount.textContent = gameState.hateCount;
+      }
+      
+      // Update day/night mode
+      if (gameState.isDay !== undefined) {
+        if (gameState.isDay) {
+          document.body.classList.add('day-mode');
+        } else {
+          document.body.classList.remove('day-mode');
+        }
+      }
+      
       if (gameState.players) {
         positionCardsInCircle(gameState.players);
         updateHostOnlyButtons();
@@ -718,6 +748,36 @@
     socket.on('initialGameState', (state) => {
       console.log('[initialGameState]', state);
       gameState = state;
+      
+      // Update score displays
+      if (gameState.partyCount !== undefined) {
+        document.getElementById('partyCount').textContent = gameState.partyCount;
+      }
+      if (gameState.scandalScore !== undefined) {
+        document.getElementById('scandalScore').textContent = gameState.scandalScore;
+      }
+      if (gameState.closeKnotScore !== undefined) {
+        document.getElementById('closeKnotScore').textContent = gameState.closeKnotScore;
+      }
+      if (gameState.voteCount !== undefined) {
+        document.getElementById('voteCount').textContent = gameState.voteCount;
+      }
+      if (gameState.loveCount !== undefined) {
+        loveCount.textContent = gameState.loveCount;
+      }
+      if (gameState.hateCount !== undefined) {
+        hateCount.textContent = gameState.hateCount;
+      }
+      
+      // Update day/night mode
+      if (gameState.isDay !== undefined) {
+        if (gameState.isDay) {
+          document.body.classList.add('day-mode');
+        } else {
+          document.body.classList.remove('day-mode');
+        }
+      }
+      
       if (gameState.players) {
         positionCardsInCircle(gameState.players);
         updateHostOnlyButtons();

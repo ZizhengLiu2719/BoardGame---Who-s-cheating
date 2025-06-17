@@ -386,7 +386,24 @@ io.on('connection', (socket) => {
         if ([
           'party', 'scandal', 'closeKnot', 'vote'
         ].includes(data.countType)) {
-          const key = data.countType + 'Count';
+          // Map countType to correct game state property names
+          let key;
+          switch (data.countType) {
+            case 'party':
+              key = 'partyCount';
+              break;
+            case 'scandal':
+              key = 'scandalScore';
+              break;
+            case 'closeKnot':
+              key = 'closeKnotScore';
+              break;
+            case 'vote':
+              key = 'voteCount';
+              break;
+            default:
+              return;
+          }
           gameState[key] += data.delta;
           if (gameState[key] < 0) gameState[key] = 0;
           await updateGameState(roomId, gameState);
