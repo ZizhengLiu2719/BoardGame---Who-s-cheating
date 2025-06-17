@@ -100,12 +100,14 @@
         'Test Player 6'
       ];
 
-      // Open all 6 tabs synchronously
-      for (let i = 0; i < testPlayers.length; i++) {
-        const isHost = i === 0;
-        const url = `start.html?roomId=${testRoomId}&password=${testPassword}&name=${encodeURIComponent(testPlayers[i])}&roomname=${encodeURIComponent(testRoomName)}${isHost ? '&host=1&maxPlayers=6&createRoom=1' : '&maxPlayers=6'}`;
-        window.open(url, `testPlayer${i + 1}`);
-      }
+// Open all 6 tabs synchronously
+for (let i = 0; i < testPlayers.length; i++) {
+  setTimeout(() => {
+    const isHost = i === 0;
+    const url = `start.html?roomId=${testRoomId}&password=${testPassword}&name=${encodeURIComponent(testPlayers[i])}&roomname=${encodeURIComponent(testRoomName)}${isHost ? '&host=1&maxPlayers=6&createRoom=1' : '&maxPlayers=6'}`;
+    window.open(url, `testPlayer${i + 1}`);
+  }, i * 1000);
+}
     }
   </script>
 </body>
