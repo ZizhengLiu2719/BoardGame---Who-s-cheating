@@ -1229,6 +1229,31 @@
     socket.on('gameStarted', () => {
       initializeHostControls();
     });
+
+    // Find the reset vote button handler and update it to only enable the vote button
+    const resetVoteBtn = document.getElementById('resetVoteBtn');
+    if (resetVoteBtn) {
+      resetVoteBtn.addEventListener('click', () => {
+        // Only enable the vote button
+        const voteBtn = document.getElementById('voteSubmitBtn');
+        if (voteBtn) {
+          voteBtn.disabled = false;
+          voteBtn.style.opacity = '1';
+        }
+        // Optionally show a message overlay if you want
+        const overlay = document.getElementById('voteMessageOverlay');
+        if (overlay) {
+          overlay.style.display = 'block';
+          setTimeout(() => {
+            overlay.style.display = 'none';
+            if (voteBtn) {
+              voteBtn.disabled = true;
+              voteBtn.style.opacity = '0.5';
+            }
+          }, 10000);
+        }
+      });
+    }
   </script>
 </body>
 </html>
