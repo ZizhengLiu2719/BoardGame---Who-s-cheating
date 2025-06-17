@@ -611,9 +611,11 @@
         if (message.text.includes('Host and helpers please take your action, and Wind and Kennedi can use their skills now!')) {
           setLoveHateWindow(true);
           setWindKennediSkillWindow(true);
+          renderSkillButtons();
           setTimeout(() => {
             setLoveHateWindow(false);
             setWindKennediSkillWindow(false);
+            renderSkillButtons();
           }, 10000);
         }
         if (message.text.includes('Every player can vote now!')) {
@@ -857,7 +859,7 @@
       }
       skillButtonContainer.style.display = 'flex';
       skillButtonContainer.style.flexDirection = 'row';
-      // Wind: two skill buttons, always visible if not used, but only enabled during skill window (for Mislead)
+      // Wind: two skill buttons
       if (role === 'Wind') {
         // Molest: only usable at night, one-time
         const molestBtn = document.createElement('button');
@@ -867,22 +869,24 @@
         molestBtn.disabled = !!usedSkills['molest'] || !isNight;
         molestBtn.onclick = function() {
           if (molestBtn.disabled) return;
+          molestBtn.disabled = true;
           socket.emit('useSkill', { skill: 'molest' });
         };
         skillButtonContainer.appendChild(molestBtn);
-        // Mislead: always visible if not used, only enabled during skill window
+        // Mislead: only enabled during skill window, one-time
         const misleadBtn = document.createElement('button');
         misleadBtn.className = 'skill-btn';
         misleadBtn.textContent = 'Mislead';
         misleadBtn.disabled = !!usedSkills['mislead'] || !windKennediSkillWindow;
         misleadBtn.onclick = function() {
           if (misleadBtn.disabled) return;
+          misleadBtn.disabled = true;
           socket.emit('useSkill', { skill: 'mislead' });
         };
         skillButtonContainer.appendChild(misleadBtn);
         return;
       }
-      // Michael: Find Abby (one-time, always visible if not used)
+      // Michael: Find Abby (one-time, always enabled if not used)
       if (role === 'Michael') {
         const abbyBtn = document.createElement('button');
         abbyBtn.className = 'skill-btn';
@@ -890,12 +894,13 @@
         abbyBtn.disabled = !!usedSkills['findabby'];
         abbyBtn.onclick = function() {
           if (abbyBtn.disabled) return;
+          abbyBtn.disabled = true;
           socket.emit('useSkill', { skill: 'findabby' });
         };
         skillButtonContainer.appendChild(abbyBtn);
         return;
       }
-      // Kennedi: Protecting Party (one-time, always visible if not used, only enabled during skill window)
+      // Kennedi: Protecting Party (one-time, only enabled during skill window)
       if (role === 'Kennedi') {
         const protectBtn = document.createElement('button');
         protectBtn.className = 'skill-btn';
@@ -903,12 +908,13 @@
         protectBtn.disabled = !!usedSkills['protectingparty'] || !windKennediSkillWindow;
         protectBtn.onclick = function() {
           if (protectBtn.disabled) return;
+          protectBtn.disabled = true;
           socket.emit('useSkill', { skill: 'protectingparty' });
         };
         skillButtonContainer.appendChild(protectBtn);
         return;
       }
-      // Ker: The Chosen One (one-time, always visible if not used)
+      // Ker: The Chosen One (one-time, always enabled if not used)
       if (role === 'Ker') {
         const kerBtn = document.createElement('button');
         kerBtn.className = 'skill-btn';
@@ -916,6 +922,7 @@
         kerBtn.disabled = !!usedSkills['thechosenone'];
         kerBtn.onclick = function() {
           if (kerBtn.disabled) return;
+          kerBtn.disabled = true;
           showKerPopup();
         };
         skillButtonContainer.appendChild(kerBtn);
