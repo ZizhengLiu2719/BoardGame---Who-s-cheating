@@ -313,7 +313,11 @@ io.on('connection', (socket) => {
       
       // Send current game state if available
       const gameState = await getGameState(roomId);
-      if (gameState) {
+      if (gameState && gameState.players && gameState.players.every(p => p.role)) {
+        // Game has started and roles are assigned
+        socket.emit('initialGameState', gameState);
+      } else if (gameState) {
+        // Game state exists but roles not assigned yet
         socket.emit('initialGameState', gameState);
       }
       
