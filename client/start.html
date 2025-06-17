@@ -581,11 +581,12 @@
     let loveHateWindow = false;
     let voteWindow = false;
     let windKennediSkillWindow = false;
+    let loveHateClickedThisRound = false;
 
     function setLoveHateWindow(enabled) {
       loveHateWindow = enabled;
-      loveBtn.disabled = !enabled;
-      hateBtn.disabled = !enabled;
+      loveBtn.disabled = !enabled || loveHateClickedThisRound;
+      hateBtn.disabled = !enabled || loveHateClickedThisRound;
     }
     function setVoteWindow(enabled) {
       voteWindow = enabled;
@@ -602,13 +603,18 @@
     socket.on('uiMessage', (message) => {
       if (message) {
         showUIMessage(message.text, 10000);
-        if (message.text.includes('Host and helpers can do their love or hate action now!')) {
+        if (message.text.includes('Host and helpers can do their action right now')) {
+          loveHateClickedThisRound = false;
           setLoveHateWindow(true);
           setTimeout(() => setLoveHateWindow(false), 10000);
         }
-        if (message.text.includes('Wind and Kennedi are allowed to use their skills right now!')) {
+        if (message.text.includes('Host and helpers please take your action, and Wind and Kennedi can use their skills now!')) {
+          setLoveHateWindow(true);
           setWindKennediSkillWindow(true);
-          setTimeout(() => setWindKennediSkillWindow(false), 10000);
+          setTimeout(() => {
+            setLoveHateWindow(false);
+            setWindKennediSkillWindow(false);
+          }, 10000);
         }
         if (message.text.includes('Every player can vote now!')) {
           setVoteWindow(true);
@@ -617,107 +623,21 @@
       }
     });
 
-    // --- Skill Button Logic (polished) ---
-    function renderSkillButtons() {
-      const skillButtonContainer = document.getElementById('skillButtonContainer');
-      skillButtonContainer.innerHTML = '';
-      if (!gameState || !gameState.players) return;
-      const me = gameState.players.find(p => p.id === socket.id);
-      if (!me || !me.role) return;
-      const role = me.role;
-      const usedSkills = (gameState.usedActions && gameState.usedActions.skills && gameState.usedActions.skills[me.name]) || {};
-      // Hide skill buttons for pets, Jack, Abby
-      const noSkillRoles = ['Kiko', 'Knox', 'Nash', 'Jack', 'Abby'];
-      if (noSkillRoles.includes(role)) {
-        skillButtonContainer.style.display = 'none';
-        skillButtonContainer.innerHTML = '';
-        return;
-      }
-      skillButtonContainer.style.display = 'flex';
-      skillButtonContainer.style.flexDirection = 'row';
-      // Wind: two skill buttons
-      if (role === 'Wind') {
-        // Molest: only usable at night, one-time
-        const molestBtn = document.createElement('button');
-        molestBtn.className = 'skill-btn';
-        molestBtn.textContent = 'Molest';
-        const isNight = !gameState.isDay;
-        molestBtn.disabled = !!usedSkills['molest'] || !isNight;
-        molestBtn.onclick = function() {
-          if (molestBtn.disabled) return;
-          socket.emit('useSkill', { skill: 'molest' });
-        };
-        skillButtonContainer.appendChild(molestBtn);
-        // Mislead: only usable during skill window, one-time
-        const misleadBtn = document.createElement('button');
-        misleadBtn.className = 'skill-btn';
-        misleadBtn.textContent = 'Mislead';
-        misleadBtn.disabled = !!usedSkills['mislead'] || !windKennediSkillWindow;
-        misleadBtn.onclick = function() {
-          if (misleadBtn.disabled) return;
-          socket.emit('useSkill', { skill: 'mislead' });
-        };
-        skillButtonContainer.appendChild(misleadBtn);
-        return;
-      }
-      // Michael: Find Abby (one-time)
-      if (role === 'Michael') {
-        const abbyBtn = document.createElement('button');
-        abbyBtn.className = 'skill-btn';
-        abbyBtn.textContent = 'Find Abby';
-        abbyBtn.disabled = !!usedSkills['findabby'];
-        abbyBtn.onclick = function() {
-          if (abbyBtn.disabled) return;
-          socket.emit('useSkill', { skill: 'findabby' });
-        };
-        skillButtonContainer.appendChild(abbyBtn);
-        return;
-      }
-      // Kennedi: Protecting Party (one-time, only during skill window)
-      if (role === 'Kennedi') {
-        const protectBtn = document.createElement('button');
-        protectBtn.className = 'skill-btn';
-        protectBtn.textContent = 'Protecting Party';
-        protectBtn.disabled = !!usedSkills['protectingparty'] || !windKennediSkillWindow;
-        protectBtn.onclick = function() {
-          if (protectBtn.disabled) return;
-          socket.emit('useSkill', { skill: 'protectingparty' });
-        };
-        skillButtonContainer.appendChild(protectBtn);
-        return;
-      }
-      // Ker: The Chosen One (one-time)
-      if (role === 'Ker') {
-        const kerBtn = document.createElement('button');
-        kerBtn.className = 'skill-btn';
-        kerBtn.textContent = 'The Chosen One';
-        kerBtn.disabled = !!usedSkills['thechosenone'];
-        kerBtn.onclick = function() {
-          if (kerBtn.disabled) return;
-          showKerPopup();
-        };
-        skillButtonContainer.appendChild(kerBtn);
-        return;
-      }
-    }
-
     // --- Love/Hate/Vote Button One-Time Use Logic ---
     loveBtn.addEventListener('click', () => {
-      if (!loveBtn.disabled && loveHateWindow) {
-        tempLoveCount++;
-        loveCount.textContent = tempLoveCount;
+      if (!loveBtn.disabled && loveHateWindow && !loveHateClickedThisRound) {
+        loveHateClickedThisRound = true;
         loveBtn.disabled = true;
         hateBtn.disabled = true;
-        socket.emit('loveHateAction', { type: 'love', count: tempLoveCount });
+        socket.emit('loveHateAction', { type: 'love' });
       }
     });
     hateBtn.addEventListener('click', () => {
-      if (!hateBtn.disabled && loveHateWindow) {
-        tempHateCount++;
-        hateCount.textContent = tempHateCount;
+      if (!hateBtn.disabled && loveHateWindow && !loveHateClickedThisRound) {
+        loveHateClickedThisRound = true;
         loveBtn.disabled = true;
         hateBtn.disabled = true;
-        socket.emit('loveHateAction', { type: 'hate', count: tempHateCount });
+        socket.emit('loveHateAction', { type: 'hate' });
       }
     });
     document.getElementById('voteSubmitBtn').addEventListener('click', () => {
@@ -727,6 +647,22 @@
       document.getElementById('voteSubmitBtn').disabled = true;
       // Emit vote action to server
       socket.emit('gameAction', { roomId, action: 'vote', playerName: myName });
+    });
+
+    // Update love/hate counts only when server sends final counts
+    socket.on('updateLoveHateCount', ({ love, hate }) => {
+      loveCount.textContent = love;
+      hateCount.textContent = hate;
+    });
+    socket.on('gameStateUpdate', (newGameState) => {
+      gameState = newGameState;
+      if (gameState.loveCount !== undefined) {
+        loveCount.textContent = gameState.loveCount;
+      }
+      if (gameState.hateCount !== undefined) {
+        hateCount.textContent = gameState.hateCount;
+      }
+      // ... existing code ...
     });
 
     // Handle skill buttons
@@ -749,13 +685,6 @@
     }
 
     // Socket event listeners
-    socket.on('updateLoveHateCount', ({ love, hate }) => {
-      loveCount.textContent = love;
-      hateCount.textContent = hate;
-      tempLoveCount = love;
-      tempHateCount = hate;
-    });
-
     socket.on('enableLoveHate', () => {
       loveBtn.disabled = false;
       hateBtn.disabled = false;

@@ -244,6 +244,9 @@ function applySkillEffect(gameState, playerName, skill, extraData) {
   }
 }
 
+// --- Action/Skill Phase State ---
+const actionPhaseState = {};
+
 // Socket.IO connection handler
 io.on('connection', (socket) => {
   console.log('A user connected:', socket.id);
@@ -442,10 +445,27 @@ io.on('connection', (socket) => {
         }, 5000);
         break;
 
-      case 'takeLoveHateAction':
+      case 'takeLoveHateAction': {
         if (!isHost) return;
-        await broadcastUIMessage(roomId, 'Host and helpers can do their love or hate action now!', 10000);
+        // Start first 10s window
+        if (!actionPhaseState[roomId]) {
+          actionPhaseState[roomId] = {
+            phase: 1,
+            loveClicks: {},
+            hateClicks: {},
+            windUsed: false,
+            kennediUsed: false,
+            skillWindowTimer: null,
+            resolveTimer: null
+          };
+        }
+        await broadcastUIMessage(roomId, 'Host and helpers can do their action right now!', 10000);
+        // After 10s, if no one clicked, auto-start skill window
+        actionPhaseState[roomId].skillWindowTimer = setTimeout(() => {
+          startSkillWindow(roomId);
+        }, 10000);
         break;
+      }
 
       case 'resetLoveHateCount':
         if (!isHost) return;
@@ -503,40 +523,29 @@ io.on('connection', (socket) => {
     }
   });
 
-  // Handle love/hate actions
-  let tempLoveHate = {};
-  socket.on('loveHateAction', async ({ type, count }) => {
-    const roomId = Array.from(socket.rooms)[1]; // Get room ID
+  // --- Love/Hate Click Handler ---
+  socket.on('loveHateAction', async ({ type }) => {
+    const roomId = Array.from(socket.rooms)[1];
     if (!roomId) return;
-    const gameState = await getGameState(roomId);
-    if (!gameState) return;
-    // Store temp counts per room
-    if (!tempLoveHate[roomId]) tempLoveHate[roomId] = { love: 0, hate: 0 };
+    const player = (await getGameState(roomId)).players.find(p => p.id === socket.id);
+    if (!player) return;
+    if (!actionPhaseState[roomId]) return;
+    // Only allow one click per player per phase
+    if (actionPhaseState[roomId].loveClicks[player.name] || actionPhaseState[roomId].hateClicks[player.name]) return;
     if (type === 'love') {
-      tempLoveHate[roomId].love = count;
+      actionPhaseState[roomId].loveClicks[player.name] = true;
     } else {
-      tempLoveHate[roomId].hate = count;
+      actionPhaseState[roomId].hateClicks[player.name] = true;
     }
-    // Broadcast updated counts to all players (temp)
-    io.to(roomId).emit('updateLoveHateCount', {
-      love: tempLoveHate[roomId].love,
-      hate: tempLoveHate[roomId].hate
-    });
-    // Show skill phase message
-    await broadcastUIMessage(roomId, "Wind and Kennedi are allowed to use their skills right now!", 10000);
-    // After 10s, apply temp counts to gameState and reset temp
-    setTimeout(async () => {
-      const gs = await getGameState(roomId);
-      if (!gs) return;
-      gs.loveCount = tempLoveHate[roomId].love;
-      gs.hateCount = tempLoveHate[roomId].hate;
-      await updateGameState(roomId, gs);
-      io.to(roomId).emit('gameStateUpdate', gs);
-      tempLoveHate[roomId] = { love: 0, hate: 0 };
-    }, 10000);
+    // If in phase 1, start skill window immediately
+    if (actionPhaseState[roomId].phase === 1) {
+      actionPhaseState[roomId].phase = 2;
+      clearTimeout(actionPhaseState[roomId].skillWindowTimer);
+      startSkillWindow(roomId);
+    }
   });
 
-  // Handle skill usage
+  // --- Skill Use Handler ---
   socket.on('useSkill', async ({ skill }) => {
     const roomId = Array.from(socket.rooms)[1];
     if (!roomId) return;
@@ -544,34 +553,61 @@ io.on('connection', (socket) => {
     if (!gameState) return;
     const player = gameState.players.find(p => p.id === socket.id);
     if (!player) return;
-    // Check if player can use the skill
-    if (!canPlayerUseSkill(gameState, player.name, skill)) {
-      return;
+    if (!actionPhaseState[roomId] || actionPhaseState[roomId].phase !== 2) return;
+    // Only allow Wind and Kennedi to use their skills during skill window
+    if (player.role === 'Wind' && skill === 'mislead') {
+      actionPhaseState[roomId].windUsed = true;
     }
-    // Apply skill effect
-    applySkillEffect(gameState, player.name, skill);
-    // Mark skill as used
+    if (player.role === 'Kennedi' && skill === 'protectingparty') {
+      actionPhaseState[roomId].kennediUsed = true;
+    }
+    // Mark skill as used in gameState (so button disables)
     markSkillUsed(gameState, player.name, skill);
-    // Update game state
     await updateGameState(roomId, gameState);
-    // Broadcast updated counts
-    io.to(roomId).emit('updateLoveHateCount', {
-      love: gameState.loveCount,
-      hate: gameState.hateCount
-    });
-    // Show confirmation message
-    if (skill === 'findabby') {
-      await broadcastUIMessage(roomId, 'Michael thinks he has found Abby now!', 5000);
-    } else if (skill === 'molest') {
-      await broadcastUIMessage(roomId, `${player.name} used their Molest skill!`, 3000);
-    } else if (skill === 'mislead') {
-      await broadcastUIMessage(roomId, `${player.name} used their Mislead skill!`, 3000);
-    } else if (skill === 'protectingparty') {
-      await broadcastUIMessage(roomId, `${player.name} used their Protecting Party skill!`, 3000);
-    } else if (skill === 'thechosenone') {
-      // Handled elsewhere
-    }
   });
+
+  // --- Start Skill Window ---
+  async function startSkillWindow(roomId) {
+    if (!actionPhaseState[roomId]) return;
+    actionPhaseState[roomId].phase = 2;
+    broadcastUIMessage(roomId, 'Host and helpers please take your action, and Wind and Kennedi can use their skills now!', 10000);
+    // After 10s, resolve all actions
+    actionPhaseState[roomId].resolveTimer = setTimeout(() => {
+      resolveActionPhase(roomId);
+    }, 10000);
+  }
+
+  // --- Resolve All Actions ---
+  async function resolveActionPhase(roomId) {
+    const state = actionPhaseState[roomId];
+    if (!state) return;
+    const gameState = await getGameState(roomId);
+    if (!gameState) return;
+    // Tally love/hate
+    let love = Object.keys(state.loveClicks).length;
+    let hate = Object.keys(state.hateClicks).length;
+    // Apply skills
+    if (state.windUsed) {
+      // Wind's Mislead: convert one love to hate (if any love exists)
+      if (love > 0) {
+        love -= 1;
+        hate += 1;
+      }
+    } else if (state.kennediUsed) {
+      // Kennedi's Protecting the Party: all hate becomes love
+      love += hate;
+      hate = 0;
+    }
+    // If both used, Wind's skill wins (already handled by order)
+    gameState.loveCount = love;
+    gameState.hateCount = hate;
+    await updateGameState(roomId, gameState);
+    io.to(roomId).emit('gameStateUpdate', gameState);
+    // Reset phase state
+    clearTimeout(state.skillWindowTimer);
+    clearTimeout(state.resolveTimer);
+    delete actionPhaseState[roomId];
+  }
 
   // Handle disconnect
   socket.on('disconnect', async () => {
