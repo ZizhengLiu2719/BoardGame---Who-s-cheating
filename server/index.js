@@ -219,21 +219,11 @@ function markSkillUsed(gameState, playerName, skill) {
   gameState.usedActions.skills[playerName][skill] = true;
 }
 
-// Helper: Apply skill effect
+// Helper: Apply skill effect (only for immediate effects, not phase-based ones)
 function applySkillEffect(gameState, playerName, skill, extraData) {
   switch (skill) {
     case 'molest':
       gameState.scandalScore += 2;
-      break;
-    case 'mislead':
-      // Flip love to hate
-      const temp = gameState.loveCount;
-      gameState.loveCount = gameState.hateCount;
-      gameState.hateCount = temp;
-      break;
-    case 'protectingparty':
-      // All helpers count as love (for now, just +3 as per rules)
-      gameState.loveCount += 3;
       break;
     case 'findabby':
       // Just show message, no effect on game state
@@ -241,6 +231,7 @@ function applySkillEffect(gameState, playerName, skill, extraData) {
     case 'thechosenone':
       // Helper swap is handled in the UI message
       break;
+    // Note: mislead and protectingparty effects are handled in resolveActionPhase
   }
 }
 
