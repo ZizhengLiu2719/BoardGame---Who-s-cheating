@@ -624,26 +624,81 @@
       if (!gameState || !gameState.players) return;
       const me = gameState.players.find(p => p.id === socket.id);
       if (!me || !me.role) return;
+      const role = me.role;
       const usedSkills = (gameState.usedActions && gameState.usedActions.skills && gameState.usedActions.skills[me.name]) || {};
-      let enabled = false;
-      if (me.role === 'Wind') {
-        enabled = windKennediSkillWindow && !usedSkills['mislead'];
-      } else if (me.role === 'Kennedi') {
-        enabled = windKennediSkillWindow && !usedSkills['protectingparty'];
-      } else if (me.role === 'Jack') {
-        enabled = !gameState.isDay && !usedSkills['molest'];
-      } else if (me.role === 'Michael') {
-        enabled = !usedSkills['findabby'];
-      } else if (me.role === 'Ker') {
-        enabled = !usedSkills['thechosenone'];
+      // Hide skill buttons for pets, Jack, Abby
+      const noSkillRoles = ['Kiko', 'Knox', 'Nash', 'Jack', 'Abby'];
+      if (noSkillRoles.includes(role)) {
+        skillButtonContainer.style.display = 'none';
+        skillButtonContainer.innerHTML = '';
+        return;
       }
-      skillButtonContainer.appendChild(createSkillButton(me.role, usedSkills[getSkillButtonLabel(me.role).toLowerCase().replace(/ /g, '')], enabled, () => {
-        if (me.role === 'Ker') {
+      skillButtonContainer.style.display = 'flex';
+      skillButtonContainer.style.flexDirection = 'row';
+      // Wind: two skill buttons
+      if (role === 'Wind') {
+        // Molest: only usable at night, one-time
+        const molestBtn = document.createElement('button');
+        molestBtn.className = 'skill-btn';
+        molestBtn.textContent = 'Molest';
+        const isNight = !gameState.isDay;
+        molestBtn.disabled = !!usedSkills['molest'] || !isNight;
+        molestBtn.onclick = function() {
+          if (molestBtn.disabled) return;
+          socket.emit('useSkill', { skill: 'molest' });
+        };
+        skillButtonContainer.appendChild(molestBtn);
+        // Mislead: only usable during skill window, one-time
+        const misleadBtn = document.createElement('button');
+        misleadBtn.className = 'skill-btn';
+        misleadBtn.textContent = 'Mislead';
+        misleadBtn.disabled = !!usedSkills['mislead'] || !windKennediSkillWindow;
+        misleadBtn.onclick = function() {
+          if (misleadBtn.disabled) return;
+          socket.emit('useSkill', { skill: 'mislead' });
+        };
+        skillButtonContainer.appendChild(misleadBtn);
+        return;
+      }
+      // Michael: Find Abby (one-time)
+      if (role === 'Michael') {
+        const abbyBtn = document.createElement('button');
+        abbyBtn.className = 'skill-btn';
+        abbyBtn.textContent = 'Find Abby';
+        abbyBtn.disabled = !!usedSkills['findabby'];
+        abbyBtn.onclick = function() {
+          if (abbyBtn.disabled) return;
+          socket.emit('useSkill', { skill: 'findabby' });
+        };
+        skillButtonContainer.appendChild(abbyBtn);
+        return;
+      }
+      // Kennedi: Protecting Party (one-time, only during skill window)
+      if (role === 'Kennedi') {
+        const protectBtn = document.createElement('button');
+        protectBtn.className = 'skill-btn';
+        protectBtn.textContent = 'Protecting Party';
+        protectBtn.disabled = !!usedSkills['protectingparty'] || !windKennediSkillWindow;
+        protectBtn.onclick = function() {
+          if (protectBtn.disabled) return;
+          socket.emit('useSkill', { skill: 'protectingparty' });
+        };
+        skillButtonContainer.appendChild(protectBtn);
+        return;
+      }
+      // Ker: The Chosen One (one-time)
+      if (role === 'Ker') {
+        const kerBtn = document.createElement('button');
+        kerBtn.className = 'skill-btn';
+        kerBtn.textContent = 'The Chosen One';
+        kerBtn.disabled = !!usedSkills['thechosenone'];
+        kerBtn.onclick = function() {
+          if (kerBtn.disabled) return;
           showKerPopup();
-        } else {
-          socket.emit('useSkill', { skill: getSkillButtonLabel(me.role).toLowerCase().replace(/ /g, '') });
-        }
-      }));
+        };
+        skillButtonContainer.appendChild(kerBtn);
+        return;
+      }
     }
 
     // --- Love/Hate/Vote Button One-Time Use Logic ---

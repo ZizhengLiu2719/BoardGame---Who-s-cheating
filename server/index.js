@@ -182,14 +182,12 @@ function canPlayerVote(gameState, playerName) {
 function canPlayerUseSkill(gameState, playerName, skill) {
   const player = gameState.players.find(p => p.name === playerName);
   if (!player) return false;
-  
   // Check if skill is already used
   if (gameState.usedActions.skills[playerName]?.[skill]) return false;
-  
   // Role-specific skill checks
   switch (skill) {
     case 'molest':
-      return player.role === 'Jack' && !gameState.isDay;
+      return player.role === 'Wind' && !gameState.isDay;
     case 'mislead':
       return player.role === 'Wind';
     case 'protectingparty':
@@ -234,8 +232,8 @@ function applySkillEffect(gameState, playerName, skill, extraData) {
       gameState.hateCount = temp;
       break;
     case 'protectingparty':
-      // All helpers count as love
-      gameState.loveCount += gameState.players.filter(p => p.role === 'Helper').length;
+      // All helpers count as love (for now, just +3 as per rules)
+      gameState.loveCount += 3;
       break;
     case 'findabby':
       // Just show message, no effect on game state
@@ -506,65 +504,73 @@ io.on('connection', (socket) => {
   });
 
   // Handle love/hate actions
+  let tempLoveHate = {};
   socket.on('loveHateAction', async ({ type, count }) => {
     const roomId = Array.from(socket.rooms)[1]; // Get room ID
     if (!roomId) return;
-
     const gameState = await getGameState(roomId);
     if (!gameState) return;
-
-    // Update temporary counts
+    // Store temp counts per room
+    if (!tempLoveHate[roomId]) tempLoveHate[roomId] = { love: 0, hate: 0 };
     if (type === 'love') {
-      gameState.loveCount = count;
+      tempLoveHate[roomId].love = count;
     } else {
-      gameState.hateCount = count;
+      tempLoveHate[roomId].hate = count;
     }
-
-    await updateGameState(roomId, gameState);
-    
-    // Broadcast updated counts to all players
+    // Broadcast updated counts to all players (temp)
     io.to(roomId).emit('updateLoveHateCount', {
-      love: gameState.loveCount,
-      hate: gameState.hateCount
+      love: tempLoveHate[roomId].love,
+      hate: tempLoveHate[roomId].hate
     });
-
     // Show skill phase message
     await broadcastUIMessage(roomId, "Wind and Kennedi are allowed to use their skills right now!", 10000);
+    // After 10s, apply temp counts to gameState and reset temp
+    setTimeout(async () => {
+      const gs = await getGameState(roomId);
+      if (!gs) return;
+      gs.loveCount = tempLoveHate[roomId].love;
+      gs.hateCount = tempLoveHate[roomId].hate;
+      await updateGameState(roomId, gs);
+      io.to(roomId).emit('gameStateUpdate', gs);
+      tempLoveHate[roomId] = { love: 0, hate: 0 };
+    }, 10000);
   });
 
   // Handle skill usage
   socket.on('useSkill', async ({ skill }) => {
     const roomId = Array.from(socket.rooms)[1];
     if (!roomId) return;
-
     const gameState = await getGameState(roomId);
     if (!gameState) return;
-
     const player = gameState.players.find(p => p.id === socket.id);
     if (!player) return;
-
     // Check if player can use the skill
     if (!canPlayerUseSkill(gameState, player.name, skill)) {
       return;
     }
-
     // Apply skill effect
     applySkillEffect(gameState, player.name, skill);
-
     // Mark skill as used
     markSkillUsed(gameState, player.name, skill);
-
     // Update game state
     await updateGameState(roomId, gameState);
-
     // Broadcast updated counts
     io.to(roomId).emit('updateLoveHateCount', {
       love: gameState.loveCount,
       hate: gameState.hateCount
     });
-
     // Show confirmation message
-    await broadcastUIMessage(roomId, `${player.name} used their ${skill} skill!`, 3000);
+    if (skill === 'findabby') {
+      await broadcastUIMessage(roomId, 'Michael thinks he has found Abby now!', 5000);
+    } else if (skill === 'molest') {
+      await broadcastUIMessage(roomId, `${player.name} used their Molest skill!`, 3000);
+    } else if (skill === 'mislead') {
+      await broadcastUIMessage(roomId, `${player.name} used their Mislead skill!`, 3000);
+    } else if (skill === 'protectingparty') {
+      await broadcastUIMessage(roomId, `${player.name} used their Protecting Party skill!`, 3000);
+    } else if (skill === 'thechosenone') {
+      // Handled elsewhere
+    }
   });
 
   // Handle disconnect
