@@ -523,6 +523,22 @@
       font-style: italic;
     }
 
+    .queue-status {
+      background: rgba(255, 193, 7, 0.1);
+      border: 1px solid rgba(255, 193, 7, 0.3);
+      border-radius: 8px;
+      padding: 4px 8px;
+      text-align: center;
+      font-weight: 500;
+      animation: pulse-gentle 2s infinite;
+    }
+
+    @keyframes pulse-gentle {
+      0% { opacity: 0.7; }
+      50% { opacity: 1; }
+      100% { opacity: 0.7; }
+    }
+
     .connection-status {
       margin-left: auto;
       font-size: 10px;
@@ -1599,6 +1615,7 @@
         this.audioContext = null;
         this.analyser = null;
         this.audioLevelInterval = null;
+        this.joinStatus = 'waiting'; // waiting, queued, joining, connected
         
         this.init();
       }
@@ -1614,6 +1631,10 @@
           if (location.protocol !== 'https:' && location.hostname !== 'localhost') {
             throw new Error('Voice chat requires HTTPS (except on localhost)');
           }
+          
+          // Create UI first to show status
+          this.createVoiceChatUI();
+          this.updateStatus('Requesting microphone access...');
           
           // Get microphone access
           this.localStream = await navigator.mediaDevices.getUserMedia({ 
@@ -1636,10 +1657,9 @@
           const source = this.audioContext.createMediaStreamSource(this.localStream);
           source.connect(this.analyser);
           
-          // Create UI
-          this.createVoiceChatUI();
+          this.updateStatus('Joining voice chat queue...');
           
-          // Join voice chat
+          // Join voice chat (will be queued on server)
           socket.emit('voiceChat:join', { roomId: this.roomId, playerName: this.playerName });
           
           this.isInitialized = true;
@@ -1676,7 +1696,7 @@
         voiceChatContainer.className = 'voice-chat-container';
         voiceChatContainer.innerHTML = `
           <div class="voice-controls">
-            <button id="muteButton" class="voice-btn mute">
+            <button id="muteButton" class="voice-btn mute" disabled>
               <i class="fas fa-microphone-slash"></i>
               <span class="btn-text">Muted</span>
             </button>
@@ -1684,7 +1704,8 @@
               <div class="level-bar"></div>
             </div>
           </div>
-          <div class="voice-status" id="voiceStatus">Voice Chat Ready</div>
+          <div class="voice-status" id="voiceStatus">Initializing Voice Chat...</div>
+          <div class="queue-status" id="queueStatus" style="display:none; font-size:11px; color:#666; margin-top:5px;"></div>
           <div class="participants-list" id="participantsList"></div>
         `;
         
@@ -1717,6 +1738,40 @@
         voiceChatContainer.style.opacity = '1';
         
         console.log('[VoiceChat] Voice chat UI setup complete');
+      }
+      
+      updateJoinStatus(status, data) {
+        this.joinStatus = status;
+        const queueStatusElement = document.getElementById('queueStatus');
+        const muteBtn = document.getElementById('muteButton');
+        
+        switch (status) {
+          case 'queued':
+            this.updateStatus(`In queue: ${data.message}`);
+            if (queueStatusElement) {
+              queueStatusElement.textContent = `Position: ${data.position}`;
+              queueStatusElement.style.display = 'block';
+            }
+            if (muteBtn) muteBtn.disabled = true;
+            break;
+            
+          case 'joining':
+            this.updateStatus(data.message);
+            if (queueStatusElement) {
+              queueStatusElement.textContent = 'Connecting...';
+              queueStatusElement.style.display = 'block';
+            }
+            if (muteBtn) muteBtn.disabled = true;
+            break;
+            
+          case 'connected':
+            this.updateStatus('Voice Chat Ready');
+            if (queueStatusElement) {
+              queueStatusElement.style.display = 'none';
+            }
+            if (muteBtn) muteBtn.disabled = false;
+            break;
+        }
       }
       
       toggleMute() {
@@ -2129,6 +2184,13 @@
       }
     });
 
+    socket.on('voiceChat:joinStatus', ({ status, position, message }) => {
+      console.log('[VoiceChat] Join status update:', { status, position, message });
+      if (voiceChat) {
+        voiceChat.updateJoinStatus(status, { position, message });
+      }
+    });
+
     socket.on('voiceChat:playerLeft', ({ playerName }) => {
       console.log('[VoiceChat] Player left:', playerName);
       if (voiceChat) {
@@ -2158,6 +2220,9 @@
       console.log('[VoiceChat] Participants list:', participants);
       if (voiceChat) {
         voiceChat.updateParticipantsList(participants);
+        
+        // Mark as connected and enable mute button
+        voiceChat.updateJoinStatus('connected', {});
         
         // Create connections for existing participants
         participants.forEach(participantName => {

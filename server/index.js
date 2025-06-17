@@ -246,6 +246,9 @@ const actionPhaseState = {};
 // --- Voice Chat State Management ---
 const voiceChatState = {};
 
+// --- Sequential Voice Chat Joining Queue ---
+const voiceChatJoinQueue = {};
+
 // Socket.IO connection handler
 io.on('connection', (socket) => {
   console.log('A user connected:', socket.id);
@@ -650,29 +653,88 @@ io.on('connection', (socket) => {
   socket.on('voiceChat:join', async ({ roomId, playerName }) => {
     console.log('[voiceChat:join]', { roomId, playerName });
     
-    if (!voiceChatState[roomId]) {
-      voiceChatState[roomId] = {
-        participants: {},
-        audioSessions: {}
+    // Initialize queue for this room if it doesn't exist
+    if (!voiceChatJoinQueue[roomId]) {
+      voiceChatJoinQueue[roomId] = {
+        queue: [],
+        processing: false,
+        currentPlayer: null
       };
     }
     
-    voiceChatState[roomId].participants[playerName] = {
-      socketId: socket.id,
-      isMuted: true, // Start muted by default
-      audioStream: null,
-      joinedAt: Date.now()
-    };
+    const queue = voiceChatJoinQueue[roomId];
     
-    // Notify other players in room
-    socket.to(roomId).emit('voiceChat:playerJoined', { playerName });
+    // Add player to queue
+    queue.queue.push({ socketId: socket.id, playerName });
+    console.log('[voiceChat:join] Added to queue:', { roomId, playerName, queueLength: queue.queue.length });
     
-    // Send current participants to the joining player
-    const participants = Object.keys(voiceChatState[roomId].participants);
-    socket.emit('voiceChat:participantsList', { participants });
+    // Notify player they're in queue
+    socket.emit('voiceChat:joinStatus', { 
+      status: 'queued', 
+      position: queue.queue.length,
+      message: `You are #${queue.queue.length} in the voice chat queue` 
+    });
     
-    console.log('[voiceChat:join] Player joined voice chat:', { roomId, playerName, totalParticipants: participants.length });
+    // Process queue if not already processing
+    if (!queue.processing) {
+      processVoiceChatQueue(roomId);
+    }
   });
+  
+  // Process voice chat join queue sequentially
+  async function processVoiceChatQueue(roomId) {
+    const queue = voiceChatJoinQueue[roomId];
+    if (!queue || queue.processing || queue.queue.length === 0) {
+      return;
+    }
+    
+    queue.processing = true;
+    
+    while (queue.queue.length > 0) {
+      const { socketId, playerName } = queue.queue.shift();
+      queue.currentPlayer = playerName;
+      
+      console.log('[voiceChat:join] Processing player:', { roomId, playerName });
+      
+      // Initialize voice chat state for room if needed
+      if (!voiceChatState[roomId]) {
+        voiceChatState[roomId] = {
+          participants: {},
+          audioSessions: {}
+        };
+      }
+      
+      // Add player to voice chat state
+      voiceChatState[roomId].participants[playerName] = {
+        socketId: socketId,
+        isMuted: true, // Start muted by default
+        audioStream: null,
+        joinedAt: Date.now()
+      };
+      
+      // Notify the specific player they can join
+      io.to(socketId).emit('voiceChat:joinStatus', { 
+        status: 'joining', 
+        message: 'Initializing voice chat...' 
+      });
+      
+      // Notify other players in room
+      socket.to(roomId).emit('voiceChat:playerJoined', { playerName });
+      
+      // Send current participants to the joining player
+      const participants = Object.keys(voiceChatState[roomId].participants);
+      io.to(socketId).emit('voiceChat:participantsList', { participants });
+      
+      console.log('[voiceChat:join] Player joined voice chat:', { roomId, playerName, totalParticipants: participants.length });
+      
+      // Wait 2 seconds before processing next player to prevent race conditions
+      await new Promise(resolve => setTimeout(resolve, 2000));
+    }
+    
+    queue.processing = false;
+    queue.currentPlayer = null;
+    console.log('[voiceChat:join] Queue processing complete for room:', roomId);
+  }
 
   // Player leaves voice chat
   socket.on('voiceChat:leave', async ({ roomId, playerName }) => {
@@ -774,6 +836,20 @@ io.on('connection', (socket) => {
           
           console.log('[voiceChat:disconnect] Cleaned up voice chat for:', { roomId, playerName });
           break;
+        }
+      }
+    }
+    
+    // Clean up voice chat join queue
+    for (const [roomId, queue] of Object.entries(voiceChatJoinQueue)) {
+      const playerIndex = queue.queue.findIndex(item => item.socketId === socket.id);
+      if (playerIndex !== -1) {
+        const removedPlayer = queue.queue.splice(playerIndex, 1)[0];
+        console.log('[voiceChat:disconnect] Removed from queue:', { roomId, playerName: removedPlayer.playerName });
+        
+        // Clean up queue if empty
+        if (queue.queue.length === 0 && !queue.processing) {
+          delete voiceChatJoinQueue[roomId];
         }
       }
     }
