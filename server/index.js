@@ -509,9 +509,14 @@ io.on('connection', (socket) => {
         if (!canPlayerUseSkill(gameState, playerName, data.skill)) return;
         applySkillEffect(gameState, playerName, data.skill, data.extraData);
         markSkillUsed(gameState, playerName, data.skill);
-        if (data.skill === 'findAbby') {
-          await broadcastUIMessage(roomId, 'Michael thinks he has found Abby now!', 5000);
+        
+        // Send specific UI messages for certain skills
+        if (data.skill === 'molest') {
+          await broadcastUIMessage(roomId, "The priest Wind decide to molest a boy tonight, it is worse than cheating, so scandal score +2 plz!", 10000);
+        } else if (data.skill === 'findabby') {
+          await broadcastUIMessage(roomId, "Michael think he find abby now!", 10000);
         }
+        
         await updateGameState(roomId, gameState);
         io.to(roomId).emit('gameStateUpdate', gameState);
         break;

@@ -1158,7 +1158,6 @@
     function handleWindMolest() {
       if (!isSkillPhase) return;
       socket.emit('updateScandal', 2);
-      showUIMessage("Wind used Molest! Scandal +2", 5000);
       if (windSkillBtn) windSkillBtn.disabled = true;
     }
 
@@ -1166,7 +1165,6 @@
     function handleWindMislead() {
       if (!isSkillPhase) return;
       // Implementation for flipping Love to Hate
-      showUIMessage("Wind used Mislead! Flipped Love to Hate", 5000);
       if (windSkillBtn) windSkillBtn.disabled = true;
     }
 
@@ -1174,13 +1172,11 @@
     function handleKennediProtect() {
       if (!isSkillPhase) return;
       // Implementation for making all Helpers count as Love
-      showUIMessage("Kennedi used Protect! All Helpers count as Love", 5000);
       if (kennediSkillBtn) kennediSkillBtn.disabled = true;
     }
 
     // Handle Michael's find Abby skill
     function handleMichaelFindAbby() {
-      showUIMessage("Michael thinks he has found Abby now!", 5000);
       if (michaelSkillBtn) michaelSkillBtn.disabled = true;
     }
 
