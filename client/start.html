@@ -3220,6 +3220,14 @@
         // ...
       };
     }
+
+    // Always join the room on page load, whether host or not
+    socket.emit('joinRoom', { roomId, playerName: myName }, (res) => {
+      if (!res.success) {
+        alert(res.message || 'Failed to join room.');
+        window.location.href = 'joining.html';
+      }
+    });
   </script>
 </body>
 </html>
