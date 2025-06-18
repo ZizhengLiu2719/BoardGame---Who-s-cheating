@@ -968,6 +968,83 @@
         opacity: 0;
       }
     }
+    .role-cards-circle { z-index: 10 !important; }
+    .role-card { z-index: 11 !important; }
+
+    .voice-chat-status-box {
+      position: fixed;
+      bottom: 32px;
+      right: 32px;
+      z-index: 1200;
+      background: linear-gradient(120deg, #fffbe7 60%, #ffe7b2 100%);
+      color: #7a5a2f;
+      border: 2.5px solid #ffdca8;
+      border-radius: 18px;
+      box-shadow: 0 8px 32px 0 #ffdca855, 0 2px 0 #fffbe7 inset;
+      font-family: 'Gochi Hand', 'Segoe Print', cursive;
+      font-size: 1.13em;
+      font-weight: bold;
+      padding: 18px 32px 18px 32px;
+      min-width: 220px;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 10px;
+      transition: all 0.3s;
+    }
+    .voice-chat-status-title {
+      font-size: 1.18em;
+      color: #e2a84f;
+      margin-bottom: 4px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .voice-chat-status-title .emoji {
+      font-size: 1.3em;
+    }
+    .voice-chat-participant {
+      font-size: 1.05em;
+      color: #7a5a2f;
+      margin-bottom: 2px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .voice-mute-toggle {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: linear-gradient(120deg, #ffe7b2 60%, #bfa16a 100%);
+      border: 2px solid #e2c391;
+      border-radius: 12px;
+      color: #7a5a2f;
+      font-size: 1.08em;
+      font-family: 'Gochi Hand', 'Segoe Print', cursive;
+      font-weight: bold;
+      padding: 6px 18px;
+      cursor: pointer;
+      box-shadow: 0 2px 8px #bfa16a33;
+      transition: all 0.2s;
+      margin-top: 6px;
+      margin-bottom: 2px;
+      outline: none;
+      position: relative;
+    }
+    .voice-mute-toggle:hover {
+      background: linear-gradient(120deg, #fffbe7 60%, #ffe7b2 100%);
+      color: #e2a84f;
+      box-shadow: 0 8px 20px 0 #ffdca866, 0 0 0 1px rgba(255,255,255,0.2) inset, 0 0 30px rgba(255,220,168,0.4);
+      transform: translateY(-2px) scale(1.04);
+    }
+    .voice-mute-toggle.muted {
+      background: linear-gradient(120deg, #e2c391 60%, #ffdca8 100%);
+      color: #bfa16a;
+    }
+    .voice-mute-toggle .emoji {
+      font-size: 1.2em;
+      margin-right: 4px;
+    }
   </style>
   <script src="/socket.io/socket.io.js"></script>
 </head>
@@ -1113,7 +1190,7 @@
             <div class="table-center-decoration"></div>
           </div>
         </div>
-        <div class="role-cards-circle" id="roleCardsCircle"></div>
+        <div class="role-cards-circle" id="roleCardsCircle" style="z-index: 10;"></div>
       </div>
       <div id="skillButtonContainer" style="margin: 24px 0 0 0; display: flex; gap: 12px;"></div>
       <div style="margin: 24px 0 0 0; display: flex; gap: 12px;">
@@ -3120,6 +3197,28 @@
       
       // Reflection is already in HTML, just ensure it's visible
       reflection.style.display = 'block';
+    }
+
+    // Example: Render Ghibli-style voice chat status box (replace your current status UI with this)
+    function renderVoiceChatStatusBox(isMuted, participants) {
+      let box = document.getElementById('voiceChatStatusBox');
+      if (!box) {
+        box = document.createElement('div');
+        box.id = 'voiceChatStatusBox';
+        box.className = 'voice-chat-status-box';
+        document.body.appendChild(box);
+      }
+      box.innerHTML = `
+        <div class="voice-chat-status-title"><span class="emoji">🎤</span> Voice Chat Ready</div>
+        <button class="voice-mute-toggle${isMuted ? ' muted' : ''}" id="voiceMuteToggleBtn">
+          <span class="emoji">${isMuted ? '🔇' : '🔊'}</span> ${isMuted ? 'Muted' : 'Speak'}
+        </button>
+        <div style="margin-top:6px;">${participants.map(p => `<div class='voice-chat-participant'>👤 ${p}</div>`).join('')}</div>
+      `;
+      document.getElementById('voiceMuteToggleBtn').onclick = function() {
+        // Toggle mute logic here
+        // ...
+      };
     }
   </script>
 </body>
