@@ -321,7 +321,16 @@ io.on('connection', (socket) => {
     socket.join(roomId);
 
     // Always check and emit the latest game state if roles are assigned
-    const gameState = await getGameState(roomId);
+    let gameState = await getGameState(roomId);
+    if (gameState && gameState.players) {
+      // Update socket ID in gameState.players for this player
+      const gsPlayerIdx = gameState.players.findIndex(p => p.name === playerName);
+      if (gsPlayerIdx !== -1) {
+        gameState.players[gsPlayerIdx].id = socket.id;
+        await updateGameState(roomId, gameState);
+      }
+    }
+    gameState = await getGameState(roomId);
     if (gameState && gameState.players && gameState.players.every(p => p.role)) {
       socket.emit('initialGameState', gameState);
     } else if (!isReconnect && players.length === parseInt(room.maxPlayers)) {
@@ -366,30 +375,25 @@ io.on('connection', (socket) => {
     const players = JSON.parse(room.players || '[]');
     const readyStates = JSON.parse(room.readyStates || '{}');
     const allReady = players.length === Number(room.maxPlayers) && players.every(p => readyStates[p.name]);
-    
     if (allReady) {
       // Initialize game state
       const hostName = room && room.hostName ? room.hostName : (players[0]?.name || '');
       const gameState = await initializeGameState(roomId, players);
-      
       // Emit game start with initial state
       io.to(roomId).emit('startGame', { gameState });
-      
       // Start role distribution
       const roles = distributeRoles(players.length);
       gameState.roles = roles;
-      await updateGameState(roomId, gameState);
-      
       // Assign roles to players
       players.forEach((player, index) => {
         gameState.players[index].role = roles[index];
         gameState.players[index].position = index;
         gameState.players[index].isHost = player.name === hostName;
+        // Always update socket ID in gameState.players
+        gameState.players[index].id = player.id;
       });
-      
       await updateGameState(roomId, gameState);
       io.to(roomId).emit('gameStateUpdate', gameState);
-      // Also emit as initialGameState to ensure all clients get the correct state
       io.to(roomId).emit('initialGameState', gameState);
     }
   });
