@@ -179,7 +179,7 @@
     }
     const params = getQueryParams();
     const roomId = params.roomId || '00000';
-    const maxPlayers = params.maxPlayers || 6;
+    let maxPlayers = params.maxPlayers || 6;
     const myName = params.name || '';
     const isHost = params.host === '1';
     let roomPassword = params.password || '';
