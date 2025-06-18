@@ -389,8 +389,11 @@ io.on('connection', (socket) => {
         gameState.players[index].role = roles[index];
         gameState.players[index].position = index;
         gameState.players[index].isHost = player.name === hostName;
-        // Always update socket ID in gameState.players
-        gameState.players[index].id = player.id;
+        // Always update socket ID in gameState.players to match player list
+        const matchingPlayer = players.find(p => p.name === gameState.players[index].name);
+        if (matchingPlayer) {
+          gameState.players[index].id = matchingPlayer.id;
+        }
       });
       await updateGameState(roomId, gameState);
       io.to(roomId).emit('gameStateUpdate', gameState);
