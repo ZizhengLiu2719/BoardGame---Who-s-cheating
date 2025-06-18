@@ -298,8 +298,8 @@ io.on('connection', (socket) => {
       return callback({ success: false, message: 'Room not found.' });
     }
 
-    const players = JSON.parse(room.players || '[]');
-    
+    let players = JSON.parse(room.players || '[]');
+    let isReconnect = false;
     // Check if player already exists in the room (reconnection scenario)
     const existingPlayerIndex = players.findIndex(p => p.name === playerName);
     if (existingPlayerIndex !== -1) {
@@ -308,51 +308,32 @@ io.on('connection', (socket) => {
       players[existingPlayerIndex].id = socket.id;
       // Clean up disconnected state
       delete players[existingPlayerIndex].disconnectedAt;
-      await setPlayerList(roomId, players);
-      socket.join(roomId);
-      
-      // Send current game state if available
-      const gameState = await getGameState(roomId);
-      if (gameState && gameState.players && gameState.players.every(p => p.role)) {
-        // Game has started and roles are assigned
-        socket.emit('initialGameState', gameState);
-      } else if (gameState) {
-        // Game state exists but roles not assigned yet
-        socket.emit('initialGameState', gameState);
+      isReconnect = true;
+    } else {
+      if (players.length >= parseInt(room.maxPlayers)) {
+        console.log('[joinRoom] Room is full:', roomId);
+        return callback({ success: false, message: 'Room is full.' });
       }
-      
-      callback({ success: true });
-      io.to(roomId).emit('playerListUpdate', {
-        players: players.map(p => p.name),
-        roomName: room.roomName
-      });
-      return;
+      // Add new player
+      players.push({ id: socket.id, name: playerName });
     }
-    
-    if (players.length >= parseInt(room.maxPlayers)) {
-      console.log('[joinRoom] Room is full:', roomId);
-      return callback({ success: false, message: 'Room is full.' });
-    }
-
-    // Add new player
-    players.push({ id: socket.id, name: playerName });
     await setPlayerList(roomId, players);
     socket.join(roomId);
 
-    // If this is the last player, distribute roles
-    if (players.length === parseInt(room.maxPlayers)) {
+    // Always check and emit the latest game state if roles are assigned
+    const gameState = await getGameState(roomId);
+    if (gameState && gameState.players && gameState.players.every(p => p.role)) {
+      socket.emit('initialGameState', gameState);
+    } else if (!isReconnect && players.length === parseInt(room.maxPlayers)) {
+      // If this is the last player and roles need to be assigned
       const roles = distributeRoles(players.length);
-      const gameState = await initializeGameState(roomId, players);
-      
-      // Assign roles to players
-      gameState.players = gameState.players.map((player, index) => ({
+      const newGameState = await initializeGameState(roomId, players);
+      newGameState.players = newGameState.players.map((player, index) => ({
         ...player,
         role: roles[index]
       }));
-      
-      await updateGameState(roomId, gameState);
-      console.log('[initialGameState] Emitting for room:', roomId, gameState);
-      io.to(roomId).emit('initialGameState', gameState);
+      await updateGameState(roomId, newGameState);
+      io.to(roomId).emit('initialGameState', newGameState);
     }
 
     callback({ success: true });
