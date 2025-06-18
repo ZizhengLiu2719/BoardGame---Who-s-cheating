@@ -1298,7 +1298,7 @@
         kerBtn.onclick = function() {
           if (kerBtn.disabled) return;
           kerBtn.disabled = true;
-          showKerPopup();
+          handleKerSkill();
         };
         skillButtonContainer.appendChild(kerBtn);
         return;
@@ -1474,7 +1474,6 @@
       const newHelper = document.getElementById('newHelper').value;
       if (helperToSwap && newHelper) {
         socket.emit('gameAction', { roomId, action: 'theChosenOne', data: { oldHelper: helperToSwap, newHelper: newHelper }, playerName: myName });
-        showUIMessage(`Ker swap ${helperToSwap} helper to ${newHelper} as new helper!`, 10000);
         closeKerDialog();
       }
     }

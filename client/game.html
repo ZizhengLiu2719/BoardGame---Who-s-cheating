@@ -273,6 +273,11 @@
       // Update room name and password from server
       document.getElementById('roomName').textContent = data.roomName ? data.roomName : '(none)';
       document.getElementById('roomPassword').textContent = data.password ? data.password : '(hidden)';
+      // Update maxPlayers from server if provided
+      if (data.maxPlayers) {
+        maxPlayers = data.maxPlayers;
+        document.getElementById('maxPlayers').textContent = maxPlayers;
+      }
       playerNamesCache = data.players || [];
       readyStatesCache = data.readyStates || {};
       roomIsFull = playerCount == maxPlayers;

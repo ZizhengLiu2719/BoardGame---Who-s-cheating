@@ -285,7 +285,8 @@ io.on('connection', (socket) => {
       players: players.map(p => p.name),
       roomName: roomName,
       password: password,
-      readyStates: readyStates
+      readyStates: readyStates,
+      maxPlayers: maxPlayers
     });
   });
 
@@ -367,7 +368,10 @@ io.on('connection', (socket) => {
     callback({ success: true });
     io.to(roomId).emit('playerListUpdate', {
       players: players.map(p => p.name),
-      roomName: room.roomName
+      roomName: room.roomName,
+      password: room.password,
+      readyStates: room.readyStates,
+      maxPlayers: room.maxPlayers
     });
   });
 
@@ -383,7 +387,8 @@ io.on('connection', (socket) => {
       players: players.map(p => p.name),
       roomName: room.roomName,
       password: room.password,
-      readyStates: readyStates
+      readyStates: readyStates,
+      maxPlayers: room.maxPlayers
     });
   });
 
@@ -584,8 +589,11 @@ io.on('connection', (socket) => {
         break;
 
       case 'theChosenOne':
-        if (playerName !== 'Ker') return;
+        if (!canPlayerUseSkill(gameState, playerName, 'thechosenone')) return;
+        markSkillUsed(gameState, playerName, 'thechosenone');
         await broadcastUIMessage(roomId, `Ker swap ${data.oldHelper} helper to ${data.newHelper} as new helper!`, 10000);
+        await updateGameState(roomId, gameState);
+        io.to(roomId).emit('gameStateUpdate', gameState);
         break;
     }
   });
@@ -963,7 +971,8 @@ io.on('connection', (socket) => {
                   players: updatedPlayers.map(p => p.name),
                   roomName: currentRoom.roomName,
                   password: currentRoom.password,
-                  readyStates: updatedReadyStates
+                  readyStates: updatedReadyStates,
+                  maxPlayers: currentRoom.maxPlayers
                 });
                 console.log('Player removed after grace period:', { roomId, playerName });
               }
