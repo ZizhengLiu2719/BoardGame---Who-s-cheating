@@ -928,6 +928,46 @@
         0 0 0 1px rgba(255, 255, 255, 0.1) inset,
         0 0 30px rgba(123, 176, 230, 0.4);
     }
+
+    /* Update role card CSS size */
+    .role-card {
+      width: 68px !important;
+      height: 96px !important;
+    }
+
+    .floating-happy-emojis {
+      position: fixed;
+      left: 0; top: 0; width: 100vw; height: 100vh;
+      pointer-events: none;
+      z-index: 1;
+      opacity: 0;
+      transition: opacity 0.8s ease;
+    }
+    body.day-mode .floating-happy-emojis {
+      opacity: 1;
+    }
+    .happy-emoji {
+      position: absolute;
+      width: 32px;
+      height: 32px;
+      font-size: 32px;
+      animation: float-happy-emoji 20s linear infinite;
+      opacity: 0.85;
+      filter: drop-shadow(0 3px 6px rgba(255, 220, 168, 0.3));
+      user-select: none;
+    }
+    @keyframes float-happy-emoji {
+      0% {
+        transform: translateY(100vh) scale(1) rotate(0deg);
+        opacity: 0;
+      }
+      10% { opacity: 0.85; }
+      90% { opacity: 0.85; }
+      100% {
+        transform: translateY(-100px) scale(1.1) rotate(360deg);
+        opacity: 0;
+      }
+    }
   </style>
   <script src="/socket.io/socket.io.js"></script>
 </head>
@@ -999,6 +1039,17 @@
     <div class="flower" style="left: 75%; animation-delay: 14s;"></div>
     <div class="flower" style="left: 85%; animation-delay: 16s;"></div>
     <div class="flower" style="left: 95%; animation-delay: 18s;"></div>
+  </div>
+  <!-- Floating happy emojis for day mode -->
+  <div class="floating-happy-emojis">
+    <div class="happy-emoji" style="left: 10%; animation-delay: 1s;">😊</div>
+    <div class="happy-emoji" style="left: 22%; animation-delay: 3s;">😁</div>
+    <div class="happy-emoji" style="left: 34%; animation-delay: 5s;">😃</div>
+    <div class="happy-emoji" style="left: 46%; animation-delay: 7s;">😄</div>
+    <div class="happy-emoji" style="left: 58%; animation-delay: 9s;">😆</div>
+    <div class="happy-emoji" style="left: 70%; animation-delay: 11s;">😍</div>
+    <div class="happy-emoji" style="left: 82%; animation-delay: 13s;">🥰</div>
+    <div class="happy-emoji" style="left: 94%; animation-delay: 15s;">😇</div>
   </div>
 
   <div class="container">
@@ -1201,28 +1252,33 @@
     // Function to position cards in a circle
     function positionCardsInCircle(players) {
       roleCardsCircle.innerHTML = '';
-      const radius = 200;
-      const centerX = 240;
-      const centerY = 240;
-      
+      const n = players.length;
+      const radius = 210; // Place cards around the edge of the table
+      const centerX = 260;
+      const centerY = 260;
+      const cardWidth = 68;
+      const cardHeight = 96;
+
       // Find current player's role
       const currentPlayer = players.find(p => p.id === socket.id);
       const myRole = currentPlayer ? currentPlayer.role : null;
       const myRoleLower = myRole ? myRole.toLowerCase() : '';
-      
+
       players.forEach((player, index) => {
-        const angle = (index * 2 * Math.PI) / players.length;
+        const angle = (index * 2 * Math.PI) / n - Math.PI / 2; // Start from top
         const x = centerX + radius * Math.cos(angle);
         const y = centerY + radius * Math.sin(angle);
         const cardContainer = document.createElement('div');
-        cardContainer.style.cssText = `position: absolute; left: ${x}px; top: ${y}px; transform: translate(-50%, -50%); width: 80px; height: 120px; transition: all 0.3s ease;`;
+        cardContainer.style.cssText = `position: absolute; left: ${x}px; top: ${y}px; transform: translate(-50%, -50%); width: ${cardWidth}px; height: ${cardHeight}px; transition: all 0.3s ease;`;
         const roleCard = document.createElement('img');
         roleCard.className = 'role-card';
-        
+        roleCard.style.width = cardWidth + 'px';
+        roleCard.style.height = cardHeight + 'px';
+
         // Role visibility logic
         let shouldShowCard = false;
         const playerRoleLower = player.role ? player.role.toLowerCase() : '';
-        
+
         if (player.id === socket.id) {
           // Everyone can see their own card
           shouldShowCard = true;
@@ -1237,14 +1293,14 @@
           // All other roles (Jack, Kennedi, Ker, Kiko, Knox, Nash) can only see their own card
           shouldShowCard = false;
         }
-        
+
         // Set card image based on visibility
         if (shouldShowCard) {
           roleCard.src = `/imgs/${player.role ? player.role.toLowerCase() : 'backSide'}.png`;
         } else {
           roleCard.src = '/imgs/backSide.png';
         }
-        
+
         const nameLabel = document.createElement('div');
         nameLabel.className = 'player-name-label';
         nameLabel.textContent = player.name + (player.isHost ? ' (Host)' : '');
@@ -2735,20 +2791,35 @@
     function addVoiceChatTestButton() {
       const testButton = document.createElement('button');
       testButton.textContent = '🎤 Enable Voice Chat';
+      testButton.id = 'enableVoiceChatBtn';
       testButton.style.cssText = `
         position: fixed;
-        top: 20px;
-        right: 20px;
-        z-index: 9999;
-        padding: 10px 15px;
-        background: #007bff;
-        color: white;
-        border: none;
-        border-radius: 5px;
+        top: 80px;
+        right: 32px;
+        z-index: 1000;
+        padding: 12px 28px;
+        background: linear-gradient(120deg, #fffbe7 60%, #ffe7b2 100%);
+        color: #e2a84f;
+        border: 2.5px solid #ffdca8;
+        border-radius: 16px;
+        font-family: 'Gochi Hand', 'Segoe Print', cursive;
+        font-size: 1.08em;
+        font-weight: bold;
+        box-shadow: 0 2px 8px 0 #ffdca833, 0 0 0 1px rgba(255,255,255,0.1) inset;
         cursor: pointer;
-        font-size: 14px;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+        letter-spacing: 1px;
+        text-shadow: 0 1px 2px rgba(255, 255, 255, 0.5);
+        transition: all 0.3s ease;
+        margin-top: 16px;
       `;
+      testButton.onmouseenter = () => {
+        testButton.style.boxShadow = '0 8px 20px 0 #ffdca866, 0 0 0 1px rgba(255,255,255,0.2) inset, 0 0 30px rgba(255,220,168,0.4)';
+        testButton.style.transform = 'translateY(-3px)';
+      };
+      testButton.onmouseleave = () => {
+        testButton.style.boxShadow = '0 2px 8px 0 #ffdca833, 0 0 0 1px rgba(255,255,255,0.1) inset';
+        testButton.style.transform = 'none';
+      };
       testButton.onclick = initializeVoiceChatNow;
       document.body.appendChild(testButton);
     }
