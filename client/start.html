@@ -14,14 +14,147 @@
       color: #e2e2e2;
       min-height: 100vh;
       transition: background 0.5s ease;
+      overflow-x: hidden;
     }
     body.day-mode {
-      background: linear-gradient(135deg, #f8f4e3 0%, #e8d5b5 100%);
+      background: linear-gradient(135deg, #f8f4e3 0%, #e8d5b5 50%, #ffe7b2 100%);
       color: #2c2c2c;
     }
     body.night-mode {
-      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f1419 100%);
     }
+
+    /* Ghibli-inspired background elements */
+    /* Starfield */
+    .ghibli-stars {
+      position: fixed;
+      left: 0; top: 0; width: 100vw; height: 100vh;
+      pointer-events: none;
+      z-index: 0;
+      background: transparent;
+      transition: opacity 0.5s ease;
+    }
+    .ghibli-stars span {
+      position: absolute;
+      display: block;
+      border-radius: 50%;
+      background: #fffbe7;
+      opacity: 0.7;
+      filter: blur(0.5px);
+      animation: twinkle 3.5s infinite alternate;
+    }
+    body.day-mode .ghibli-stars span {
+      background: rgba(255, 220, 168, 0.6);
+      opacity: 0.4;
+      box-shadow: 0 0 4px rgba(255, 220, 168, 0.4);
+    }
+    @keyframes twinkle {
+      0%,100% { opacity: 0.8; transform: scale(1); }
+      50% { opacity: 0.3; transform: scale(0.8); }
+    }
+
+    /* Crescent moon */
+    .ghibli-moon {
+      position: fixed;
+      right: 5vw;
+      top: 4vw;
+      width: 80px;
+      height: 80px;
+      z-index: 1;
+      opacity: 0.25;
+      pointer-events: none;
+      filter: drop-shadow(0 0 12px rgba(255, 251, 231, 0.4));
+      transition: opacity 0.8s ease;
+      animation: moon-glow 4s ease-in-out infinite alternate;
+    }
+    @keyframes moon-glow {
+      0% { filter: drop-shadow(0 0 12px rgba(255, 251, 231, 0.4)); }
+      100% { filter: drop-shadow(0 0 20px rgba(255, 251, 231, 0.6)); }
+    }
+    body.day-mode .ghibli-moon {
+      opacity: 0.05;
+      filter: drop-shadow(0 0 4px rgba(255, 251, 231, 0.1));
+    }
+
+    /* Moonlight reflection */
+    .moonlight-reflection {
+      position: fixed;
+      right: 0;
+      top: 0;
+      width: 250px;
+      height: 100vh;
+      background: linear-gradient(90deg, 
+        rgba(255, 251, 231, 0.08) 0%, 
+        rgba(255, 251, 231, 0.04) 50%, 
+        transparent 100%);
+      pointer-events: none;
+      z-index: 1;
+      animation: moonlight-shimmer 10s ease-in-out infinite alternate;
+      transition: opacity 0.8s ease;
+    }
+    body.day-mode .moonlight-reflection {
+      background: linear-gradient(90deg, 
+        rgba(255, 220, 168, 0.04) 0%, 
+        rgba(255, 220, 168, 0.02) 50%, 
+        transparent 100%);
+    }
+    @keyframes moonlight-shimmer {
+      0% { opacity: 0.4; transform: translateX(0px); }
+      100% { opacity: 0.8; transform: translateX(-15px); }
+    }
+
+    /* Floating particles */
+    .floating-particles {
+      position: fixed;
+      left: 0; top: 0; width: 100vw; height: 100vh;
+      pointer-events: none;
+      z-index: 1;
+      transition: opacity 0.8s ease;
+    }
+    .particle {
+      position: absolute;
+      width: 4px;
+      height: 4px;
+      background: rgba(255, 251, 231, 0.6);
+      border-radius: 50%;
+      animation: float-particle 25s linear infinite;
+      box-shadow: 0 0 6px rgba(255, 251, 231, 0.4);
+    }
+    body.day-mode .particle {
+      background: rgba(255, 220, 168, 0.4);
+      box-shadow: 0 0 4px rgba(255, 220, 168, 0.3);
+    }
+    @keyframes float-particle {
+      0% { 
+        transform: translateY(100vh) translateX(0px) rotate(0deg);
+        opacity: 0;
+      }
+      10% { opacity: 1; }
+      90% { opacity: 1; }
+      100% { 
+        transform: translateY(-100px) translateX(120px) rotate(360deg);
+        opacity: 0;
+      }
+    }
+
+    /* Soft vignette overlay */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      pointer-events: none;
+      background: radial-gradient(ellipse at 50% 60%, 
+        rgba(30,20,40,0) 60%, 
+        rgba(30,20,40,0.85) 100%);
+      transition: opacity 0.5s;
+    }
+    body.day-mode::before {
+      background: radial-gradient(ellipse at 50% 60%, 
+        rgba(248,244,227,0) 60%, 
+        rgba(248,244,227,0.3) 100%);
+    }
+
     .container {
       display: flex;
       flex-direction: row;
@@ -43,9 +176,25 @@
       gap: 32px;
       background: rgba(255,251,231,0.92);
       border-radius: 24px;
-      box-shadow: 0 4px 32px 0 #23202a33, 0 2px 0 #fffbe7 inset;
+      box-shadow: 
+        0 4px 32px 0 #23202a33, 
+        0 2px 0 #fffbe7 inset,
+        0 0 20px rgba(226, 195, 145, 0.2);
       border: 2.5px solid #bfa16a;
       padding: 18px 18px 18px 18px;
+      backdrop-filter: blur(10px);
+      position: relative;
+      overflow: hidden;
+    }
+    .left-panel::before, .right-panel::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background: linear-gradient(90deg, #e2c391, #bfa16a, #e2c391);
+      border-radius: 24px 24px 0 0;
     }
     .center-panel {
       flex: 1;
@@ -65,7 +214,10 @@
       color: #e2c391;
       border-radius: 32px 22px 38px 22px/22px 38px 22px 38px;
       border: 3.5px solid #7bb0e6;
-      box-shadow: 0 6px 24px 0 #23202a55, 0 2px 0 #fffbe7 inset;
+      box-shadow: 
+        0 6px 24px 0 #23202a55, 
+        0 2px 0 #fffbe7 inset,
+        0 0 20px rgba(123, 176, 230, 0.3);
       padding: 22px 48px 18px 48px;
       margin-bottom: 18px;
       text-align: center;
@@ -73,16 +225,35 @@
       min-width: 200px;
       transition: all 0.3s;
       text-shadow: 0 2px 8px #23202a44;
+      position: relative;
+    }
+    .title-badge::after {
+      content: '';
+      position: absolute;
+      top: 8px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 40px;
+      height: 4px;
+      background: linear-gradient(90deg, transparent, #e2c391, transparent);
+      border-radius: 2px;
     }
     body.day-mode .title-badge {
       background: linear-gradient(120deg,#fffbe7 60%,#ffe7b2 100%);
       color: #e2a84f;
       border: 3.5px solid #ffdca8;
+      box-shadow: 
+        0 6px 24px 0 #ffdca855, 
+        0 2px 0 #fffbe7 inset,
+        0 0 20px rgba(255, 220, 168, 0.3);
     }
     .score-box, .love-hate-box {
       background: #fffbe7ee;
       border-radius: 18px;
-      box-shadow: 0 2px 18px 0 #23202a22,0 2px 0 #fffbe7 inset;
+      box-shadow: 
+        0 2px 18px 0 #23202a22,
+        0 2px 0 #fffbe7 inset,
+        0 0 15px rgba(226, 195, 145, 0.1);
       border: 2px solid #7bb0e6;
       padding: 18px 18px 14px 18px;
       font-size: 1.13rem;
@@ -92,6 +263,28 @@
       flex-direction: column;
       gap: 12px;
       font-family: 'Gochi Hand', 'Segoe Print', cursive;
+      position: relative;
+      overflow: hidden;
+    }
+    .score-box::before, .love-hate-box::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, #7bb0e6, #e2c391, #7bb0e6);
+      border-radius: 18px 18px 0 0;
+    }
+    body.day-mode .score-box, body.day-mode .love-hate-box {
+      border: 2px solid #ffdca8;
+      box-shadow: 
+        0 2px 18px 0 #ffdca822,
+        0 2px 0 #fffbe7 inset,
+        0 0 15px rgba(255, 220, 168, 0.1);
+    }
+    body.day-mode .score-box::before, body.day-mode .love-hate-box::before {
+      background: linear-gradient(90deg, #ffdca8, #e2c391, #ffdca8);
     }
     .score-row {
       display: flex;
@@ -119,8 +312,16 @@
       font-size: 1.3em;
       font-weight: bold;
       cursor: pointer;
-      transition: background 0.2s, color 0.2s, box-shadow 0.2s;
-      box-shadow: 0 2px 8px #bfa16a33;
+      transition: all 0.2s;
+      box-shadow: 
+        0 2px 8px #bfa16a33,
+        0 0 0 1px rgba(255, 255, 255, 0.1) inset;
+    }
+    .score-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 
+        0 4px 12px #bfa16a55,
+        0 0 0 1px rgba(255, 255, 255, 0.2) inset;
     }
     .score-btn:disabled {
       opacity: 0.5;
@@ -149,10 +350,33 @@
       font-family: 'Gochi Hand', 'Segoe Print', cursive;
       font-weight: bold;
       cursor: pointer;
-      transition: background 0.2s, color 0.2s, box-shadow 0.2s;
-      box-shadow: 0 2px 8px #bfa16a33;
+      transition: all 0.2s;
+      box-shadow: 
+        0 2px 8px #bfa16a33,
+        0 0 0 1px rgba(255, 255, 255, 0.1) inset;
       letter-spacing: 1px;
       text-shadow: 0 1px 4px #fffbe7cc;
+      position: relative;
+      overflow: hidden;
+    }
+    .action-btn::before, .reset-btn::before, .vote-btn::before, .skill-btn::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+      transition: left 0.5s;
+    }
+    .action-btn:hover::before, .reset-btn:hover::before, .vote-btn:hover::before, .skill-btn:hover::before {
+      left: 100%;
+    }
+    .action-btn:hover, .reset-btn:hover, .vote-btn:hover, .skill-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 
+        0 4px 12px #bfa16a55,
+        0 0 0 1px rgba(255, 255, 255, 0.2) inset;
     }
     .action-btn:disabled, .reset-btn:disabled, .vote-btn:disabled, .skill-btn:disabled {
       opacity: 0.5;
@@ -199,42 +423,276 @@
       border-radius: 50%;
       background: radial-gradient(circle at 60% 40%, #6b5a3a 55%, #2d1c0b 100%);
       border: 10px solid #bfa16a;
-      box-shadow: 0 16px 64px 0 #23202a, 0 0 0 32px #23202a33 inset, 0 0 0 12px #7bb0e633 inset;
+      box-shadow: 
+        0 16px 64px 0 #23202a, 
+        0 0 0 32px #23202a33 inset, 
+        0 0 0 12px #7bb0e633 inset,
+        0 0 40px rgba(123, 176, 230, 0.2);
       position: absolute;
       left: 50%; top: 50%;
       transform: translate(-50%, -50%);
       z-index: 1;
+      transition: all 0.3s ease;
     }
     body.day-mode .circle-table {
       background: radial-gradient(circle at 60% 40%, #fffbe7 60%, #ffe7b2 100%);
-      box-shadow: 0 20px 80px 0 #ffdca888, 0 0 0 32px #fffbe7cc inset, 0 0 0 12px #ffe7b2cc inset;
+      box-shadow: 
+        0 20px 80px 0 #ffdca888, 
+        0 0 0 32px #fffbe7cc inset, 
+        0 0 0 12px #ffe7b2cc inset,
+        0 0 40px rgba(255, 220, 168, 0.3);
     }
-    .role-cards-circle {
+
+    /* Enhanced table details */
+    .table-details {
       position: absolute;
-      left: 50%; top: 50%;
-      width: 520px; height: 520px;
+      top: 50%;
+      left: 50%;
       transform: translate(-50%, -50%);
+      width: 200px;
+      height: 200px;
+      z-index: 2;
       pointer-events: none;
+    }
+    .table-center-decoration {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 60px;
+      height: 60px;
+      background: radial-gradient(circle, #e2c391 30%, #bfa16a 70%);
+      border-radius: 50%;
+      border: 2px solid #7a5a2f;
+      box-shadow: 
+        0 0 20px rgba(226, 195, 145, 0.4),
+        inset 0 0 20px rgba(255, 255, 255, 0.1);
+    }
+    .table-pattern {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 300px;
+      height: 300px;
+      border: 1px solid rgba(226, 195, 145, 0.3);
+      border-radius: 50%;
+    }
+    .table-pattern::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 250px;
+      height: 250px;
+      border: 1px solid rgba(226, 195, 145, 0.2);
+      border-radius: 50%;
+    }
+    .table-pattern::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 200px;
+      height: 200px;
+      border: 1px solid rgba(226, 195, 145, 0.1);
+      border-radius: 50%;
+    }
+
+    /* Table cups */
+    .table-cups {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 400px;
+      height: 400px;
+      z-index: 3;
+      pointer-events: none;
+    }
+    .cup {
+      position: absolute;
+      width: 24px;
+      height: 32px;
+      background: linear-gradient(135deg, #fffbe7 0%, #ffe7b2 50%, #e2c391 100%);
+      border-radius: 12px 12px 8px 8px / 16px 16px 12px 12px;
+      border: 2px solid #bfa16a;
+      box-shadow: 
+        0 2px 8px rgba(0, 0, 0, 0.2),
+        inset 0 2px 4px rgba(255, 255, 255, 0.3);
+    }
+    .cup::before {
+      content: '';
+      position: absolute;
+      top: 4px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 16px;
+      height: 20px;
+      background: linear-gradient(135deg, #cbe6d6 0%, #a0bfa1 100%);
+      border-radius: 8px 8px 6px 6px / 10px 10px 8px 8px;
+      border: 1px solid #7a9a7b;
+    }
+    .cup::after {
+      content: '';
+      position: absolute;
+      top: 2px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 20px;
+      height: 4px;
+      background: #bfa16a;
+      border-radius: 2px;
+    }
+
+    /* Enhanced day mode sunny effects */
+    .sunny-effects {
+      position: fixed;
+      left: 0; top: 0; width: 100vw; height: 100vh;
+      pointer-events: none;
+      z-index: 1;
+      opacity: 0;
+      transition: opacity 0.8s ease;
+    }
+    body.day-mode .sunny-effects {
+      opacity: 1;
+    }
+
+    /* Enhanced sun rays for happy party vibe */
+    .sun-rays {
+      position: absolute;
+      right: 8vw;
+      top: 6vw;
+      width: 100px;
+      height: 100px;
       z-index: 2;
     }
-    .role-card {
+    .sun-rays::before {
+      content: '';
       position: absolute;
-      width: 90px; height: 135px;
-      border-radius: 12px;
-      box-shadow: 0 6px 24px rgba(0, 0, 0, 0.15);
-      border: 2px solid #e2c391;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 80px;
+      height: 80px;
+      background: radial-gradient(circle, #ffdca8 0%, #ffe7b2 60%, #fff5e6 100%);
+      border-radius: 50%;
+      box-shadow: 
+        0 0 30px rgba(255, 220, 168, 0.8),
+        0 0 60px rgba(255, 220, 168, 0.4);
+      animation: sun-pulse 3s ease-in-out infinite alternate;
+    }
+    @keyframes sun-pulse {
+      0% { transform: translate(-50%, -50%) scale(1); }
+      100% { transform: translate(-50%, -50%) scale(1.1); }
+    }
+    .sun-ray {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 6px;
+      height: 25px;
+      background: linear-gradient(to bottom, #ffdca8, transparent);
+      border-radius: 3px;
+      transform-origin: 3px 12.5px;
+      animation: sun-rotate 20s linear infinite;
+      box-shadow: 0 0 8px rgba(255, 220, 168, 0.6);
+    }
+    @keyframes sun-rotate {
+      0% { transform: translate(-50%, -50%) rotate(0deg); }
+      100% { transform: translate(-50%, -50%) rotate(360deg); }
+    }
+
+    /* Enhanced floating flowers for happy party vibe */
+    .floating-flowers {
+      position: fixed;
+      left: 0; top: 0; width: 100vw; height: 100vh;
+      pointer-events: none;
+      z-index: 1;
+      opacity: 0;
+      transition: opacity 0.8s ease;
+    }
+    body.day-mode .floating-flowers {
+      opacity: 1;
+    }
+    .flower {
+      position: absolute;
+      width: 24px;
+      height: 24px;
+      animation: float-flower 18s linear infinite;
+      opacity: 0.8;
+    }
+    .flower::before {
+      content: '🌸';
+      font-size: 24px;
+      filter: drop-shadow(0 3px 6px rgba(255, 182, 193, 0.4));
+      animation: flower-bounce 2s ease-in-out infinite alternate;
+    }
+    @keyframes flower-bounce {
+      0% { transform: scale(1) rotate(0deg); }
+      100% { transform: scale(1.1) rotate(5deg); }
+    }
+    @keyframes float-flower {
+      0% { 
+        transform: translateY(100vh) translateX(0px) rotate(0deg);
+        opacity: 0;
+      }
+      10% { opacity: 0.8; }
+      90% { opacity: 0.8; }
+      100% { 
+        transform: translateY(-100px) translateX(80px) rotate(360deg);
+        opacity: 0;
+      }
+    }
+
+    /* Enhanced night mode elements for night vibe */
+    .ghibli-stars {
+      position: fixed;
+      left: 0; top: 0; width: 100vw; height: 100vh;
+      pointer-events: none;
+      z-index: 0;
+      background: transparent;
+      transition: opacity 0.8s ease;
+    }
+    .ghibli-stars span {
+      position: absolute;
+      display: block;
+      border-radius: 50%;
       background: #fffbe7;
+      opacity: 0.8;
+      filter: blur(0.5px);
+      animation: twinkle 4s infinite alternate;
+      box-shadow: 0 0 6px rgba(255, 251, 231, 0.6);
+    }
+    body.day-mode .ghibli-stars span {
       object-fit: cover;
       transition: all 0.3s ease;
+      cursor: pointer;
+    }
+    .role-card:hover {
+      transform: scale(1.05) translateY(-4px);
+      box-shadow: 
+        0 12px 36px rgba(0, 0, 0, 0.2),
+        0 0 0 2px rgba(226, 195, 145, 0.3) inset;
     }
     .role-card.me {
       border: 3px solid #7a5a2f;
-      box-shadow: 0 0 0 4px rgba(191, 161, 106, 0.3);
+      box-shadow: 
+        0 0 0 4px rgba(191, 161, 106, 0.3),
+        0 6px 24px rgba(0, 0, 0, 0.15),
+        0 0 0 1px rgba(255, 255, 255, 0.1) inset;
     }
     .role-card.me.night-mode {
       border-color: #7bb0e6;
-      box-shadow: 0 0 0 4px rgba(123, 176, 230, 0.3);
+      box-shadow: 
+        0 0 0 4px rgba(123, 176, 230, 0.3),
+        0 6px 24px rgba(0, 0, 0, 0.15),
+        0 0 0 1px rgba(255, 255, 255, 0.1) inset;
     }
+
+    /* Enhanced player name labels */
     .player-name-label {
       position: absolute;
       padding: 6px 12px;
@@ -246,11 +704,17 @@
       white-space: nowrap;
       pointer-events: none;
       transition: all 0.3s ease;
+      backdrop-filter: blur(5px);
+      border: 1px solid rgba(226, 195, 145, 0.3);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
     }
     .player-name-label.night-mode {
       background: rgba(26, 26, 46, 0.85);
       color: #7bb0e6;
+      border: 1px solid rgba(123, 176, 230, 0.3);
     }
+
+    /* Enhanced skill buttons */
     .skill-btn {
       width: auto;
       min-width: 120px;
@@ -273,383 +737,270 @@
       opacity: 0.5;
       cursor: not-allowed;
     }
-    @media (max-width: 1200px) {
-      .container { flex-direction: column; align-items: center; }
-      .left-panel, .right-panel { width: 90vw; max-width: 98vw; margin: 0 0 24px 0; }
-      .center-panel { min-width: 320px; }
-      .circle-table-container, .role-cards-circle { width: 98vw; height: 98vw; min-width: 200px; min-height: 200px; }
-      .circle-table { width: 60vw; height: 60vw; min-width: 200px; min-height: 200px; }
-    }
-    .game-container {
+
+    /* Enhanced vote buttons */
+    #voteYesBtn, #voteNoBtn, #voteSubmitBtn {
+      background: linear-gradient(120deg, #ffe7b2 60%, #bfa16a 100%) !important;
+      border: 2.5px solid #e2c391 !important;
+      border-radius: 16px !important;
+      color: #7a5a2f !important;
+      font-weight: bold !important;
+      box-shadow: 
+        0 2px 8px #bfa16a33,
+        0 0 0 1px rgba(255, 255, 255, 0.1) inset !important;
+      transition: all 0.2s !important;
+      font-family: 'Gochi Hand', 'Segoe Print', cursive !important;
       position: relative;
-      width: 100vw;
-      height: 100vh;
       overflow: hidden;
     }
-    .table {
+    #voteYesBtn::before, #voteNoBtn::before, #voteSubmitBtn::before {
+      content: '';
       position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      width: 480px;
-      height: 480px;
-      background: rgba(255, 251, 231, 0.95);
-      border-radius: 50%;
-      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
-      border: 3px solid #e2c391;
-      transition: all 0.3s ease;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+      transition: left 0.5s;
     }
-    .table.night-mode {
-      background: rgba(40, 40, 60, 0.95);
-      border-color: #7bb0e6;
-      box-shadow: 0 8px 32px rgba(123, 176, 230, 0.2);
+    #voteYesBtn:hover::before, #voteNoBtn:hover::before, #voteSubmitBtn:hover::before {
+      left: 100%;
     }
-    .host-controls {
-      position: fixed;
-      top: 20px;
-      right: 20px;
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-      z-index: 100;
+    #voteYesBtn:hover, #voteNoBtn:hover, #voteSubmitBtn:hover {
+      transform: translateY(-2px) !important;
+      box-shadow: 
+        0 4px 12px #bfa16a55,
+        0 0 0 1px rgba(255, 255, 255, 0.2) inset !important;
     }
-    .host-button {
-      padding: 10px 20px;
-      border: none;
-      border-radius: 8px;
-      background: rgba(255, 251, 231, 0.9);
-      color: #2c2c2c;
-      font-weight: 500;
-      cursor: pointer;
-      transition: all 0.2s ease;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-    }
-    .host-button:hover {
-      background: #e2c391;
-      transform: translateY(-2px);
-    }
-    .host-button.night-mode {
-      background: rgba(40, 40, 60, 0.9);
-      color: #e2e2e2;
-    }
-    .count-controls {
-      position: fixed;
-      left: 20px;
-      top: 50%;
-      transform: translateY(-50%);
-      display: flex;
-      flex-direction: column;
-      gap: 15px;
-      z-index: 100;
-    }
-    .count-button {
-      padding: 8px 16px;
-      border: none;
-      border-radius: 6px;
-      background: rgba(255, 251, 231, 0.9);
-      color: #2c2c2c;
-      font-weight: 500;
-      cursor: pointer;
-      transition: all 0.2s ease;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-    }
-    .count-button:hover {
-      background: #e2c391;
-      transform: translateY(-2px);
-    }
-    .count-button.night-mode {
-      background: rgba(40, 40, 60, 0.9);
-      color: #e2e2e2;
-    }
-    .ui-message {
-      position: fixed;
-      top: 20px;
-      left: 50%;
-      transform: translateX(-50%);
-      padding: 12px 24px;
-      background: rgba(255, 251, 231, 0.95);
-      color: #2c2c2c;
-      border-radius: 8px;
-      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
-      font-weight: 500;
-      z-index: 1000;
-      transition: all 0.3s ease;
-    }
-    .ui-message.night-mode {
-      background: rgba(40, 40, 60, 0.95);
-      color: #e2e2e2;
+    #voteYesBtn:disabled, #voteNoBtn:disabled, #voteSubmitBtn:disabled {
+      opacity: 0.5 !important;
+      cursor: not-allowed !important;
+      transform: none !important;
     }
 
-    /* Voice Chat Styles */
-    .voice-chat-container {
-      position: fixed;
-      bottom: 20px;
-      right: 20px;
-      z-index: 1000;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 10px;
-      background: rgba(255, 255, 255, 0.95);
-      padding: 15px;
-      border-radius: 15px;
-      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-      backdrop-filter: blur(10px);
+    /* Enhanced score values */
+    .score-value {
+      width: 36px;
+      text-align: center;
+      font-size: 1.18em;
+      font-weight: bold;
+      color: #bfa16a;
+      background: linear-gradient(135deg, #fffbe7 0%, #ffe7b2 100%);
+      border-radius: 8px;
+      border: 1.5px solid #e2c391;
+      box-shadow: 
+        0 1px 4px #bfa16a22 inset,
+        0 0 0 1px rgba(255, 255, 255, 0.1) inset;
+      transition: all 0.2s;
+    }
+    .score-value:hover {
+      transform: scale(1.05);
+      box-shadow: 
+        0 2px 6px #bfa16a33 inset,
+        0 0 0 1px rgba(255, 255, 255, 0.2) inset;
+    }
+
+    /* Enhanced love/hate values */
+    .love-hate-value {
+      width: 36px;
+      text-align: center;
+      font-size: 1.18em;
+      font-weight: bold;
+      color: #e26a6a;
+      background: linear-gradient(135deg, #fffbe7 0%, #ffe7b2 100%);
+      border-radius: 8px;
+      border: 1.5px solid #e2c391;
+      box-shadow: 
+        0 1px 4px #e2c39122 inset,
+        0 0 0 1px rgba(255, 255, 255, 0.1) inset;
+      transition: all 0.2s;
+    }
+    .love-hate-value:hover {
+      transform: scale(1.05);
+      box-shadow: 
+        0 2px 6px #e2c39133 inset,
+        0 0 0 1px rgba(255, 255, 255, 0.2) inset;
+    }
+    .hate-value {
+      color: #7a5a2f;
+    }
+
+    /* Enhanced scrollbar styling for How to Play box */
+    .score-box::-webkit-scrollbar {
+      width: 8px;
+    }
+    .score-box::-webkit-scrollbar-track {
+      background: rgba(226, 195, 145, 0.1);
+      border-radius: 4px;
+    }
+    .score-box::-webkit-scrollbar-thumb {
+      background: linear-gradient(135deg, #e2c391 0%, #bfa16a 100%);
+      border-radius: 4px;
       border: 1px solid rgba(255, 255, 255, 0.2);
-      min-width: 200px;
+    }
+    .score-box::-webkit-scrollbar-thumb:hover {
+      background: linear-gradient(135deg, #bfa16a 0%, #7a5a2f 100%);
+    }
+    body.day-mode .score-box::-webkit-scrollbar-thumb {
+      background: linear-gradient(135deg, #ffdca8 0%, #e2c391 100%);
+    }
+    body.day-mode .score-box::-webkit-scrollbar-thumb:hover {
+      background: linear-gradient(135deg, #e2c391 0%, #bfa16a 100%);
     }
 
-    .voice-controls {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-
-    .voice-btn {
-      padding: 12px 20px;
-      border: none;
-      border-radius: 25px;
-      font-size: 14px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.3s ease;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-      min-width: 120px;
-      justify-content: center;
-    }
-
-    .voice-btn.mute {
-      background: #dc3545;
-      color: white;
-    }
-
-    .voice-btn.mute:hover {
-      background: #c82333;
-      transform: translateY(-2px);
-      box-shadow: 0 6px 16px rgba(220, 53, 69, 0.3);
-    }
-
-    .voice-btn.unmute {
-      background: #28a745;
-      color: white;
-    }
-
-    .voice-btn.unmute:hover {
-      background: #218838;
-      transform: translateY(-2px);
-      box-shadow: 0 6px 16px rgba(40, 167, 69, 0.3);
-    }
-
-    .voice-btn:active {
-      transform: translateY(0);
-    }
-
-    .voice-status {
-      font-size: 12px;
-      color: #666;
-      text-align: center;
-      font-weight: 500;
-    }
-
-    .audio-level {
-      width: 4px;
-      height: 30px;
-      background: #e9ecef;
-      border-radius: 2px;
-      overflow: hidden;
-      position: relative;
-    }
-
-    .level-bar {
-      position: absolute;
-      bottom: 0;
-      width: 100%;
-      background: #6c757d;
-      transition: all 0.1s ease;
-      border-radius: 2px;
-    }
-
-    .level-bar.active {
-      background: #28a745;
-      animation: pulse 1s infinite;
-    }
-
-    @keyframes pulse {
-      0% { opacity: 1; }
-      50% { opacity: 0.7; }
-      100% { opacity: 1; }
-    }
-
-    .participants-list {
-      max-height: 150px;
-      overflow-y: auto;
-      width: 100%;
-      margin-top: 10px;
-    }
-
-    .participant {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      padding: 5px 10px;
-      border-radius: 8px;
-      font-size: 12px;
-      color: #495057;
-      background: rgba(0, 0, 0, 0.05);
-      margin-bottom: 2px;
-    }
-
-    .participant.me {
-      background: rgba(40, 167, 69, 0.1);
-      color: #28a745;
-      font-weight: 600;
-    }
-
-    .participant i {
-      font-size: 10px;
-      color: #6c757d;
-    }
-
-    .participant.me i {
-      color: #28a745;
-    }
-
-    .mute-indicator {
-      font-size: 10px;
-      color: #6c757d;
-      font-style: italic;
-    }
-
-    .queue-status {
-      background: rgba(255, 193, 7, 0.1);
-      border: 1px solid rgba(255, 193, 7, 0.3);
-      border-radius: 8px;
-      padding: 4px 8px;
-      text-align: center;
-      font-weight: 500;
-      animation: pulse-gentle 2s infinite;
-    }
-
-    @keyframes pulse-gentle {
-      0% { opacity: 0.7; }
-      50% { opacity: 1; }
-      100% { opacity: 0.7; }
-    }
-
-    .connection-status {
-      margin-left: auto;
-      font-size: 10px;
-      display: flex;
-      align-items: center;
-      gap: 4px;
-    }
-
-    .connection-status.connected {
-      color: #28a745;
-    }
-
-    .connection-status.connecting {
-      color: #ffc107;
-    }
-
-    .connection-status.disconnected {
-      color: #6c757d;
-    }
-
-    .connection-status.failed {
-      color: #dc3545;
-    }
-
-    .connection-status.unknown {
-      color: #6c757d;
-    }
-
-    .connection-status i {
-      font-size: 8px;
-    }
-
-    .voice-error {
+    /* Enhanced toggle button with dynamic styling */
+    #toggleStageBtn {
       position: fixed;
-      top: 20px;
-      right: 20px;
-      background: #f8d7da;
-      color: #721c24;
-      padding: 12px 16px;
-      border-radius: 8px;
-      border: 1px solid #f5c6cb;
-      z-index: 1001;
-      max-width: 300px;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-    }
-
-    .error-message {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      font-size: 14px;
-    }
-
-    .error-close {
-      background: none;
-      border: none;
-      color: #721c24;
+      top: 32px;
+      right: 32px;
+      padding: 12px 28px;
+      font-size: 1.1em;
+      border-radius: 16px;
+      border: 2px solid #e2c391;
+      background: linear-gradient(120deg, #ffe7b2 60%, #bfa16a 100%);
+      color: #7a5a2f;
+      font-weight: bold;
+      box-shadow: 
+        0 2px 8px 0 #e2c39133,
+        0 0 0 1px rgba(255, 255, 255, 0.1) inset;
       cursor: pointer;
-      padding: 2px;
-      border-radius: 3px;
-      margin-left: auto;
+      z-index: 1000;
+      transition: all 0.3s ease;
+      font-family: 'Gochi Hand', 'Segoe Print', cursive;
+      letter-spacing: 1px;
+      text-shadow: 0 1px 2px rgba(255, 255, 255, 0.5);
+      position: relative;
+      overflow: hidden;
+    }
+    #toggleStageBtn::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+      transition: left 0.6s;
+    }
+    #toggleStageBtn:hover::before {
+      left: 100%;
+    }
+    #toggleStageBtn:hover {
+      transform: translateY(-3px);
+      box-shadow: 
+        0 8px 20px 0 #e2c39166,
+        0 0 0 1px rgba(255, 255, 255, 0.2) inset,
+        0 0 30px rgba(226, 195, 145, 0.4);
+    }
+    #toggleStageBtn:active {
+      transform: translateY(-1px);
     }
 
-    .error-close:hover {
-      background: rgba(114, 28, 36, 0.1);
+    /* Day mode button styling */
+    body.day-mode #toggleStageBtn {
+      border: 2px solid #ffdca8;
+      background: linear-gradient(120deg, #fffbe7 60%, #ffe7b2 100%);
+      color: #e2a84f;
+      box-shadow: 
+        0 2px 8px 0 #ffdca833,
+        0 0 0 1px rgba(255, 255, 255, 0.1) inset;
+    }
+    body.day-mode #toggleStageBtn:hover {
+      box-shadow: 
+        0 8px 20px 0 #ffdca866,
+        0 0 0 1px rgba(255, 255, 255, 0.2) inset,
+        0 0 30px rgba(255, 220, 168, 0.4);
     }
 
-    /* Responsive design */
-    @media (max-width: 768px) {
-      .voice-chat-container {
-        bottom: 10px;
-        right: 10px;
-        left: 10px;
-        min-width: auto;
-      }
-      
-      .voice-controls {
-        flex-direction: column;
-        gap: 8px;
-      }
-      
-      .voice-btn {
-        width: 100%;
-        min-width: auto;
-      }
+    /* Night mode button styling */
+    body.night-mode #toggleStageBtn {
+      border: 2px solid #7bb0e6;
+      background: linear-gradient(120deg, #23202a 60%, #22304a 100%);
+      color: #7bb0e6;
+      box-shadow: 
+        0 2px 8px 0 #23202a99,
+        0 0 0 1px rgba(255, 255, 255, 0.05) inset;
+      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8);
     }
-
-    /* Dark mode support */
-    @media (prefers-color-scheme: dark) {
-      .voice-chat-container {
-        background: rgba(33, 37, 41, 0.95);
-        border-color: rgba(255, 255, 255, 0.1);
-      }
-      
-      .voice-status {
-        color: #adb5bd;
-      }
-      
-      .participant {
-        background: rgba(255, 255, 255, 0.05);
-        color: #dee2e6;
-      }
-      
-      .participant.me {
-        background: rgba(40, 167, 69, 0.2);
-      }
+    body.night-mode #toggleStageBtn:hover {
+      box-shadow: 
+        0 8px 20px 0 #23202acc,
+        0 0 0 1px rgba(255, 255, 255, 0.1) inset,
+        0 0 30px rgba(123, 176, 230, 0.4);
     }
   </style>
   <script src="/socket.io/socket.io.js"></script>
 </head>
 <body>
+  <!-- Ghibli-inspired background elements -->
+  <div class="ghibli-stars">
+    <span style="left:8vw;top:12vh;width:2.5px;height:2.5px;animation-delay:0s;"></span>
+    <span style="left:18vw;top:22vh;width:1.5px;height:1.5px;animation-delay:1.2s;"></span>
+    <span style="left:38vw;top:8vh;width:2.2px;height:2.2px;animation-delay:2.1s;"></span>
+    <span style="left:62vw;top:18vh;width:1.8px;height:1.8px;animation-delay:0.7s;"></span>
+    <span style="left:78vw;top:12vh;width:2.7px;height:2.7px;animation-delay:2.8s;"></span>
+    <span style="left:88vw;top:28vh;width:1.2px;height:1.2px;animation-delay:1.7s;"></span>
+    <span style="left:55vw;top:6vh;width:1.9px;height:1.9px;animation-delay:0.3s;"></span>
+    <span style="left:25vw;top:18vh;width:2.1px;height:2.1px;animation-delay:2.3s;"></span>
+    <span style="left:70vw;top:10vh;width:1.6px;height:1.6px;animation-delay:1.1s;"></span>
+    <span style="left:48vw;top:24vh;width:2.3px;height:2.3px;animation-delay:0.9s;"></span>
+    <span style="left:15vw;top:15vh;width:1.8px;height:1.8px;animation-delay:1.5s;"></span>
+    <span style="left:85vw;top:8vh;width:2.0px;height:2.0px;animation-delay:0.5s;"></span>
+    <span style="left:35vw;top:25vh;width:1.4px;height:1.4px;animation-delay:2.0s;"></span>
+    <span style="left:75vw;top:20vh;width:1.7px;height:1.7px;animation-delay:1.8s;"></span>
+    <span style="left:45vw;top:12vh;width:2.1px;height:2.1px;animation-delay:0.8s;"></span>
+  </div>
+
+  <!-- Crescent moon -->
+  <svg class="ghibli-moon" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M32 4C16.536 4 4 16.536 4 32s12.536 28 28 28c15.464 0 28-12.536 28-28S47.464 4 32 4zm0 4c13.255 0 24 10.745 24 24S45.255 56 32 56c-13.255 0-24-10.745-24-24S18.745 8 32 8z" fill="#fffbe7"/>
+    <path d="M32 8c-13.255 0-24 10.745-24 24s10.745 24 24 24c13.255 0 24-10.745 24-24S45.255 8 32 8zm0 4c11.046 0 20 8.954 20 20s-8.954 20-20 20S12 43.046 12 32s8.954-20 20-20z" fill="#1a1a2e"/>
+  </svg>
+
+  <!-- Moonlight reflection -->
+  <div class="moonlight-reflection"></div>
+
+  <!-- Floating particles -->
+  <div class="floating-particles">
+    <div class="particle" style="left: 10%; animation-delay: 0s;"></div>
+    <div class="particle" style="left: 20%; animation-delay: 3s;"></div>
+    <div class="particle" style="left: 30%; animation-delay: 6s;"></div>
+    <div class="particle" style="left: 40%; animation-delay: 9s;"></div>
+    <div class="particle" style="left: 50%; animation-delay: 12s;"></div>
+    <div class="particle" style="left: 60%; animation-delay: 15s;"></div>
+    <div class="particle" style="left: 70%; animation-delay: 18s;"></div>
+    <div class="particle" style="left: 80%; animation-delay: 21s;"></div>
+    <div class="particle" style="left: 90%; animation-delay: 24s;"></div>
+  </div>
+
+  <!-- Sunny effects for day mode -->
+  <div class="sunny-effects">
+    <div class="sun-rays">
+      <div class="sun-ray" style="transform: translate(-50%, -50%) rotate(0deg);"></div>
+      <div class="sun-ray" style="transform: translate(-50%, -50%) rotate(45deg);"></div>
+      <div class="sun-ray" style="transform: translate(-50%, -50%) rotate(90deg);"></div>
+      <div class="sun-ray" style="transform: translate(-50%, -50%) rotate(135deg);"></div>
+      <div class="sun-ray" style="transform: translate(-50%, -50%) rotate(180deg);"></div>
+      <div class="sun-ray" style="transform: translate(-50%, -50%) rotate(225deg);"></div>
+      <div class="sun-ray" style="transform: translate(-50%, -50%) rotate(270deg);"></div>
+      <div class="sun-ray" style="transform: translate(-50%, -50%) rotate(315deg);"></div>
+    </div>
+  </div>
+
+  <!-- Floating flowers for day mode -->
+  <div class="floating-flowers">
+    <div class="flower" style="left: 5%; animation-delay: 0s;"></div>
+    <div class="flower" style="left: 15%; animation-delay: 2s;"></div>
+    <div class="flower" style="left: 25%; animation-delay: 4s;"></div>
+    <div class="flower" style="left: 35%; animation-delay: 6s;"></div>
+    <div class="flower" style="left: 45%; animation-delay: 8s;"></div>
+    <div class="flower" style="left: 55%; animation-delay: 10s;"></div>
+    <div class="flower" style="left: 65%; animation-delay: 12s;"></div>
+    <div class="flower" style="left: 75%; animation-delay: 14s;"></div>
+    <div class="flower" style="left: 85%; animation-delay: 16s;"></div>
+    <div class="flower" style="left: 95%; animation-delay: 18s;"></div>
+  </div>
+
   <div class="container">
     <!-- Left Panel: Scores and Actions -->
     <div class="left-panel">
@@ -705,7 +1056,12 @@
     <!-- Center Panel: Table and Cards -->
     <div class="center-panel">
       <div class="circle-table-container">
-        <div class="circle-table"></div>
+        <div class="circle-table">
+          <div class="table-details">
+            <div class="table-pattern"></div>
+            <div class="table-center-decoration"></div>
+          </div>
+        </div>
         <div class="role-cards-circle" id="roleCardsCircle"></div>
       </div>
       <div id="skillButtonContainer" style="margin: 24px 0 0 0; display: flex; gap: 12px;"></div>
@@ -717,27 +1073,97 @@
     </div>
     <!-- Right Panel: How to Play -->
     <div class="right-panel">
-      <div class="score-box" style="min-height: 320px; max-height: 70vh; overflow-y: auto;">
+      <div class="score-box" style="min-height: 320px; max-height: 60vh; overflow-y: auto; margin-top: 80px; position: relative;">
+        <!-- Removed duplicate toggleStageBtn button from here -->
         <div style="font-size:1.13rem;font-weight:bold;margin-bottom:8px;color:#7bb0e6;letter-spacing:1px;">How to Play</div>
         <div style="font-size:1.05rem;">
-          <b>Game Overview</b><br>
-          • 6–9 players: Cheaters vs. Keepers<br>
-          • Cheaters: 2–3 players, Keepers: 4–6 players<br>
-          • Each player gets a unique role with special abilities<br>
-          • Game ends when all Cheaters are caught or when Cheaters win<br>
-          <br>
-          <b>Game Flow</b><br>
-          • Each round, players take turns picking Helpers<br>
-          • Helpers can be Love (positive) or Hate (negative)<br>
-          • Host and helpers can play Love/Hate cards when allowed<br>
-          • Special skills can be used at certain times<br>
-          • Use the UI to track scores and actions<br>
+          <p><strong>Who's Cheating? – Family Feud Edition</strong></p>
+          <p>An online, no-elimination social-deduction web game for <strong>6–9 players</strong>. Over a set number of Family Parties, you'll collect ❤️ Close-knot or rack up 💥 Scandal points. After the final party (or if Scandal hits 10), whoever leads wins—unless Michael's "Finding Abby" twist upends the result!</p>
+          
+          <h4>👪 Players & Parties</h4>
+          <p><strong>Pets:</strong> Pets are on the Keeper side and are also Keepers, but have no special power. 2-Pet games (6 or 8): Kiko + Knox. 3-Pet games (7 or 9): Kiko, Knox + Nash.</p>
+          <ul>
+            <li><strong>6 Players:</strong> 2 Cheaters (Michael, Wind) + 4 Keepers (Abby, Kennedi, Kiko, Knox) + 3 Parties</li>
+            <li><strong>7 Players:</strong> 2 Cheaters (Michael, Wind) + 5 Keepers (Abby, Kennedi, Kiko, Knox, Nash) + 3 Parties</li>
+            <li><strong>8 Players:</strong> 3 Cheaters (Michael, Jack, Wind) + 5 Keepers (Abby, Kennedi, Ker, Kiko, Knox) + 4 Parties</li>
+            <li><strong>9 Players:</strong> 3 Cheaters (Michael, Jack, Wind) + 6 Keepers (Abby, Kennedi, Ker, Kiko, Knox, Nash) + 4 Parties</li>
+          </ul>
+
+          <h4>🎲 Components</h4>
+          <ul>
+            <li>Role cards (one per player)</li>
+            <li>Vote cards: ✅ Approve / ❌ Reject</li>
+            <li>Drama cards: each player's hand of 1 Love + 1 Hate</li>
+            <li>Close-knot & Scandal tracks (0→10)</li>
+            <li>Night marker (counts nights)</li>
+            <li>Skill buttons are visible only to relevant players</li>
+          </ul>
+
+          <h4>🔧 Setup</h4>
+          <ol>
+            <li>Deal each player one secret Role card.</li>
+            <li>Abby peeks: View all Cheaters except Jack.</li>
+            <li>Cheaters peek (except Jack): recognize one another; Jack stays hidden.</li>
+            <li>Initialize tracks at 0; Night marker → 0.</li>
+            <li>Randomly select the first Election Candidate.</li>
+          </ol>
+
+          <h4>🔄 Round Flow</h4>
+          <p><strong>Repeat for N Family Parties (see table above):</strong></p>
+          <ol>
+            <li><strong>Night (10 sec)</strong><br>
+              Rumors fly: Scandal +1.<br>
+              Wind may click <em>Molesting a Boy</em> (once) to instead add Scandal +2.<br>
+              Advance Night marker.
+            </li>
+            <li><strong>Host Election & Helpers</strong><br>
+              Elect Host: all vote ✅/❌ on the current Election Candidate.<br>
+              &gt;50% Approve → becomes Host.<br>
+              ≤50% Approve → pass candidate clockwise; return to Night for same party.<br>
+              Helpers: The Host picks 2 Helpers.
+            </li>
+            <li><strong>Family Party (Drama & Scoring)</strong><br>
+              <strong>Skill-use window (10 sec):</strong><br>
+              Kennedi may click <em>Protecting the Party</em> (once): all 3 cards count as Love → Close-knot +3.<br>
+              Wind may click <em>Mislead</em> (once): after reveals flip one Love→Hate → Scandal +1.<br>
+              If both are used, compare totals at that moment: the higher side's effect applies.<br>
+              Play Drama cards: Host + 2 Helpers each play Love or Hate.<br>
+              Reveal & tally: Love → +1 Close-knot; Hate → +1 Scandal.<br>
+              Michael may click <em>Finding Abby</em> anytime this Party: name one player as Abby.<br>
+              Correct → immediate Cheater victory.<br>
+              Wrong → immediate Keeper victory.<br>
+              If Parties remain, loop to Night; otherwise → Endgame.
+            </li>
+          </ol>
+
+          <h4>🔮 One-Time Role Powers</h4>
+          <ul>
+            <li><strong>Abby:</strong> Keen Sight - Setup (auto) - Learns all the Cheaters except Jack</li>
+            <li><strong>Jack:</strong> I Would Like to Hide My Card - Passive - Jack's identity remains hidden from Abby & other Cheaters</li>
+            <li><strong>Wind:</strong> Molesting a Boy - Night - Use instead of +1 → Scandal +2</li>
+            <li><strong>Wind:</strong> Mislead - After the Party reveals - Flip one Love→Hate → Scandal +1</li>
+            <li><strong>Michael:</strong> Creator's Privilege: Finding Abby - Anytime during the Party - Guess Abby; correct → Cheaters win; wrong → Keepers win</li>
+            <li><strong>Kennedi:</strong> Protecting the Party - Before reveals - All 3 cards count as Love → Close-knot +3</li>
+            <li><strong>Ker:</strong> The Chosen One - After Helpers picked - Swap one chosen Helper with one non-Helper</li>
+          </ul>
+          <p><em><strong>Note:</strong> Each power is clickable once; button then disables.</em></p>
+
+          <h4>🏆 Endgame & Victory</h4>
+          <ul>
+            <li>After all Family Parties:</li>
+            <ul>
+              <li>Close-knot &gt; Scandal → Keepers win</li>
+              <li>Scandal ≥ Close-knot → Cheaters win</li>
+            </ul>
+            <li>Michael's final Finding Abby may overturn a Keeper win if he correctly names Abby.</li>
+          </ul>
         </div>
       </div>
       <button class="reset-btn host-only" id="restartBtn" style="margin-top:24px;">Restart the Game</button>
-      <button id="toggleStageBtn" style="position:absolute;top:32px;right:32px;padding:12px 28px;font-size:1.1em;border-radius:16px;border:2px solid #e2c391;background:#ffe7b2;color:#7a5a2f;font-weight:bold;box-shadow:0 2px 8px 0 #e2c39133;cursor:pointer;z-index:10;">🌙 Switch to Day</button>
     </div>
   </div>
+  <!-- Top right corner switch button, always visible above background/table -->
+  <button id="toggleStageBtn" style="position:fixed;top:32px;right:32px;z-index:1000;">🌙 Switch to Day</button>
   <div id="gameStateBox" style="display:none;"></div>
   <script src="/socket.io/socket.io.js"></script>
   <script>
@@ -1325,6 +1751,22 @@
     // --- Default State on Load ---
     document.addEventListener('DOMContentLoaded', () => {
       document.body.classList.remove('day-mode'); // Night mode by default
+      
+      // Initialize background elements for night mode
+      const stars = document.querySelector('.ghibli-stars');
+      const moon = document.querySelector('.ghibli-moon');
+      const moonlight = document.querySelector('.moonlight-reflection');
+      const particles = document.querySelector('.floating-particles');
+      const sunnyEffects = document.querySelector('.sunny-effects');
+      const floatingFlowers = document.querySelector('.floating-flowers');
+      
+      if (stars) stars.style.opacity = '1';
+      if (moon) moon.style.opacity = '0.18';
+      if (moonlight) moonlight.style.opacity = '1';
+      if (particles) particles.style.opacity = '1';
+      if (sunnyEffects) sunnyEffects.style.opacity = '0';
+      if (floatingFlowers) floatingFlowers.style.opacity = '0';
+      
       // Set all counts to 0
       document.querySelectorAll('.score-value').forEach(el => el.textContent = '0');
       loveCount.textContent = '0';
@@ -1638,6 +2080,33 @@
       document.querySelectorAll('.role-card').forEach(card => card.classList.toggle('night-mode', isNight));
       document.querySelectorAll('.player-name-label').forEach(label => label.classList.toggle('night-mode', isNight));
       document.querySelectorAll('.host-button, .count-button').forEach(btn => btn.classList.toggle('night-mode', isNight));
+      
+      // Handle background elements
+      const stars = document.querySelector('.ghibli-stars');
+      const moon = document.querySelector('.ghibli-moon');
+      const moonlight = document.querySelector('.moonlight-reflection');
+      const particles = document.querySelector('.floating-particles');
+      const sunnyEffects = document.querySelector('.sunny-effects');
+      const floatingFlowers = document.querySelector('.floating-flowers');
+      
+      if (isNight) {
+        // Show night elements
+        if (stars) stars.style.opacity = '1';
+        if (moon) moon.style.opacity = '0.18';
+        if (moonlight) moonlight.style.opacity = '1';
+        if (particles) particles.style.opacity = '1';
+        if (sunnyEffects) sunnyEffects.style.opacity = '0';
+        if (floatingFlowers) floatingFlowers.style.opacity = '0';
+      } else {
+        // Hide night elements for day mode
+        if (stars) stars.style.opacity = '0.3';
+        if (moon) moon.style.opacity = '0.05';
+        if (moonlight) moonlight.style.opacity = '0.2';
+        if (particles) particles.style.opacity = '0.5';
+        if (sunnyEffects) sunnyEffects.style.opacity = '1';
+        if (floatingFlowers) floatingFlowers.style.opacity = '1';
+      }
+      
       socket.emit('toggleDayNight', isNight);
     }
 
@@ -1670,6 +2139,32 @@
       document.querySelectorAll('.role-card').forEach(card => card.classList.toggle('night-mode', isNight));
       document.querySelectorAll('.player-name-label').forEach(label => label.classList.toggle('night-mode', isNight));
       document.querySelectorAll('.host-button, .count-button').forEach(btn => btn.classList.toggle('night-mode', isNight));
+      
+      // Handle background elements
+      const stars = document.querySelector('.ghibli-stars');
+      const moon = document.querySelector('.ghibli-moon');
+      const moonlight = document.querySelector('.moonlight-reflection');
+      const particles = document.querySelector('.floating-particles');
+      const sunnyEffects = document.querySelector('.sunny-effects');
+      const floatingFlowers = document.querySelector('.floating-flowers');
+      
+      if (isNight) {
+        // Show night elements
+        if (stars) stars.style.opacity = '1';
+        if (moon) moon.style.opacity = '0.18';
+        if (moonlight) moonlight.style.opacity = '1';
+        if (particles) particles.style.opacity = '1';
+        if (sunnyEffects) sunnyEffects.style.opacity = '0';
+        if (floatingFlowers) floatingFlowers.style.opacity = '0';
+      } else {
+        // Hide night elements for day mode
+        if (stars) stars.style.opacity = '0.3';
+        if (moon) moon.style.opacity = '0.05';
+        if (moonlight) moonlight.style.opacity = '0.2';
+        if (particles) particles.style.opacity = '0.5';
+        if (sunnyEffects) sunnyEffects.style.opacity = '1';
+        if (floatingFlowers) floatingFlowers.style.opacity = '1';
+      }
     });
 
     socket.on('gameRestarted', () => {
@@ -2437,6 +2932,124 @@
       if (roleCheckTimer) clearTimeout(roleCheckTimer);
       roleCheckTimer = setTimeout(checkRoleAssigned, 5000);
     });
+
+    // Toggle between day and night modes
+    function toggleStage() {
+      const body = document.body;
+      const toggleBtn = document.getElementById('toggleStageBtn');
+      
+      if (body.classList.contains('night-mode')) {
+        // Switch from night to day mode
+        body.classList.remove('night-mode');
+        body.classList.add('day-mode');
+        toggleBtn.innerHTML = '🌙 Switch to Night';
+      } else {
+        // Switch from day to night mode
+        body.classList.remove('day-mode');
+        body.classList.add('night-mode');
+        toggleBtn.innerHTML = '☀️ Switch to Day';
+      }
+    }
+
+    // Initialize the page
+    document.addEventListener('DOMContentLoaded', function() {
+      // Initialize day/night mode toggle
+      const toggleBtn = document.getElementById('toggleStageBtn');
+      const body = document.body;
+      
+      // Set initial button state based on current mode
+      if (body.classList.contains('night-mode')) {
+        toggleBtn.innerHTML = '☀️ Switch to Day';
+      } else {
+        toggleBtn.innerHTML = '🌙 Switch to Night';
+      }
+      
+      // Add event listener for toggle button
+      toggleBtn.addEventListener('click', toggleStage);
+      
+      // Initialize other elements
+      initializeStars();
+      initializeSunRays();
+      initializeFlowers();
+      initializeParticles();
+      initializeMoon();
+      initializeMoonlightReflection();
+      
+      // ... existing code ...
+    });
+
+    // Initialize background elements
+    function initializeStars() {
+      const starsContainer = document.querySelector('.ghibli-stars');
+      if (!starsContainer) return;
+      
+      for (let i = 0; i < 50; i++) {
+        const star = document.createElement('span');
+        star.style.left = Math.random() * 100 + '%';
+        star.style.top = Math.random() * 100 + '%';
+        star.style.width = Math.random() * 3 + 2 + 'px';
+        star.style.height = star.style.width;
+        star.style.animationDelay = Math.random() * 4 + 's';
+        starsContainer.appendChild(star);
+      }
+    }
+
+    function initializeSunRays() {
+      const sunContainer = document.querySelector('.sun-rays');
+      if (!sunContainer) return;
+      
+      for (let i = 0; i < 12; i++) {
+        const ray = document.createElement('div');
+        ray.className = 'sun-ray';
+        ray.style.transform = `translate(-50%, -50%) rotate(${i * 30}deg)`;
+        ray.style.animationDelay = Math.random() * 2 + 's';
+        sunContainer.appendChild(ray);
+      }
+    }
+
+    function initializeFlowers() {
+      const flowersContainer = document.querySelector('.floating-flowers');
+      if (!flowersContainer) return;
+      
+      for (let i = 0; i < 15; i++) {
+        const flower = document.createElement('div');
+        flower.className = 'flower';
+        flower.style.left = Math.random() * 100 + '%';
+        flower.style.animationDelay = Math.random() * 18 + 's';
+        flower.style.animationDuration = (Math.random() * 10 + 15) + 's';
+        flowersContainer.appendChild(flower);
+      }
+    }
+
+    function initializeParticles() {
+      const particlesContainer = document.querySelector('.floating-particles');
+      if (!particlesContainer) return;
+      
+      for (let i = 0; i < 30; i++) {
+        const particle = document.createElement('div');
+        particle.className = 'particle';
+        particle.style.left = Math.random() * 100 + '%';
+        particle.style.animationDelay = Math.random() * 25 + 's';
+        particle.style.animationDuration = (Math.random() * 15 + 20) + 's';
+        particlesContainer.appendChild(particle);
+      }
+    }
+
+    function initializeMoon() {
+      const moon = document.querySelector('.ghibli-moon');
+      if (!moon) return;
+      
+      // Moon is already in HTML, just ensure it's visible
+      moon.style.display = 'block';
+    }
+
+    function initializeMoonlightReflection() {
+      const reflection = document.querySelector('.moonlight-reflection');
+      if (!reflection) return;
+      
+      // Reflection is already in HTML, just ensure it's visible
+      reflection.style.display = 'block';
+    }
   </script>
 </body>
 </html>
