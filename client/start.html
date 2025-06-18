@@ -1028,6 +1028,8 @@
         updateHostOnlyButtons();
         renderSkillButtons();
       }
+      if (roleCheckTimer) clearTimeout(roleCheckTimer);
+      roleCheckTimer = setTimeout(checkRoleAssigned, 5000);
     });
 
     // Handle skill buttons
@@ -1104,6 +1106,8 @@
         updateHostOnlyButtons();
         renderSkillButtons();
       }
+      if (roleCheckTimer) clearTimeout(roleCheckTimer);
+      roleCheckTimer = setTimeout(checkRoleAssigned, 5000);
     });
 
     // --- Room Join Logic ---
@@ -1193,6 +1197,8 @@
         updateHostOnlyButtons();
         renderSkillButtons();
       }
+      if (roleCheckTimer) clearTimeout(roleCheckTimer);
+      roleCheckTimer = setTimeout(checkRoleAssigned, 5000);
     });
 
     // --- Host-Only Controls and Default State ---
@@ -2409,6 +2415,28 @@
           console.error('[VoiceChat] Failed to add ICE candidate:', error);
         }
       }
+    });
+
+    // After receiving initialGameState or gameStateUpdate, start a timer to check for missing role
+    let roleCheckTimer = null;
+    function checkRoleAssigned() {
+      if (!gameState || !gameState.players) return;
+      const me = gameState.players.find(p => p.id === socket.id);
+      if (!me || !me.role || me.role === 'backSide') {
+        alert('Connection issue: Please refresh or rejoin the room.');
+      }
+    }
+    socket.on('initialGameState', (state) => {
+      gameState = state;
+      // ... existing code ...
+      if (roleCheckTimer) clearTimeout(roleCheckTimer);
+      roleCheckTimer = setTimeout(checkRoleAssigned, 5000);
+    });
+    socket.on('gameStateUpdate', (state) => {
+      gameState = state;
+      // ... existing code ...
+      if (roleCheckTimer) clearTimeout(roleCheckTimer);
+      roleCheckTimer = setTimeout(checkRoleAssigned, 5000);
     });
   </script>
 </body>

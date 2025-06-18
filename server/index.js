@@ -319,6 +319,8 @@ io.on('connection', (socket) => {
     }
     await setPlayerList(roomId, players);
     socket.join(roomId);
+    // Log the full player list after join
+    console.log(`[joinRoom] Player list for room ${roomId}:`, players.map(p => ({ name: p.name, id: p.id })));
 
     // Always check and emit the latest game state if roles are assigned
     let gameState = await getGameState(roomId);
@@ -334,15 +336,32 @@ io.on('connection', (socket) => {
     if (gameState && gameState.players && gameState.players.every(p => p.role)) {
       socket.emit('initialGameState', gameState);
     } else if (!isReconnect && players.length === parseInt(room.maxPlayers)) {
-      // If this is the last player and roles need to be assigned
-      const roles = distributeRoles(players.length);
-      const newGameState = await initializeGameState(roomId, players);
-      newGameState.players = newGameState.players.map((player, index) => ({
-        ...player,
-        role: roles[index]
-      }));
-      await updateGameState(roomId, newGameState);
-      io.to(roomId).emit('initialGameState', newGameState);
+      // Wait 2 seconds before assigning roles
+      setTimeout(async () => {
+        // Re-fetch the latest player list
+        const roomCheck = await redis.hgetall(`room:${roomId}`);
+        const playersCheck = JSON.parse(roomCheck.players || '[]');
+        // Only assign roles if all players are still present and connected
+        const allConnected = playersCheck.length === parseInt(room.maxPlayers) && playersCheck.every(p => p.id);
+        if (!allConnected) {
+          console.log(`[joinRoom] Not all players connected after grace period in room ${roomId}. Waiting to assign roles.`);
+          return;
+        }
+        const roles = distributeRoles(playersCheck.length);
+        const newGameState = await initializeGameState(roomId, playersCheck);
+        newGameState.players = newGameState.players.map((player, index) => ({
+          ...player,
+          role: roles[index]
+        }));
+        // Update socket IDs in gameState.players
+        newGameState.players.forEach((p, idx) => {
+          const matchingPlayer = playersCheck.find(pl => pl.name === p.name);
+          if (matchingPlayer) newGameState.players[idx].id = matchingPlayer.id;
+        });
+        await updateGameState(roomId, newGameState);
+        io.to(roomId).emit('initialGameState', newGameState);
+        console.log(`[joinRoom] Roles assigned after grace period for room ${roomId}:`, newGameState.players.map(p => ({ name: p.name, role: p.role, id: p.id })));
+      }, 2000);
     }
 
     callback({ success: true });
@@ -396,6 +415,8 @@ io.on('connection', (socket) => {
         }
       });
       await updateGameState(roomId, gameState);
+      // Log the full gameState.players after roles are assigned
+      console.log(`[startGame] gameState.players for room ${roomId}:`, gameState.players.map(p => ({ name: p.name, role: p.role, id: p.id })));
       io.to(roomId).emit('gameStateUpdate', gameState);
       io.to(roomId).emit('initialGameState', gameState);
     }
