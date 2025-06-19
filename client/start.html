@@ -1211,6 +1211,7 @@
           <h4>👪 Players & Parties</h4>
           <p><strong>Pets:</strong> Pets are on the Keeper side and are also Keepers, but have no special power. 2-Pet games (6 or 8): Kiko + Knox. 3-Pet games (7 or 9): Kiko, Knox + Nash.</p>
           <ul>
+            <li><strong>5 Players:</strong> 2 Cheaters (Michael, Wind) + 3 Keepers (Abby, Kennedi, Kiko) + 3 Parties</li>
             <li><strong>6 Players:</strong> 2 Cheaters (Michael, Wind) + 4 Keepers (Abby, Kennedi, Kiko, Knox) + 3 Parties</li>
             <li><strong>7 Players:</strong> 2 Cheaters (Michael, Wind) + 5 Keepers (Abby, Kennedi, Kiko, Knox, Nash) + 3 Parties</li>
             <li><strong>8 Players:</strong> 3 Cheaters (Michael, Jack, Wind) + 5 Keepers (Abby, Kennedi, Ker, Kiko, Knox) + 4 Parties</li>
@@ -1682,7 +1683,7 @@
     let myName = params.name || '';
     const password = params.password || '';
     const roomName = params.roomname || '';
-    const maxPlayers = params.maxPlayers || 6;
+    const maxPlayers = params.maxPlayers || 5;
     const isCreateRoom = params.createRoom === '1';
     if (!myName) {
       myName = prompt('Enter your name:');
@@ -3228,6 +3229,14 @@
         window.location.href = 'joining.html';
       }
     });
+
+    const testPlayers = [
+      'Test Player 1',
+      'Test Player 2',
+      'Test Player 3',
+      'Test Player 4',
+      'Test Player 5'
+    ];
   </script>
 </body>
 </html>

@@ -96,15 +96,14 @@
         'Test Player 2',
         'Test Player 3',
         'Test Player 4',
-        'Test Player 5',
-        'Test Player 6'
+        'Test Player 5'
       ];
 
-// Open all 6 tabs synchronously
+// Open all 5 tabs synchronously
 for (let i = 0; i < testPlayers.length; i++) {
   setTimeout(() => {
     const isHost = i === 0;
-    const url = `start.html?roomId=${testRoomId}&password=${testPassword}&name=${encodeURIComponent(testPlayers[i])}&roomname=${encodeURIComponent(testRoomName)}&maxPlayers=6${isHost ? '&createRoom=1' : ''}`;
+    const url = `start.html?roomId=${testRoomId}&password=${testPassword}&name=${encodeURIComponent(testPlayers[i])}&roomname=${encodeURIComponent(testRoomName)}&maxPlayers=5${isHost ? '&createRoom=1' : ''}`;
     window.open(url, `testPlayer${i + 1}`);
   }, i * 1500); // Increased delay to 1.5 seconds to prevent race conditions
 }

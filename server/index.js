@@ -39,7 +39,10 @@ function distributeRoles(playerCount) {
   const roles = [];
   
   // Define role pools based on player count
-  if (playerCount === 6) {
+  if (playerCount === 5) {
+    // 2 Cheaters, 3 Keepers (including 1 Pet)
+    roles.push('Michael', 'Wind', 'Abby', 'Kennedi', 'Kiko');
+  } else if (playerCount === 6) {
     // 2 Cheaters, 4 Keepers (including 2 Pets)
     roles.push('Michael', 'Wind', 'Abby', 'Kennedi', 'Kiko', 'Knox');
   } else if (playerCount === 7) {

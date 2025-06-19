@@ -156,7 +156,7 @@
     <div class="room-id-ghibli" id="roomIdBox">Room ID: <span id="roomId"></span></div>
     <div class="room-name-ghibli" id="roomNameBox" style="margin-top:8px; font-size:1.1rem; color:#a07c4f; background:#fffbe7; border:2px solid #e2c391; border-radius:14px; padding:8px 22px; box-shadow:0 2px 8px 0 #e2c39122;">Room Name: <span id="roomName"></span></div>
     <div class="room-password-ghibli" id="roomPasswordBox" style="margin-top:8px; font-size:1.1rem; color:#a07c4f; background:#fffbe7; border:2px solid #e2c391; border-radius:14px; padding:8px 22px; box-shadow:0 2px 8px 0 #e2c39122;">Room Password: <span id="roomPassword"></span></div>
-    <div class="player-count-box" id="playerCountBox">Players: <span id="playerCount">1</span>/<span id="maxPlayers">6</span></div>
+    <div class="player-count-box" id="playerCountBox">Players: <span id="playerCount">1</span>/<span id="maxPlayers">5</span></div>
     <div class="player-list" id="playerList">
       <strong>Players in Room:</strong>
       <ul id="playerNames" style="margin: 8px 0 0 0; padding-left: 18px;"></ul>
@@ -179,7 +179,7 @@
     }
     const params = getQueryParams();
     const roomId = params.roomId || '00000';
-    let maxPlayers = params.maxPlayers || 6;
+    let maxPlayers = params.maxPlayers || 5;
     const myName = params.name || '';
     const isHost = params.host === '1';
     let roomPassword = params.password || '';
