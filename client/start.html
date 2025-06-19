@@ -1045,45 +1045,6 @@
       font-size: 1.2em;
       margin-right: 4px;
     }
-
-    /* Add CSS for host helper mode */
-    .host-helper-mode .player-card {
-      cursor: pointer;
-      transition: transform 0.3s, box-shadow 0.3s;
-    }
-    .host-helper-mode .player-card:hover {
-      transform: scale(1.05);
-      box-shadow: 0 0 20px rgba(226, 195, 145, 0.4);
-    }
-    .player-card.selected-host {
-      border: 4px solid #4caf50;
-      box-shadow: 0 0 20px rgba(76, 175, 80, 0.4);
-    }
-    .ghibli-notification {
-      position: fixed;
-      top: 20px;
-      left: 50%;
-      transform: translateX(-50%);
-      background: #fffbe7;
-      border: 2px solid #e2c391;
-      border-radius: 12px;
-      padding: 15px 25px;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-      z-index: 1000;
-      font-family: 'Segoe Print', 'Comic Sans MS', cursive;
-      color: #5a4327;
-      animation: notification-slide 0.5s ease-out;
-    }
-    @keyframes notification-slide {
-      from {
-        transform: translateX(-50%) translateY(-100%);
-        opacity: 0;
-      }
-      to {
-        transform: translateX(-50%) translateY(0);
-        opacity: 1;
-      }
-    }
   </style>
   <script src="/socket.io/socket.io.js"></script>
 </head>
@@ -2012,9 +1973,8 @@
         const x = radius * Math.cos(angle);
         const y = radius * Math.sin(angle);
         
-        // Create role card
         const card = document.createElement('img');
-        card.className = 'role-card player-card' + (i === myIndex ? ' me' : '');
+        card.className = 'role-card' + (i === myIndex ? ' me' : '');
         card.style.left = `calc(50% + ${x}px - 45px)`;
         card.style.top = `calc(50% + ${y}px - 67.5px)`;
         
@@ -2037,7 +1997,6 @@
           shouldShowCard = false;
         }
 
-        card.setAttribute('data-player', name);
         card.src = shouldShowCard ? roleImages[role] : backsideImg;
         card.alt = shouldShowCard ? role : 'Hidden';
         container.appendChild(card);
@@ -2232,8 +2191,6 @@
       hostControls.innerHTML = `
         <button class="host-button" onclick="toggleDayNight()">Toggle Day/Night</button>
         <button class="host-button" onclick="restartGame()">Restart Game</button>
-        <button class="host-button" onclick="toggleHostHelper()" id="hostHelperBtn">Select Party Hosts</button>
-        <button class="host-button" onclick="resetPartyHosts()" id="resetHostsBtn">Reset Party Hosts</button>
       `;
       document.body.appendChild(hostControls);
 
@@ -3280,149 +3237,6 @@
       'Test Player 4',
       'Test Player 5'
     ];
-
-    // Add CSS for host helper mode
-    const hostHelperStyle = document.createElement('style');
-    hostHelperStyle.textContent = `
-      .host-helper-mode .player-card {
-        cursor: pointer;
-        transition: transform 0.3s, box-shadow 0.3s;
-      }
-      .host-helper-mode .player-card:hover {
-        transform: scale(1.05);
-        box-shadow: 0 0 20px rgba(226, 195, 145, 0.4);
-      }
-      .player-card.selected-host {
-        border: 4px solid #4caf50;
-        box-shadow: 0 0 20px rgba(76, 175, 80, 0.4);
-      }
-      .ghibli-notification {
-        position: fixed;
-        top: 20px;
-        left: 50%;
-        transform: translateX(-50%);
-        background: #fffbe7;
-        border: 2px solid #e2c391;
-        border-radius: 12px;
-        padding: 15px 25px;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-        z-index: 1000;
-        font-family: 'Segoe Print', 'Comic Sans MS', cursive;
-        color: #5a4327;
-        animation: notification-slide 0.5s ease-out;
-      }
-      @keyframes notification-slide {
-        from {
-          transform: translateX(-50%) translateY(-100%);
-          opacity: 0;
-        }
-        to {
-          transform: translateX(-50%) translateY(0);
-          opacity: 1;
-        }
-      }
-    `;
-    document.head.appendChild(hostHelperStyle);
-
-    // Host helper mode variables
-    let isHostHelperMode = false;
-    let selectedHosts = new Set();
-
-    // Toggle host helper mode
-    function toggleHostHelper() {
-      isHostHelperMode = !isHostHelperMode;
-      const gameArea = document.querySelector('.game-area');
-      const hostHelperBtn = document.getElementById('hostHelperBtn');
-      
-      if (isHostHelperMode) {
-        gameArea.classList.add('host-helper-mode');
-        hostHelperBtn.style.background = '#4caf50';
-        showGhibliNotification('Click on players to select Family Party hosts!');
-        
-        // Add click handlers to player cards
-        const playerCards = document.querySelectorAll('.player-card');
-        playerCards.forEach(card => {
-          card.onclick = function() {
-            if (card.classList.contains('selected-host')) {
-              card.classList.remove('selected-host');
-              selectedHosts.delete(card.getAttribute('data-player'));
-            } else {
-              card.classList.add('selected-host');
-              selectedHosts.add(card.getAttribute('data-player'));
-            }
-          };
-        });
-      } else {
-        gameArea.classList.remove('host-helper-mode');
-        hostHelperBtn.style.background = '';
-        showGhibliNotification('Family Party hosts have been selected!');
-        
-        // Remove click handlers from player cards
-        const playerCards = document.querySelectorAll('.player-card');
-        playerCards.forEach(card => {
-          card.onclick = null;
-        });
-        
-        // Emit selected hosts to server
-        socket.emit('updatePartyHosts', { roomId, hosts: Array.from(selectedHosts) });
-      }
-    }
-
-    // Show Ghibli-style notification
-    function showGhibliNotification(message, duration = 3000) {
-      const notification = document.createElement('div');
-      notification.className = 'ghibli-notification';
-      notification.textContent = message;
-      document.body.appendChild(notification);
-      
-      setTimeout(() => {
-        notification.style.opacity = '0';
-        notification.style.transform = 'translateX(-50%) translateY(-100%)';
-        setTimeout(() => notification.remove(), 500);
-      }, duration);
-    }
-
-    // Update love/hate button states based on party hosts
-    socket.on('partyHostsUpdate', ({ hosts }) => {
-      const loveBtn = document.getElementById('loveBtn');
-      const hateBtn = document.getElementById('hateBtn');
-      
-      if (hosts.includes(myName)) {
-        loveBtn.disabled = false;
-        hateBtn.disabled = false;
-      } else {
-        loveBtn.disabled = true;
-        hateBtn.disabled = true;
-      }
-    });
-
-    // Function to reset party hosts
-    function resetPartyHosts() {
-      if (!isHost) return;
-      
-      // Clear selected hosts
-      selectedHosts.clear();
-      
-      // Reset visual state
-      document.querySelectorAll('.player-card').forEach(card => {
-        card.classList.remove('selected-host');
-      });
-      document.querySelectorAll('.party-host-indicator, .party-host-crown').forEach(el => el.remove());
-      
-      // Reset button state if in host helper mode
-      const hostHelperBtn = document.getElementById('hostHelperBtn');
-      if (isHostHelperMode) {
-        isHostHelperMode = false;
-        hostHelperBtn.style.background = '';
-        document.querySelector('.game-area').classList.remove('host-helper-mode');
-      }
-      
-      // Emit empty hosts array to server
-      socket.emit('updatePartyHosts', { roomId, hosts: [] });
-      
-      // Show notification
-      showGhibliNotification('Party hosts have been reset!');
-    }
   </script>
 </body>
 </html>

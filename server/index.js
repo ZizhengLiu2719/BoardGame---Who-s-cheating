@@ -259,12 +259,6 @@ const voiceChatState = {};
 // --- Sequential Voice Chat Joining Queue ---
 const voiceChatJoinQueue = {};
 
-// Game state
-const rooms = {};
-const readyStates = {};
-const gameStates = {};
-const partyHosts = {}; // Add this line to store party hosts for each room
-
 // Socket.IO connection handler
 io.on('connection', (socket) => {
   console.log('A user connected:', socket.id);
@@ -433,9 +427,6 @@ io.on('connection', (socket) => {
       console.log(`[startGame] gameState.players for room ${roomId}:`, gameState.players.map(p => ({ name: p.name, role: p.role, id: p.id })));
       io.to(roomId).emit('gameStateUpdate', gameState);
       io.to(roomId).emit('initialGameState', gameState);
-
-      // When starting game, initialize empty party hosts
-      partyHosts[roomId] = [];
     }
   });
 
@@ -995,17 +986,6 @@ io.on('connection', (socket) => {
         break;
       }
     }
-
-    // When game ends or room is deleted, clean up party hosts
-    delete partyHosts[roomId];
-  });
-
-  // Handle party hosts update
-  socket.on('updatePartyHosts', ({ roomId, hosts }) => {
-    if (!rooms[roomId]) return;
-    
-    partyHosts[roomId] = hosts;
-    io.to(roomId).emit('partyHostsUpdate', { hosts });
   });
 });
 
