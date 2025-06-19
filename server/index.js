@@ -149,7 +149,8 @@ async function resetGameState(roomId) {
       name: p.name,
       role: roles[index], // Assign new random role
       position: index,
-      isHost: p.name === hostName
+      isHost: p.name === hostName,
+      isPartyHost: false // Reset party host status
     })),
     roles: roles, // Store the new role distribution
     isDay: false,
@@ -1017,7 +1018,10 @@ io.on('connection', (socket) => {
       if (targetPlayer) {
         targetPlayer.isPartyHost = !targetPlayer.isPartyHost;
         await updateGameState(roomId, gameState);
+        
+        // Broadcast the update to all players in the room
         io.to(roomId).emit('partyHostsUpdate', gameState.players);
+        io.to(roomId).emit('gameStateUpdate', gameState);
       }
     });
 
@@ -1035,7 +1039,10 @@ io.on('connection', (socket) => {
       // Reset party host status for all players
       gameState.players.forEach(p => p.isPartyHost = false);
       await updateGameState(roomId, gameState);
+      
+      // Broadcast the update to all players in the room
       io.to(roomId).emit('partyHostsUpdate', gameState.players);
+      io.to(roomId).emit('gameStateUpdate', gameState);
     });
   });
 

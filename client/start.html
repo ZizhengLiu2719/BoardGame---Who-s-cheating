@@ -1418,7 +1418,7 @@
     function positionCardsInCircle(players) {
       roleCardsCircle.innerHTML = '';
       const n = players.length;
-      const radius = 210; // Place cards around the edge of the table
+      const radius = 210;
       const centerX = 260;
       const centerY = 260;
       const cardWidth = 68;
@@ -1430,11 +1430,17 @@
       const myRoleLower = myRole ? myRole.toLowerCase() : '';
 
       players.forEach((player, index) => {
-        const angle = (index * 2 * Math.PI) / n - Math.PI / 2; // Start from top
+        const angle = (index * 2 * Math.PI) / n - Math.PI / 2;
         const x = centerX + radius * Math.cos(angle);
         const y = centerY + radius * Math.sin(angle);
         const cardContainer = document.createElement('div');
-        cardContainer.style.cssText = `position: absolute; left: ${x}px; top: ${y}px; transform: translate(-50%, -50%); width: ${cardWidth}px; height: ${cardHeight}px; transition: all 0.3s ease;`;
+        cardContainer.style.cssText = `position: absolute; left: ${x}px; top: ${y}px; transform: translate(-50%, -50%); width: ${cardWidth}px; height: ${cardHeight}px; transition: all 0.3s ease; cursor: ${currentPlayer?.isHost ? 'pointer' : 'default'};`;
+        
+        // Add click handler only if current player is the host
+        if (currentPlayer?.isHost) {
+          cardContainer.addEventListener('click', () => handleCardClick(player, cardContainer));
+        }
+
         const roleCard = document.createElement('img');
         roleCard.className = 'role-card';
         roleCard.style.width = cardWidth + 'px';
@@ -1445,30 +1451,31 @@
         const playerRoleLower = player.role ? player.role.toLowerCase() : '';
 
         if (player.id === socket.id) {
-          // Everyone can see their own card
           shouldShowCard = true;
           roleCard.classList.add('me');
         } else if (myRoleLower === 'abby') {
-          // Abby can see Michael and Wind's cards only
           shouldShowCard = (playerRoleLower === 'michael' || playerRoleLower === 'wind');
         } else if (myRoleLower === 'michael' || myRoleLower === 'wind') {
-          // Michael and Wind can see each other's cards
           shouldShowCard = (playerRoleLower === 'michael' || playerRoleLower === 'wind');
         } else {
-          // All other roles (Jack, Kennedi, Ker, Kiko, Knox, Nash) can only see their own card
           shouldShowCard = false;
         }
 
-        // Set card image based on visibility
-        if (shouldShowCard) {
-          roleCard.src = `/imgs/${player.role ? player.role.toLowerCase() : 'backSide'}.png`;
-        } else {
-          roleCard.src = '/imgs/backSide.png';
-        }
+        roleCard.src = shouldShowCard ? `/imgs/${player.role ? player.role.toLowerCase() : 'backSide'}.png` : '/imgs/backSide.png';
 
         const nameLabel = document.createElement('div');
         nameLabel.className = 'player-name-label';
         nameLabel.textContent = player.name + (player.isHost ? ' (Host)' : '');
+
+        // Show crown for party hosts - visible to everyone
+        if (player.isPartyHost) {
+          const crown = document.createElement('div');
+          crown.className = 'crown-emoji';
+          crown.textContent = '👑';
+          crown.style.cssText = 'position: absolute; top: -20px; left: 50%; transform: translateX(-50%); font-size: 20px; z-index: 12;';
+          cardContainer.appendChild(crown);
+        }
+
         cardContainer.appendChild(roleCard);
         cardContainer.appendChild(nameLabel);
         roleCardsCircle.appendChild(cardContainer);
@@ -1560,17 +1567,16 @@
       console.log('[uiMessage received]', message);
       if (message) {
         showUIMessage(message.text, 10000);
-        if (message.text.includes('Host and helpers can do their action right now')) {
+        if (message.text.includes('Host and helpers can do their action right now') || 
+            message.text.includes('Host and helpers please take your action')) {
           loveHateClickedThisRound = false;
           setLoveHateWindow(true);
           window.loveHateTimer = setTimeout(() => setLoveHateWindow(false), 10000);
         }
-        if (message.text.includes('Host and helpers please take your action, and Wind and Kennedi can use their skills now!')) {
-          setLoveHateWindow(true);
+        if (message.text.includes('Wind and Kennedi can use their skills now!')) {
           setWindKennediSkillWindow(true);
           renderSkillButtons();
           window.skillWindowTimer = setTimeout(() => {
-            setLoveHateWindow(false);
             setWindKennediSkillWindow(false);
             renderSkillButtons();
           }, 10000);
@@ -3620,10 +3626,13 @@
         const x = centerX + radius * Math.cos(angle);
         const y = centerY + radius * Math.sin(angle);
         const cardContainer = document.createElement('div');
+        // Only make it clickable for the host
         cardContainer.style.cssText = `position: absolute; left: ${x}px; top: ${y}px; transform: translate(-50%, -50%); width: ${cardWidth}px; height: ${cardHeight}px; transition: all 0.3s ease; cursor: ${currentPlayer?.isHost ? 'pointer' : 'default'};`;
         
-        // Add click handler for party host selection
-        cardContainer.addEventListener('click', () => handleCardClick(player, cardContainer));
+        // Add click handler for party host selection (only for host)
+        if (currentPlayer?.isHost) {
+          cardContainer.addEventListener('click', () => handleCardClick(player, cardContainer));
+        }
 
         const roleCard = document.createElement('img');
         roleCard.className = 'role-card';
@@ -3649,9 +3658,9 @@
 
         const nameLabel = document.createElement('div');
         nameLabel.className = 'player-name-label';
-        nameLabel.textContent = player.name + (player.isHost ? ' (Host)' : '') + (player.isPartyHost ? ' 👑' : '');
+        nameLabel.textContent = player.name + (player.isHost ? ' (Host)' : '');
         
-        // Add crown emoji for party hosts
+        // Always show crown for party hosts, regardless of who's viewing
         if (player.isPartyHost) {
           const crown = document.createElement('div');
           crown.className = 'crown-emoji';
@@ -3673,7 +3682,7 @@
       if (!currentPlayer) return;
 
       const isPartyHost = currentPlayer.isPartyHost;
-      const canUseLoveHate = isPartyHost && loveHateWindow && !loveHateClickedThisRound;
+      const canUseLoveHate = loveHateWindow && !loveHateClickedThisRound && isPartyHost;
       
       loveBtn.disabled = !canUseLoveHate;
       hateBtn.disabled = !canUseLoveHate;
