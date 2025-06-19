@@ -1045,6 +1045,52 @@
       font-size: 1.2em;
       margin-right: 4px;
     }
+
+    /* Role intro tooltip */
+    .role-intro-tooltip {
+      position: fixed;
+      left: 50%;
+      bottom: 180px;
+      transform: translateX(-50%);
+      min-width: 220px;
+      max-width: 320px;
+      z-index: 300;
+      background: linear-gradient(120deg,#23202a 60%,#6b5a3a 100%);
+      color: #e2c391;
+      border: 2px solid #7bb0e6;
+      border-radius: 18px 22px 18px 22px/22px 18px 22px 18px;
+      box-shadow: 0 2px 18px 0 #23202a55,0 2px 0 #fffbe7 inset;
+      font-family: 'Caveat','Segoe Print','Comic Sans MS',cursive;
+      font-size: 1.08rem;
+      padding: 18px 18px 14px 18px;
+      line-height: 1.5;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.2s;
+      display: none;
+    }
+    .role-card.me:hover + .role-intro-tooltip,
+    .role-intro-tooltip.active {
+      display: block;
+      opacity: 1;
+      pointer-events: auto;
+    }
+    body.day-mode .role-intro-tooltip {
+      background: linear-gradient(120deg,#fffbe7 60%,#ffe7b2 100%);
+      color: #a07c4f;
+      border: 2px solid #ffdca8;
+      box-shadow: 0 2px 18px 0 #ffdca822,0 2px 0 #fffbe7 inset;
+    }
+    .role-intro-tooltip .role-title {
+      font-size: 1.13rem;
+      font-weight: bold;
+      margin-bottom: 8px;
+      color: #7bb0e6;
+      letter-spacing: 1px;
+    }
+    body.day-mode .role-intro-tooltip .role-title {
+      color: #e2a84f;
+    }
   </style>
   <script src="/socket.io/socket.io.js"></script>
 </head>
@@ -1342,6 +1388,55 @@
       const myRole = currentPlayer ? currentPlayer.role : null;
       const myRoleLower = myRole ? myRole.toLowerCase() : '';
 
+      // Role info for tooltip with detailed descriptions
+      const roleInfo = {
+        michael: {
+          name: 'Michael', 
+          team: 'Cheater', 
+          power: 'Creator\'s Privilege: Finding Abby - Can guess who Abby is during the Party. If correct, Cheaters win instantly; if wrong, Keepers win instantly.'
+        },
+        wind: {
+          name: 'Wind', 
+          team: 'Cheater', 
+          power: 'Molesting a Boy: At Night, can add extra Scandal (+2 instead of +1). Mislead: After reveals, can flip one Love to Hate, adding Scandal. A master of stirring up drama.'
+        },
+        jack: {
+          name: 'Jack', 
+          team: 'Cheater', 
+          power: 'I Would Like to Hide My Card - Jack\'s identity is hidden from Abby and other Cheaters. A mysterious presence at the party.'
+        },
+        abby: {
+          name: 'Abby', 
+          team: 'Keeper', 
+          power: 'Keen Sight: During setup, learns all Cheaters except Jack. The sharp-eyed detective of the family.'
+        },
+        kennedi: {
+          name: 'Kennedi', 
+          team: 'Keeper', 
+          power: 'Protecting the Party: Before reveals, can make all cards count as Love, boosting Close-knot (+3). The heart and shield of the group.'
+        },
+        ker: {
+          name: 'Ker', 
+          team: 'Keeper', 
+          power: 'The Chosen One: After Helpers are picked, can swap a Helper with a non-Helper. Brings a twist to every party.'
+        },
+        kiko: {
+          name: 'Kiko', 
+          team: 'Keeper (Pet)', 
+          power: 'A loyal companion on the Keeper side. No special power but always present at the party, adding warmth and a touch of magic to the family gatherings.'
+        },
+        knox: {
+          name: 'Knox', 
+          team: 'Keeper (Pet)', 
+          power: 'Faithful and playful companion. No special power but a source of joy and comfort for everyone, loves to be in the middle of the action.'
+        },
+        nash: {
+          name: 'Nash', 
+          team: 'Keeper (Pet)', 
+          power: 'The newest addition to the Keeper side. No special power but brings energy and excitement to every party.'
+        }
+      };
+
       players.forEach((player, index) => {
         const angle = (index * 2 * Math.PI) / n - Math.PI / 2; // Start from top
         const x = centerX + radius * Math.cos(angle);
@@ -1377,6 +1472,29 @@
           roleCard.src = `/imgs/${player.role ? player.role.toLowerCase() : 'backSide'}.png`;
         } else {
           roleCard.src = '/imgs/backSide.png';
+        }
+
+        // Add role intro tooltip for myself only
+        if (player.id === socket.id) {
+          const tooltip = document.createElement('div');
+          tooltip.className = 'role-intro-tooltip';
+          const info = roleInfo[myRoleLower];
+          if (info) {
+            tooltip.innerHTML = `
+              <div class='role-title'>${info.name} (${info.team})</div>
+              <div><b>Power:</b> ${info.power}</div>
+            `;
+            
+            // Add hover event listeners
+            roleCard.addEventListener('mouseenter', () => {
+              tooltip.classList.add('active');
+            });
+            roleCard.addEventListener('mouseleave', () => {
+              tooltip.classList.remove('active');
+            });
+            
+            roleCardsCircle.appendChild(tooltip);
+          }
         }
 
         const nameLabel = document.createElement('div');
@@ -1947,17 +2065,53 @@
       const n = playerNames.length;
       const radius = 240;
       
-      // Role info for tooltip
+      // Role info for tooltip with more detailed descriptions
       const roleInfo = {
-        michael: {name:'Michael', team:'Cheater', power:'Can see Wind\'s card. Can guess Abby for instant win'},
-        wind: {name:'Wind', team:'Cheater', power:'Can see Michael\'s card. Molest: +2 Scandal; Mislead: flip Love→Hate'},
-        jack: {name:'Jack', team:'Cheater', power:'Hidden from everyone except self'},
-        abby: {name:'Abby', team:'Keeper', power:'Can see Michael and Wind'},
-        kennedi: {name:'Kennedi', team:'Keeper', power:'Can see own card. All Helpers count as Love'},
-        ker: {name:'Ker', team:'Keeper', power:'Can see own card. Can swap one Helper'},
-        kiko: {name:'Kiko', team:'Keeper (Pet)', power:'No special power'},
-        knox: {name:'Knox', team:'Keeper (Pet)', power:'No special power'},
-        nash: {name:'Nash', team:'Keeper (Pet)', power:'No special power'}
+        michael: {
+          name: 'Michael', 
+          team: 'Cheater', 
+          power: 'Creator\'s Privilege: Finding Abby - Can guess who Abby is during the Party. If correct, Cheaters win instantly; if wrong, Keepers win instantly.'
+        },
+        wind: {
+          name: 'Wind', 
+          team: 'Cheater', 
+          power: 'Molesting a Boy: At Night, can add extra Scandal (+2 instead of +1). Mislead: After reveals, can flip one Love to Hate, adding Scandal. A master of stirring up drama.'
+        },
+        jack: {
+          name: 'Jack', 
+          team: 'Cheater', 
+          power: 'I Would Like to Hide My Card - Jack\'s identity is hidden from Abby and other Cheaters. A mysterious presence at the party.'
+        },
+        abby: {
+          name: 'Abby', 
+          team: 'Keeper', 
+          power: 'Keen Sight: During setup, learns all Cheaters except Jack. The sharp-eyed detective of the family.'
+        },
+        kennedi: {
+          name: 'Kennedi', 
+          team: 'Keeper', 
+          power: 'Protecting the Party: Before reveals, can make all cards count as Love, boosting Close-knot (+3). The heart and shield of the group.'
+        },
+        ker: {
+          name: 'Ker', 
+          team: 'Keeper', 
+          power: 'The Chosen One: After Helpers are picked, can swap a Helper with a non-Helper. Brings a twist to every party.'
+        },
+        kiko: {
+          name: 'Kiko', 
+          team: 'Keeper (Pet)', 
+          power: 'A loyal companion on the Keeper side. No special power but always present at the party, adding warmth and a touch of magic to the family gatherings.'
+        },
+        knox: {
+          name: 'Knox', 
+          team: 'Keeper (Pet)', 
+          power: 'Faithful and playful companion. No special power but a source of joy and comfort for everyone, loves to be in the middle of the action.'
+        },
+        nash: {
+          name: 'Nash', 
+          team: 'Keeper (Pet)', 
+          power: 'The newest addition to the Keeper side. No special power but brings energy and excitement to every party.'
+        }
       };
 
       // Lowercase role for comparison
@@ -2006,10 +2160,22 @@
           const tooltip = document.createElement('div');
           tooltip.className = 'role-intro-tooltip';
           const info = roleInfo[myRoleLower];
-          tooltip.innerHTML = `<div class='role-title'>${info.name} (${info.team})</div><div><b>Power:</b> ${info.power}</div>`;
-          card.addEventListener('mouseenter',()=>{tooltip.classList.add('active');});
-          card.addEventListener('mouseleave',()=>{tooltip.classList.remove('active');});
-          container.appendChild(tooltip);
+          if (info) {
+            tooltip.innerHTML = `
+              <div class='role-title'>${info.name} (${info.team})</div>
+              <div><b>Power:</b> ${info.power}</div>
+            `;
+            
+            // Add hover event listeners
+            card.addEventListener('mouseenter', () => {
+              tooltip.classList.add('active');
+            });
+            card.addEventListener('mouseleave', () => {
+              tooltip.classList.remove('active');
+            });
+            
+            container.appendChild(tooltip);
+          }
         }
 
         // Add player name label with adjusted positioning
