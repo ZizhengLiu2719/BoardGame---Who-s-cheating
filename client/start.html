@@ -935,6 +935,39 @@
       height: 96px !important;
     }
 
+    .floating-happy-emojis {
+      position: fixed;
+      left: 0; top: 0; width: 100vw; height: 100vh;
+      pointer-events: none;
+      z-index: 1;
+      opacity: 0;
+      transition: opacity 0.8s ease;
+    }
+    body.day-mode .floating-happy-emojis {
+      opacity: 1;
+    }
+    .happy-emoji {
+      position: absolute;
+      width: 32px;
+      height: 32px;
+      font-size: 32px;
+      animation: float-happy-emoji 20s linear infinite;
+      opacity: 0.85;
+      filter: drop-shadow(0 3px 6px rgba(255, 220, 168, 0.3));
+      user-select: none;
+    }
+    @keyframes float-happy-emoji {
+      0% {
+        transform: translateY(100vh) scale(1) rotate(0deg);
+        opacity: 0;
+      }
+      10% { opacity: 0.85; }
+      90% { opacity: 0.85; }
+      100% {
+        transform: translateY(-100px) scale(1.1) rotate(360deg);
+        opacity: 0;
+      }
+    }
     .role-cards-circle { z-index: 10 !important; }
     .role-card { z-index: 11 !important; }
 
@@ -1058,71 +1091,6 @@
     body.day-mode .role-intro-tooltip .role-title {
       color: #e2a84f;
     }
-
-    /* Floating leaves and flowers for day mode */
-    .floating-nature {
-      position: fixed;
-      left: 0; top: 0; width: 100vw; height: 100vh;
-      pointer-events: none;
-      z-index: 1;
-      opacity: 0;
-      transition: opacity 0.8s ease;
-    }
-    body.day-mode .floating-nature {
-      opacity: 1;
-    }
-    .floating-leaf {
-      position: absolute;
-      width: 24px;
-      height: 24px;
-      animation: float-leaf 25s linear infinite;
-      opacity: 0.7;
-      filter: drop-shadow(0 2px 4px rgba(76, 175, 80, 0.3));
-      user-select: none;
-    }
-    .floating-leaf::before {
-      content: '🍃';
-      font-size: 24px;
-      display: block;
-    }
-    .floating-flower {
-      position: absolute;
-      width: 28px;
-      height: 28px;
-      animation: float-flower 30s linear infinite;
-      opacity: 0.8;
-      filter: drop-shadow(0 3px 6px rgba(255, 105, 180, 0.3));
-      user-select: none;
-    }
-    .floating-flower::before {
-      content: '🌸';
-      font-size: 28px;
-      display: block;
-    }
-    @keyframes float-leaf {
-      0% {
-        transform: translateY(100vh) scale(0.8) rotate(0deg);
-        opacity: 0;
-      }
-      10% { opacity: 0.7; }
-      90% { opacity: 0.7; }
-      100% {
-        transform: translateY(-100px) scale(1.2) rotate(720deg);
-        opacity: 0;
-      }
-    }
-    @keyframes float-flower {
-      0% {
-        transform: translateY(100vh) scale(0.9) rotate(0deg);
-        opacity: 0;
-      }
-      10% { opacity: 0.8; }
-      90% { opacity: 0.8; }
-      100% {
-        transform: translateY(-100px) scale(1.1) rotate(360deg);
-        opacity: 0;
-      }
-    }
   </style>
   <script src="/socket.io/socket.io.js"></script>
 </head>
@@ -1195,7 +1163,6 @@
     <div class="flower" style="left: 85%; animation-delay: 16s;"></div>
     <div class="flower" style="left: 95%; animation-delay: 18s;"></div>
   </div>
-
   <!-- Floating happy emojis for day mode -->
   <div class="floating-happy-emojis">
     <div class="happy-emoji" style="left: 10%; animation-delay: 1s;">😊</div>
@@ -1206,29 +1173,6 @@
     <div class="happy-emoji" style="left: 70%; animation-delay: 11s;">😍</div>
     <div class="happy-emoji" style="left: 82%; animation-delay: 13s;">🥰</div>
     <div class="happy-emoji" style="left: 94%; animation-delay: 15s;">😇</div>
-  </div>
-
-  <!-- Floating leaves and flowers for day mode -->
-  <div class="floating-nature">
-    <div class="floating-leaf" style="left: 8%; animation-delay: 0s;"></div>
-    <div class="floating-leaf" style="left: 18%; animation-delay: 4s;"></div>
-    <div class="floating-leaf" style="left: 28%; animation-delay: 8s;"></div>
-    <div class="floating-leaf" style="left: 38%; animation-delay: 12s;"></div>
-    <div class="floating-leaf" style="left: 48%; animation-delay: 16s;"></div>
-    <div class="floating-leaf" style="left: 58%; animation-delay: 20s;"></div>
-    <div class="floating-leaf" style="left: 68%; animation-delay: 24s;"></div>
-    <div class="floating-leaf" style="left: 78%; animation-delay: 28s;"></div>
-    <div class="floating-leaf" style="left: 88%; animation-delay: 32s;"></div>
-    <div class="floating-leaf" style="left: 98%; animation-delay: 36s;"></div>
-    
-    <div class="floating-flower" style="left: 12%; animation-delay: 2s;"></div>
-    <div class="floating-flower" style="left: 24%; animation-delay: 6s;"></div>
-    <div class="floating-flower" style="left: 36%; animation-delay: 10s;"></div>
-    <div class="floating-flower" style="left: 50%; animation-delay: 14s;"></div>
-    <div class="floating-flower" style="left: 62%; animation-delay: 18s;"></div>
-    <div class="floating-flower" style="left: 74%; animation-delay: 22s;"></div>
-    <div class="floating-flower" style="left: 86%; animation-delay: 26s;"></div>
-    <div class="floating-flower" style="left: 96%; animation-delay: 30s;"></div>
   </div>
 
   <div class="container">
@@ -1428,3 +1372,2037 @@
       display: none;
     `;
     document.body.appendChild(uiMessageBox);
+
+    // Function to position cards in a circle
+    function positionCardsInCircle(players) {
+      roleCardsCircle.innerHTML = '';
+      const n = players.length;
+      const radius = 210; // Place cards around the edge of the table
+      const centerX = 260;
+      const centerY = 260;
+      const cardWidth = 68;
+      const cardHeight = 96;
+
+      // Find current player's role
+      const currentPlayer = players.find(p => p.id === socket.id);
+      const myRole = currentPlayer ? currentPlayer.role : null;
+      const myRoleLower = myRole ? myRole.toLowerCase() : '';
+
+      // Role info for tooltip with detailed descriptions
+      const roleInfo = {
+        michael: {
+          name: 'Michael', 
+          team: 'Cheater', 
+          power: 'Creator\'s Privilege: Finding Abby - Can guess who Abby is during the Party. If correct, Cheaters win instantly; if wrong, Keepers win instantly.'
+        },
+        wind: {
+          name: 'Wind', 
+          team: 'Cheater', 
+          power: 'Molesting a Boy: At Night, can add extra Scandal (+2 instead of +1). Mislead: After reveals, can flip one Love to Hate, adding Scandal. A master of stirring up drama.'
+        },
+        jack: {
+          name: 'Jack', 
+          team: 'Cheater', 
+          power: 'I Would Like to Hide My Card - Jack\'s identity is hidden from Abby and other Cheaters. A mysterious presence at the party.'
+        },
+        abby: {
+          name: 'Abby', 
+          team: 'Keeper', 
+          power: 'Keen Sight: During setup, learns all Cheaters except Jack. The sharp-eyed detective of the family.'
+        },
+        kennedi: {
+          name: 'Kennedi', 
+          team: 'Keeper', 
+          power: 'Protecting the Party: Before reveals, can make all cards count as Love, boosting Close-knot (+3). The heart and shield of the group.'
+        },
+        ker: {
+          name: 'Ker', 
+          team: 'Keeper', 
+          power: 'The Chosen One: After Helpers are picked, can swap a Helper with a non-Helper. Brings a twist to every party.'
+        },
+        kiko: {
+          name: 'Kiko', 
+          team: 'Keeper (Pet)', 
+          power: 'A loyal companion on the Keeper side. No special power but always present at the party, adding warmth and a touch of magic to the family gatherings.'
+        },
+        knox: {
+          name: 'Knox', 
+          team: 'Keeper (Pet)', 
+          power: 'Faithful and playful companion. No special power but a source of joy and comfort for everyone, loves to be in the middle of the action.'
+        },
+        nash: {
+          name: 'Nash', 
+          team: 'Keeper (Pet)', 
+          power: 'The newest addition to the Keeper side. No special power but brings energy and excitement to every party.'
+        }
+      };
+
+      players.forEach((player, index) => {
+        const angle = (index * 2 * Math.PI) / n - Math.PI / 2; // Start from top
+        const x = centerX + radius * Math.cos(angle);
+        const y = centerY + radius * Math.sin(angle);
+        const cardContainer = document.createElement('div');
+        cardContainer.style.cssText = `position: absolute; left: ${x}px; top: ${y}px; transform: translate(-50%, -50%); width: ${cardWidth}px; height: ${cardHeight}px; transition: all 0.3s ease;`;
+        const roleCard = document.createElement('img');
+        roleCard.className = 'role-card';
+        roleCard.style.width = cardWidth + 'px';
+        roleCard.style.height = cardHeight + 'px';
+
+        // Role visibility logic
+        let shouldShowCard = false;
+        const playerRoleLower = player.role ? player.role.toLowerCase() : '';
+
+        if (player.id === socket.id) {
+          // Everyone can see their own card
+          shouldShowCard = true;
+          roleCard.classList.add('me');
+        } else if (myRoleLower === 'abby') {
+          // Abby can see Michael and Wind's cards only
+          shouldShowCard = (playerRoleLower === 'michael' || playerRoleLower === 'wind');
+        } else if (myRoleLower === 'michael' || myRoleLower === 'wind') {
+          // Michael and Wind can see each other's cards
+          shouldShowCard = (playerRoleLower === 'michael' || playerRoleLower === 'wind');
+        } else {
+          // All other roles (Jack, Kennedi, Ker, Kiko, Knox, Nash) can only see their own card
+          shouldShowCard = false;
+        }
+
+        // Set card image based on visibility
+        if (shouldShowCard) {
+          roleCard.src = `/imgs/${player.role ? player.role.toLowerCase() : 'backSide'}.png`;
+        } else {
+          roleCard.src = '/imgs/backSide.png';
+        }
+
+        // Add role intro tooltip for myself only
+        if (player.id === socket.id) {
+          const tooltip = document.createElement('div');
+          tooltip.className = 'role-intro-tooltip';
+          const info = roleInfo[myRoleLower];
+          if (info) {
+            tooltip.innerHTML = `
+              <div class='role-title'>${info.name} (${info.team})</div>
+              <div><b>Power:</b> ${info.power}</div>
+            `;
+            
+            // Add hover event listeners
+            roleCard.addEventListener('mouseenter', () => {
+              tooltip.classList.add('active');
+            });
+            roleCard.addEventListener('mouseleave', () => {
+              tooltip.classList.remove('active');
+            });
+            
+            roleCardsCircle.appendChild(tooltip);
+          }
+        }
+
+        const nameLabel = document.createElement('div');
+        nameLabel.className = 'player-name-label';
+        nameLabel.textContent = player.name + (player.isHost ? ' (Host)' : '');
+        cardContainer.appendChild(roleCard);
+        cardContainer.appendChild(nameLabel);
+        roleCardsCircle.appendChild(cardContainer);
+      });
+    }
+
+    // Show UI message
+    function showUIMessage(text, duration) {
+      uiMessageBox.textContent = text;
+      uiMessageBox.style.display = 'block';
+      if (duration) {
+        setTimeout(() => {
+          uiMessageBox.style.display = 'none';
+          if (text.includes('Wind and Kennedi')) {
+            isSkillPhase = false;
+            if (windSkillBtn) windSkillBtn.disabled = true;
+            if (kennediSkillBtn) kennediSkillBtn.disabled = true;
+          }
+        }, duration);
+      }
+    }
+
+    // --- UI Message-Driven Button States ---
+    let loveHateWindow = false;
+    let voteWindow = false;
+    let windKennediSkillWindow = false;
+    let loveHateClickedThisRound = false;
+
+    // Function to reset all button states to initial disabled state
+    function resetAllButtonStates() {
+      console.log('[resetAllButtonStates] Resetting all button states to initial disabled state');
+      
+      // Clear any ongoing timers
+      if (window.loveHateTimer) {
+        clearTimeout(window.loveHateTimer);
+        window.loveHateTimer = null;
+      }
+      if (window.voteTimer) {
+        clearTimeout(window.voteTimer);
+        window.voteTimer = null;
+      }
+      if (window.skillWindowTimer) {
+        clearTimeout(window.skillWindowTimer);
+        window.skillWindowTimer = null;
+      }
+      
+      // Reset love/hate buttons
+      loveHateWindow = false;
+      loveHateClickedThisRound = false;
+      loveBtn.disabled = true;
+      hateBtn.disabled = true;
+      
+      // Reset vote buttons
+      voteWindow = false;
+      const voteYesBtn = document.getElementById('voteYesBtn');
+      const voteNoBtn = document.getElementById('voteNoBtn');
+      const voteSubmitBtn = document.getElementById('voteSubmitBtn');
+      if (voteYesBtn) voteYesBtn.disabled = true;
+      if (voteNoBtn) voteNoBtn.disabled = true;
+      if (voteSubmitBtn) voteSubmitBtn.disabled = true;
+      
+      // Reset skill window state
+      windKennediSkillWindow = false;
+      
+      // Re-render skill buttons (they will be disabled based on new game state)
+      renderSkillButtons();
+      
+      console.log('[resetAllButtonStates] All button states reset');
+    }
+
+    function setLoveHateWindow(enabled) {
+      loveHateWindow = enabled;
+      loveBtn.disabled = !enabled || loveHateClickedThisRound;
+      hateBtn.disabled = !enabled || loveHateClickedThisRound;
+    }
+    function setVoteWindow(enabled) {
+      voteWindow = enabled;
+      document.getElementById('voteYesBtn').disabled = !enabled;
+      document.getElementById('voteNoBtn').disabled = !enabled;
+      document.getElementById('voteSubmitBtn').disabled = !enabled;
+    }
+    function setWindKennediSkillWindow(enabled) {
+      windKennediSkillWindow = enabled;
+      renderSkillButtons();
+    }
+
+    // --- Listen for UI Messages to Control Button States ---
+    socket.on('uiMessage', (message) => {
+      console.log('[uiMessage received]', message);
+      if (message) {
+        showUIMessage(message.text, 10000);
+        if (message.text.includes('Host and helpers can do their action right now')) {
+          loveHateClickedThisRound = false;
+          setLoveHateWindow(true);
+          window.loveHateTimer = setTimeout(() => setLoveHateWindow(false), 10000);
+        }
+        if (message.text.includes('Host and helpers please take your action, and Wind and Kennedi can use their skills now!')) {
+          setLoveHateWindow(true);
+          setWindKennediSkillWindow(true);
+          renderSkillButtons();
+          window.skillWindowTimer = setTimeout(() => {
+            setLoveHateWindow(false);
+            setWindKennediSkillWindow(false);
+            renderSkillButtons();
+          }, 10000);
+        }
+        if (message.text.includes('Every player can vote now!')) {
+          setVoteWindow(true);
+          window.voteTimer = setTimeout(() => setVoteWindow(false), 10000);
+        }
+        renderSkillButtons();
+      }
+    });
+
+    // --- Love/Hate/Vote Button One-Time Use Logic ---
+    loveBtn.addEventListener('click', () => {
+      if (!loveBtn.disabled && loveHateWindow && !loveHateClickedThisRound) {
+        loveHateClickedThisRound = true;
+        loveBtn.disabled = true;
+        hateBtn.disabled = true;
+        socket.emit('loveHateAction', { type: 'love' });
+      }
+    });
+    hateBtn.addEventListener('click', () => {
+      if (!hateBtn.disabled && loveHateWindow && !loveHateClickedThisRound) {
+        loveHateClickedThisRound = true;
+        loveBtn.disabled = true;
+        hateBtn.disabled = true;
+        socket.emit('loveHateAction', { type: 'hate' });
+      }
+    });
+    document.getElementById('voteSubmitBtn').addEventListener('click', () => {
+      if (!voteWindow) return;
+      document.getElementById('voteYesBtn').disabled = true;
+      document.getElementById('voteNoBtn').disabled = true;
+      document.getElementById('voteSubmitBtn').disabled = true;
+      // Emit vote action to server
+      socket.emit('gameAction', { roomId, action: 'vote', playerName: myName });
+    });
+
+    // Update love/hate counts only when server sends final counts
+    socket.on('updateLoveHateCount', ({ love, hate }) => {
+      loveCount.textContent = love;
+      hateCount.textContent = hate;
+    });
+    socket.on('gameStateUpdate', (newGameState) => {
+      gameState = newGameState;
+      console.log('[gameStateUpdate]', newGameState);
+      
+      // Check if this is a restart (all scores are 0 and isDay is false)
+      const isRestart = newGameState.partyCount === 0 && 
+                       newGameState.scandalScore === 0 && 
+                       newGameState.closeKnotScore === 0 && 
+                       newGameState.voteCount === 0 && 
+                       newGameState.loveCount === 0 && 
+                       newGameState.hateCount === 0 && 
+                       newGameState.isDay === false;
+      
+      // Log role changes if this is a restart
+      if (gameState && newGameState && gameState.players && newGameState.players) {
+        const oldRoles = gameState.players.map(p => ({ name: p.name, role: p.role }));
+        const newRoles = newGameState.players.map(p => ({ name: p.name, role: p.role }));
+        console.log('[gameStateUpdate] Role changes:', { oldRoles, newRoles });
+        
+        // If roles have changed, this is definitely a restart
+        const rolesChanged = JSON.stringify(oldRoles) !== JSON.stringify(newRoles);
+        if (rolesChanged || isRestart) {
+          console.log('[gameStateUpdate] Restart detected, resetting button states');
+          resetAllButtonStates();
+        }
+      }
+      
+      // Update score displays
+      if (gameState.partyCount !== undefined) {
+        document.getElementById('partyCount').textContent = gameState.partyCount;
+      }
+      if (gameState.scandalScore !== undefined) {
+        document.getElementById('scandalScore').textContent = gameState.scandalScore;
+      }
+      if (gameState.closeKnotScore !== undefined) {
+        document.getElementById('closeKnotScore').textContent = gameState.closeKnotScore;
+      }
+      if (gameState.voteCount !== undefined) {
+        document.getElementById('voteCount').textContent = gameState.voteCount;
+      }
+      if (gameState.loveCount !== undefined) {
+        loveCount.textContent = gameState.loveCount;
+      }
+      if (gameState.hateCount !== undefined) {
+        hateCount.textContent = gameState.hateCount;
+      }
+      
+      // Update day/night mode
+      if (gameState.isDay !== undefined) {
+        if (gameState.isDay) {
+          document.body.classList.add('day-mode');
+        } else {
+          document.body.classList.remove('day-mode');
+        }
+      }
+      
+      if (gameState.players) {
+        positionCardsInCircle(gameState.players);
+        updateHostOnlyButtons();
+        renderSkillButtons();
+      }
+      if (roleCheckTimer) clearTimeout(roleCheckTimer);
+      roleCheckTimer = setTimeout(checkRoleAssigned, 5000);
+    });
+
+    // Handle skill buttons
+    if (windSkillBtn) {
+      windSkillBtn.addEventListener('click', () => {
+        if (!windSkillBtn.disabled && isSkillPhase) {
+          socket.emit('gameAction', { roomId, action: 'useSkill', data: { skill: 'mislead' }, playerName: myName });
+          windSkillBtn.disabled = true;
+        }
+      });
+    }
+
+    if (kennediSkillBtn) {
+      kennediSkillBtn.addEventListener('click', () => {
+        if (!kennediSkillBtn.disabled && isSkillPhase) {
+          socket.emit('useSkill', { skill: 'protectingparty' });
+          kennediSkillBtn.disabled = true;
+        }
+      });
+    }
+
+    // Socket event listeners
+    socket.on('enableLoveHate', () => {
+      loveBtn.disabled = false;
+      hateBtn.disabled = false;
+    });
+
+    socket.on('disableLoveHate', () => {
+      loveBtn.disabled = true;
+      hateBtn.disabled = true;
+    });
+
+    // Debug: Log all socket events
+    socket.onAny((event, ...args) => {
+      console.log('[Socket Event]', event, ...args);
+    });
+
+    // Handle initial game state
+    socket.on('initialGameState', (state) => {
+      console.log('[initialGameState]', state);
+      gameState = state;
+      
+      // Update score displays
+      if (gameState.partyCount !== undefined) {
+        document.getElementById('partyCount').textContent = gameState.partyCount;
+      }
+      if (gameState.scandalScore !== undefined) {
+        document.getElementById('scandalScore').textContent = gameState.scandalScore;
+      }
+      if (gameState.closeKnotScore !== undefined) {
+        document.getElementById('closeKnotScore').textContent = gameState.closeKnotScore;
+      }
+      if (gameState.voteCount !== undefined) {
+        document.getElementById('voteCount').textContent = gameState.voteCount;
+      }
+      if (gameState.loveCount !== undefined) {
+        loveCount.textContent = gameState.loveCount;
+      }
+      if (gameState.hateCount !== undefined) {
+        hateCount.textContent = gameState.hateCount;
+      }
+      
+      // Update day/night mode
+      if (gameState.isDay !== undefined) {
+        if (gameState.isDay) {
+          document.body.classList.add('day-mode');
+        } else {
+          document.body.classList.remove('day-mode');
+        }
+      }
+      
+      if (gameState.players) {
+        positionCardsInCircle(gameState.players);
+        updateHostOnlyButtons();
+        renderSkillButtons();
+      }
+      if (roleCheckTimer) clearTimeout(roleCheckTimer);
+      roleCheckTimer = setTimeout(checkRoleAssigned, 5000);
+    });
+
+    // --- Room Join Logic ---
+    function getQueryParams() {
+      const params = {};
+      window.location.search.replace(/[?&]+([^=&]+)=([^&]*)/gi, function(str,key,value) {
+        params[key] = decodeURIComponent(value);
+      });
+      return params;
+    }
+    const params = getQueryParams();
+    const roomId = params.roomId || '00000';
+    let myName = params.name || '';
+    const password = params.password || '';
+    const roomName = params.roomname || '';
+    const maxPlayers = params.maxPlayers || 5;
+    const isCreateRoom = params.createRoom === '1';
+    if (!myName) {
+      myName = prompt('Enter your name:');
+    }
+    if (isCreateRoom) {
+      // Host: create the room first, then join
+      socket.emit('createRoom', { roomId, password, maxPlayers, hostName: myName, roomName }, (res) => {
+        if (res.success) {
+          // Room created successfully, now join it
+          socket.emit('joinRoom', { roomId, playerName: myName }, (res2) => {
+            if (!res2.success) {
+              alert(res2.message || 'Failed to join room.');
+              window.location.href = 'joining.html';
+            }
+          });
+        } else if (res.message && res.message.includes('already exists')) {
+          // Room already exists, just join it
+          console.log('Room already exists, joining existing room...');
+          socket.emit('joinRoom', { roomId, playerName: myName }, (res2) => {
+            if (!res2.success) {
+              alert(res2.message || 'Failed to join existing room.');
+              window.location.href = 'joining.html';
+            }
+          });
+        } else {
+          alert(res.message || 'Failed to create test room.');
+          window.location.href = 'joining.html';
+        }
+      });
+    } else {
+      // Regular player: just join
+      socket.emit('joinRoom', { roomId, playerName: myName }, (res) => {
+        if (!res.success) {
+          alert(res.message || 'Failed to join room.');
+          window.location.href = 'joining.html';
+        }
+      });
+    }
+    // Always listen for both initialGameState and gameStateUpdate
+    socket.on('initialGameState', (state) => {
+      gameState = state;
+      // Update UI with latest game state
+      if (gameState.partyCount !== undefined) {
+        document.getElementById('partyCount').textContent = gameState.partyCount;
+      }
+      if (gameState.scandalScore !== undefined) {
+        document.getElementById('scandalScore').textContent = gameState.scandalScore;
+      }
+      if (gameState.closeKnotScore !== undefined) {
+        document.getElementById('closeKnotScore').textContent = gameState.closeKnotScore;
+      }
+      if (gameState.voteCount !== undefined) {
+        document.getElementById('voteCount').textContent = gameState.voteCount;
+      }
+      if (gameState.loveCount !== undefined) {
+        loveCount.textContent = gameState.loveCount;
+      }
+      if (gameState.hateCount !== undefined) {
+        hateCount.textContent = gameState.hateCount;
+      }
+      // Update day/night mode
+      if (gameState.isDay !== undefined) {
+        if (gameState.isDay) {
+          document.body.classList.add('day-mode');
+        } else {
+          document.body.classList.remove('day-mode');
+        }
+      }
+      if (gameState.players) {
+        positionCardsInCircle(gameState.players);
+        updateHostOnlyButtons();
+        renderSkillButtons();
+      }
+      if (roleCheckTimer) clearTimeout(roleCheckTimer);
+      roleCheckTimer = setTimeout(checkRoleAssigned, 5000);
+    });
+
+    // --- Host-Only Controls and Default State ---
+    function updateHostOnlyButtons() {
+      if (!gameState || !gameState.players) return;
+      const me = gameState.players.find(p => p.id === socket.id);
+      const isHost = me && me.isHost;
+      document.querySelectorAll('.host-only').forEach(btn => {
+        btn.disabled = !isHost;
+      });
+      // Only host can switch day/night
+      const toggleStageBtn = document.getElementById('toggleStageBtn');
+      if (toggleStageBtn) toggleStageBtn.disabled = !isHost;
+    }
+
+    // --- Skill Button Logic (robust) ---
+    function renderSkillButtons() {
+      const skillButtonContainer = document.getElementById('skillButtonContainer');
+      skillButtonContainer.innerHTML = '';
+      if (!gameState || !gameState.players) return;
+      const me = gameState.players.find(p => p.id === socket.id);
+      if (!me || !me.role) return;
+      const role = me.role;
+      const usedSkills = (gameState.usedActions && gameState.usedActions.skills && gameState.usedActions.skills[me.name]) || {};
+      // Hide skill buttons for pets, Jack, Abby
+      const noSkillRoles = ['Kiko', 'Knox', 'Nash', 'Jack', 'Abby'];
+      if (noSkillRoles.includes(role)) {
+        skillButtonContainer.style.display = 'none';
+        skillButtonContainer.innerHTML = '';
+        return;
+      }
+      skillButtonContainer.style.display = 'flex';
+      skillButtonContainer.style.flexDirection = 'row';
+      // Wind: two skill buttons
+      if (role === 'Wind') {
+        // Molest: only usable at night, one-time
+        const molestBtn = document.createElement('button');
+        molestBtn.className = 'skill-btn';
+        molestBtn.textContent = 'Molest';
+        const isNight = !gameState.isDay;
+        molestBtn.disabled = !!usedSkills['molest'] || !isNight;
+        molestBtn.onclick = function() {
+          if (molestBtn.disabled) return;
+          molestBtn.disabled = true;
+          socket.emit('gameAction', { roomId, action: 'useSkill', data: { skill: 'molest' }, playerName: myName });
+        };
+        skillButtonContainer.appendChild(molestBtn);
+        // Mislead: only enabled during skill window, one-time
+        const misleadBtn = document.createElement('button');
+        misleadBtn.className = 'skill-btn';
+        misleadBtn.textContent = 'Mislead';
+        misleadBtn.disabled = !!usedSkills['mislead'] || !windKennediSkillWindow;
+        misleadBtn.onclick = function() {
+          if (misleadBtn.disabled) return;
+          misleadBtn.disabled = true;
+          // Use direct useSkill event for skill window skills
+          socket.emit('useSkill', { skill: 'mislead' });
+        };
+        skillButtonContainer.appendChild(misleadBtn);
+        return;
+      }
+      // Michael: Find Abby (one-time, always enabled if not used)
+      if (role === 'Michael') {
+        const abbyBtn = document.createElement('button');
+        abbyBtn.className = 'skill-btn';
+        abbyBtn.textContent = 'Find Abby';
+        abbyBtn.disabled = !!usedSkills['findabby'];
+        abbyBtn.onclick = function() {
+          if (abbyBtn.disabled) return;
+          abbyBtn.disabled = true;
+          socket.emit('gameAction', { roomId, action: 'useSkill', data: { skill: 'findabby' }, playerName: myName });
+        };
+        skillButtonContainer.appendChild(abbyBtn);
+        return;
+      }
+      // Kennedi: Protecting Party (one-time, only enabled during skill window)
+      if (role === 'Kennedi') {
+        const protectBtn = document.createElement('button');
+        protectBtn.className = 'skill-btn';
+        protectBtn.textContent = 'Protecting Party';
+        protectBtn.disabled = !!usedSkills['protectingparty'] || !windKennediSkillWindow;
+        protectBtn.onclick = function() {
+          if (protectBtn.disabled) return;
+          protectBtn.disabled = true;
+          // Use direct useSkill event for skill window skills
+          socket.emit('useSkill', { skill: 'protectingparty' });
+        };
+        skillButtonContainer.appendChild(protectBtn);
+        return;
+      }
+      // Ker: The Chosen One (one-time, always enabled if not used)
+      if (role === 'Ker') {
+        const kerBtn = document.createElement('button');
+        kerBtn.className = 'skill-btn';
+        kerBtn.textContent = 'The Chosen One';
+        kerBtn.disabled = !!usedSkills['thechosenone'];
+        kerBtn.onclick = function() {
+          if (kerBtn.disabled) return;
+          kerBtn.disabled = true;
+          handleKerSkill();
+        };
+        skillButtonContainer.appendChild(kerBtn);
+        return;
+      }
+    }
+
+    // --- Ker's Popup ---
+    function showKerPopup() {
+      const popup = document.createElement('div');
+      popup.style.cssText = 'position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:#fffbe7;border:2px solid #e2c391;padding:24px;z-index:2000;border-radius:16px;box-shadow:0 2px 18px #23202a22;';
+      popup.innerHTML = `<b>The Chosen One</b><br><br>Pick the helper to swap:<br><input id="kerHelper" style="width:180px;"><br><br>Pick the non-helper candidate:<br><input id="kerNonHelper" style="width:180px;"><br><br><button id="kerSubmit">Submit</button> <button id="kerCancel">Cancel</button>`;
+      document.body.appendChild(popup);
+      document.getElementById('kerSubmit').onclick = function() {
+        const helper = document.getElementById('kerHelper').value;
+        const nonHelper = document.getElementById('kerNonHelper').value;
+        socket.emit('gameAction', { roomId, action: 'theChosenOne', data: { oldHelper: helper, newHelper: nonHelper }, playerName: myName });
+        document.body.removeChild(popup);
+      };
+      document.getElementById('kerCancel').onclick = function() {
+        document.body.removeChild(popup);
+      };
+    }
+
+    // --- Default State on Load ---
+    document.addEventListener('DOMContentLoaded', () => {
+      document.body.classList.remove('day-mode'); // Night mode by default
+      
+      // Initialize background elements for night mode
+      const stars = document.querySelector('.ghibli-stars');
+      const moon = document.querySelector('.ghibli-moon');
+      const moonlight = document.querySelector('.moonlight-reflection');
+      const particles = document.querySelector('.floating-particles');
+      const sunnyEffects = document.querySelector('.sunny-effects');
+      const floatingFlowers = document.querySelector('.floating-flowers');
+      
+      if (stars) stars.style.opacity = '1';
+      if (moon) moon.style.opacity = '0.18';
+      if (moonlight) moonlight.style.opacity = '1';
+      if (particles) particles.style.opacity = '1';
+      if (sunnyEffects) sunnyEffects.style.opacity = '0';
+      if (floatingFlowers) floatingFlowers.style.opacity = '0';
+      
+      // Set all counts to 0
+      document.querySelectorAll('.score-value').forEach(el => el.textContent = '0');
+      loveCount.textContent = '0';
+      hateCount.textContent = '0';
+      // Disable all action buttons by default
+      document.querySelectorAll('.action-btn, .reset-btn, .vote-btn').forEach(btn => btn.disabled = true);
+      // Skill buttons will be rendered by renderSkillButtons
+
+      // --- Host-Only Button Event Listeners ---
+      const hostBtnMap = [
+        { id: 'partyPlusBtn', action: { action: 'updateCount', data: { countType: 'party', delta: 1 } } },
+        { id: 'partyMinusBtn', action: { action: 'updateCount', data: { countType: 'party', delta: -1 } } },
+        { id: 'scandalPlusBtn', action: { action: 'updateCount', data: { countType: 'scandal', delta: 1 } } },
+        { id: 'scandalMinusBtn', action: { action: 'updateCount', data: { countType: 'scandal', delta: -1 } } },
+        { id: 'closeKnotPlusBtn', action: { action: 'updateCount', data: { countType: 'closeKnot', delta: 1 } } },
+        { id: 'closeKnotMinusBtn', action: { action: 'updateCount', data: { countType: 'closeKnot', delta: -1 } } },
+        { id: 'votePlusBtn', action: { action: 'updateCount', data: { countType: 'vote', delta: 1 } } },
+        { id: 'voteMinusBtn', action: { action: 'updateCount', data: { countType: 'vote', delta: -1 } } },
+        { id: 'takeActionBtn', action: { action: 'takeLoveHateAction', data: {} } },
+        { id: 'resetLoveHateBtn', action: { action: 'resetLoveHateCount', data: {} } },
+        { id: 'resetVoteBtn', action: { action: 'resetVote', data: {} } },
+        { id: 'restartBtn', action: { action: 'restartGame', data: {} } },
+        { id: 'toggleStageBtn', action: { action: 'switchDayNight', data: {} }, isToggle: true }
+      ];
+      hostBtnMap.forEach(({ id, action, isToggle }) => {
+        const btn = document.getElementById(id);
+        if (btn) {
+          btn.addEventListener('click', () => {
+            if (id === 'toggleStageBtn') {
+              // Toggle day/night
+              const isDay = !document.body.classList.contains('day-mode');
+              socket.emit('gameAction', { roomId, action: 'switchDayNight', data: { isDay }, playerName: myName });
+            } else {
+              socket.emit('gameAction', { roomId, ...action, playerName: myName });
+            }
+          });
+        }
+      });
+    });
+
+    function renderRoleCards() {
+      const container = document.getElementById('roleCardsCircle');
+      container.innerHTML = '';
+      const n = playerNames.length;
+      const radius = 240;
+      
+      // Role info for tooltip with more detailed descriptions
+      const roleInfo = {
+        michael: {
+          name: 'Michael', 
+          team: 'Cheater', 
+          power: 'Creator\'s Privilege: Finding Abby - Can guess who Abby is during the Party. If correct, Cheaters win instantly; if wrong, Keepers win instantly.'
+        },
+        wind: {
+          name: 'Wind', 
+          team: 'Cheater', 
+          power: 'Molesting a Boy: At Night, can add extra Scandal (+2 instead of +1). Mislead: After reveals, can flip one Love to Hate, adding Scandal. A master of stirring up drama.'
+        },
+        jack: {
+          name: 'Jack', 
+          team: 'Cheater', 
+          power: 'I Would Like to Hide My Card - Jack\'s identity is hidden from Abby and other Cheaters. A mysterious presence at the party.'
+        },
+        abby: {
+          name: 'Abby', 
+          team: 'Keeper', 
+          power: 'Keen Sight: During setup, learns all Cheaters except Jack. The sharp-eyed detective of the family.'
+        },
+        kennedi: {
+          name: 'Kennedi', 
+          team: 'Keeper', 
+          power: 'Protecting the Party: Before reveals, can make all cards count as Love, boosting Close-knot (+3). The heart and shield of the group.'
+        },
+        ker: {
+          name: 'Ker', 
+          team: 'Keeper', 
+          power: 'The Chosen One: After Helpers are picked, can swap a Helper with a non-Helper. Brings a twist to every party.'
+        },
+        kiko: {
+          name: 'Kiko', 
+          team: 'Keeper (Pet)', 
+          power: 'A loyal companion on the Keeper side. No special power but always present at the party, adding warmth and a touch of magic to the family gatherings.'
+        },
+        knox: {
+          name: 'Knox', 
+          team: 'Keeper (Pet)', 
+          power: 'Faithful and playful companion. No special power but a source of joy and comfort for everyone, loves to be in the middle of the action.'
+        },
+        nash: {
+          name: 'Nash', 
+          team: 'Keeper (Pet)', 
+          power: 'The newest addition to the Keeper side. No special power but brings energy and excitement to every party.'
+        }
+      };
+
+      // Lowercase role for comparison
+      const myRoleLower = myRole ? myRole.toLowerCase() : '';
+      
+      // Calculate angles for players with equal spacing
+      const angles = Array.from({length: n}, (_, i) => {
+        return (Math.PI / 2) + (i * (2 * Math.PI / n));
+      });
+
+      playerNames.forEach((name, i) => {
+        const angle = angles[i];
+        const x = radius * Math.cos(angle);
+        const y = radius * Math.sin(angle);
+        
+        const card = document.createElement('img');
+        card.className = 'role-card' + (i === myIndex ? ' me' : '');
+        card.style.left = `calc(50% + ${x}px - 45px)`;
+        card.style.top = `calc(50% + ${y}px - 67.5px)`;
+        
+        // Show card face-up based on role-specific rules
+        const role = shuffledRoles[i];
+        const roleLower = role ? role.toLowerCase() : '';
+        let shouldShowCard = false;
+
+        if (i === myIndex) {
+          // Everyone can see their own card
+          shouldShowCard = true;
+        } else if (myRoleLower === 'abby') {
+          // Abby can see Michael and Wind's cards only
+          shouldShowCard = (roleLower === 'michael' || roleLower === 'wind');
+        } else if (myRoleLower === 'michael' || myRoleLower === 'wind') {
+          // Michael and Wind can see each other's cards
+          shouldShowCard = (roleLower === 'michael' || roleLower === 'wind');
+        } else {
+          // All other roles (Jack, Kennedi, Ker, Kiko, Knox, Nash) can only see their own card
+          shouldShowCard = false;
+        }
+
+        card.src = shouldShowCard ? roleImages[role] : backsideImg;
+        card.alt = shouldShowCard ? role : 'Hidden';
+        container.appendChild(card);
+
+        // Add role intro tooltip for myself only
+        if (i === myIndex) {
+          const tooltip = document.createElement('div');
+          tooltip.className = 'role-intro-tooltip';
+          const info = roleInfo[myRoleLower];
+          if (info) {
+            tooltip.innerHTML = `
+              <div class='role-title'>${info.name} (${info.team})</div>
+              <div><b>Power:</b> ${info.power}</div>
+            `;
+            
+            // Add hover event listeners
+            card.addEventListener('mouseenter', () => {
+              tooltip.classList.add('active');
+            });
+            card.addEventListener('mouseleave', () => {
+              tooltip.classList.remove('active');
+            });
+            
+            container.appendChild(tooltip);
+          }
+        }
+
+        // Add player name label with adjusted positioning
+        const nameLabel = document.createElement('div');
+        nameLabel.className = 'player-name-label';
+        const nameOffsetY = y > 0 ? 100 : -100;
+        nameLabel.style.left = `calc(50% + ${x}px)`;
+        nameLabel.style.top = `calc(50% + ${y + nameOffsetY}px)`;
+        nameLabel.textContent = name;
+        container.appendChild(nameLabel);
+      });
+    }
+
+    // Handle Ker's skill
+    function handleKerSkill() {
+      const dialog = document.createElement('div');
+      dialog.className = 'ker-skill-dialog';
+      dialog.innerHTML = `
+        <div class="dialog-content">
+          <h3>The Chosen One</h3>
+          <div class="input-section">
+            <label>Pick the helper to swap:</label>
+            <input type="text" id="helperToSwap" placeholder="Enter helper name">
+          </div>
+          <div class="input-section">
+            <label>Pick the non-helper candidate:</label>
+            <input type="text" id="newHelper" placeholder="Enter non-helper name">
+          </div>
+          <button onclick="submitKerSwap()">Confirm Swap</button>
+          <button onclick="closeKerDialog()">Cancel</button>
+        </div>
+      `;
+      document.body.appendChild(dialog);
+    }
+
+    function submitKerSwap() {
+      const helperToSwap = document.getElementById('helperToSwap').value;
+      const newHelper = document.getElementById('newHelper').value;
+      if (helperToSwap && newHelper) {
+        socket.emit('gameAction', { roomId, action: 'theChosenOne', data: { oldHelper: helperToSwap, newHelper: newHelper }, playerName: myName });
+        closeKerDialog();
+      }
+    }
+
+    function closeKerDialog() {
+      const dialog = document.querySelector('.ker-skill-dialog');
+      if (dialog) dialog.remove();
+    }
+
+    // Handle Wind and Kennedi's skill phase
+    function handleLoveHate(action) {
+      if (isSkillPhase) return;
+      
+      if (action === 'love') {
+        tempLoveCount++;
+      } else {
+        tempHateCount++;
+      }
+      
+      // Disable love/hate buttons after use
+      document.getElementById('loveBtn').disabled = true;
+      document.getElementById('hateBtn').disabled = true;
+      
+      // Enable Wind and Kennedi's skills
+      isSkillPhase = true;
+      if (windSkillBtn) windSkillBtn.disabled = false;
+      if (kennediSkillBtn) kennediSkillBtn.disabled = false;
+      
+      showUIMessage("Wind and Kennedi are allowed to use their skills right now!", 10000);
+      
+      // After 10 seconds, disable skills and apply temp counts
+      setTimeout(() => {
+        isSkillPhase = false;
+        if (windSkillBtn) windSkillBtn.disabled = true;
+        if (kennediSkillBtn) kennediSkillBtn.disabled = true;
+        
+        // Apply the temporary counts
+        if (tempLoveCount > 0) {
+          socket.emit('updateLoveCount', tempLoveCount);
+        }
+        if (tempHateCount > 0) {
+          socket.emit('updateHateCount', tempHateCount);
+        }
+        
+        // Reset temp counts
+        tempLoveCount = 0;
+        tempHateCount = 0;
+        
+        // Re-enable love/hate buttons
+        document.getElementById('loveBtn').disabled = false;
+        document.getElementById('hateBtn').disabled = false;
+      }, 10000);
+    }
+
+    // Handle Wind's molest skill
+    function handleWindMolest() {
+      if (!isSkillPhase) return;
+      socket.emit('gameAction', { roomId, action: 'useSkill', data: { skill: 'molest' }, playerName: myName });
+      if (windSkillBtn) windSkillBtn.disabled = true;
+    }
+
+    // Handle Wind's mislead skill
+    function handleWindMislead() {
+      if (!isSkillPhase) return;
+      socket.emit('useSkill', { skill: 'mislead' });
+      if (windSkillBtn) windSkillBtn.disabled = true;
+    }
+
+    // Handle Kennedi's protect skill
+    function handleKennediProtect() {
+      if (!isSkillPhase) return;
+      socket.emit('useSkill', { skill: 'protectingparty' });
+      if (kennediSkillBtn) kennediSkillBtn.disabled = true;
+    }
+
+    // Handle Michael's find Abby skill
+    function handleMichaelFindAbby() {
+      socket.emit('gameAction', { roomId, action: 'useSkill', data: { skill: 'findabby' }, playerName: myName });
+      if (michaelSkillBtn) michaelSkillBtn.disabled = true;
+    }
+
+    // Add CSS for Ker's skill dialog
+    const style = document.createElement('style');
+    style.textContent = `
+      .ker-skill-dialog {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.7);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 1000;
+      }
+      .dialog-content {
+        background: #fffbe7;
+        padding: 20px;
+        border-radius: 12px;
+        border: 2px solid #e2c391;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+      }
+      .input-section {
+        margin: 15px 0;
+      }
+      .input-section label {
+        display: block;
+        margin-bottom: 5px;
+        color: #5a4327;
+      }
+      .input-section input {
+        width: 100%;
+        padding: 8px;
+        border: 1px solid #e2c391;
+        border-radius: 4px;
+      }
+      .dialog-content button {
+        margin: 5px;
+        padding: 8px 16px;
+        border: none;
+        border-radius: 4px;
+        background: #e2c391;
+        color: #5a4327;
+        cursor: pointer;
+      }
+      .dialog-content button:hover {
+        background: #bfa16a;
+      }
+    `;
+    document.head.appendChild(style);
+
+    // Host controls
+    function initializeHostControls() {
+      if (!isHost) return;
+
+      const hostControls = document.createElement('div');
+      hostControls.className = 'host-controls';
+      hostControls.innerHTML = `
+        <button class="host-button" onclick="toggleDayNight()">Toggle Day/Night</button>
+        <button class="host-button" onclick="restartGame()">Restart Game</button>
+      `;
+      document.body.appendChild(hostControls);
+
+      const countControls = document.createElement('div');
+      countControls.className = 'count-controls';
+      countControls.innerHTML = `
+        <button class="count-button" onclick="updateLoveCount(1)">Love +1</button>
+        <button class="count-button" onclick="updateLoveCount(-1)">Love -1</button>
+        <button class="count-button" onclick="updateHateCount(1)">Hate +1</button>
+        <button class="count-button" onclick="updateHateCount(-1)">Hate -1</button>
+        <button class="count-button" onclick="updateScandal(1)">Scandal +1</button>
+        <button class="count-button" onclick="updateScandal(-1)">Scandal -1</button>
+      `;
+      document.body.appendChild(countControls);
+    }
+
+    function toggleDayNight() {
+      if (!isHost) return;
+      const isNight = document.body.classList.toggle('night-mode');
+      document.querySelector('.table').classList.toggle('night-mode', isNight);
+      document.querySelectorAll('.role-card').forEach(card => card.classList.toggle('night-mode', isNight));
+      document.querySelectorAll('.player-name-label').forEach(label => label.classList.toggle('night-mode', isNight));
+      document.querySelectorAll('.host-button, .count-button').forEach(btn => btn.classList.toggle('night-mode', isNight));
+      
+      // Handle background elements
+      const stars = document.querySelector('.ghibli-stars');
+      const moon = document.querySelector('.ghibli-moon');
+      const moonlight = document.querySelector('.moonlight-reflection');
+      const particles = document.querySelector('.floating-particles');
+      const sunnyEffects = document.querySelector('.sunny-effects');
+      const floatingFlowers = document.querySelector('.floating-flowers');
+      
+      if (isNight) {
+        // Show night elements
+        if (stars) stars.style.opacity = '1';
+        if (moon) moon.style.opacity = '0.18';
+        if (moonlight) moonlight.style.opacity = '1';
+        if (particles) particles.style.opacity = '1';
+        if (sunnyEffects) sunnyEffects.style.opacity = '0';
+        if (floatingFlowers) floatingFlowers.style.opacity = '0';
+      } else {
+        // Hide night elements for day mode
+        if (stars) stars.style.opacity = '0.3';
+        if (moon) moon.style.opacity = '0.05';
+        if (moonlight) moonlight.style.opacity = '0.2';
+        if (particles) particles.style.opacity = '0.5';
+        if (sunnyEffects) sunnyEffects.style.opacity = '1';
+        if (floatingFlowers) floatingFlowers.style.opacity = '1';
+      }
+      
+      socket.emit('toggleDayNight', isNight);
+    }
+
+    function restartGame() {
+      if (!isHost) return;
+      if (confirm('Are you sure you want to restart the game?')) {
+        socket.emit('gameAction', { roomId, action: 'restartGame', data: {}, playerName: myName });
+      }
+    }
+
+    function updateLoveCount(delta) {
+      if (!isHost) return;
+      socket.emit('updateLoveCount', delta);
+    }
+
+    function updateHateCount(delta) {
+      if (!isHost) return;
+      socket.emit('updateHateCount', delta);
+    }
+
+    function updateScandal(delta) {
+      if (!isHost) return;
+      socket.emit('updateScandal', delta);
+    }
+
+    // Socket event handlers
+    socket.on('toggleDayNight', (isNight) => {
+      document.body.classList.toggle('night-mode', isNight);
+      document.querySelector('.table').classList.toggle('night-mode', isNight);
+      document.querySelectorAll('.role-card').forEach(card => card.classList.toggle('night-mode', isNight));
+      document.querySelectorAll('.player-name-label').forEach(label => label.classList.toggle('night-mode', isNight));
+      document.querySelectorAll('.host-button, .count-button').forEach(btn => btn.classList.toggle('night-mode', isNight));
+      
+      // Handle background elements
+      const stars = document.querySelector('.ghibli-stars');
+      const moon = document.querySelector('.ghibli-moon');
+      const moonlight = document.querySelector('.moonlight-reflection');
+      const particles = document.querySelector('.floating-particles');
+      const sunnyEffects = document.querySelector('.sunny-effects');
+      const floatingFlowers = document.querySelector('.floating-flowers');
+      
+      if (isNight) {
+        // Show night elements
+        if (stars) stars.style.opacity = '1';
+        if (moon) moon.style.opacity = '0.18';
+        if (moonlight) moonlight.style.opacity = '1';
+        if (particles) particles.style.opacity = '1';
+        if (sunnyEffects) sunnyEffects.style.opacity = '0';
+        if (floatingFlowers) floatingFlowers.style.opacity = '0';
+      } else {
+        // Hide night elements for day mode
+        if (stars) stars.style.opacity = '0.3';
+        if (moon) moon.style.opacity = '0.05';
+        if (moonlight) moonlight.style.opacity = '0.2';
+        if (particles) particles.style.opacity = '0.5';
+        if (sunnyEffects) sunnyEffects.style.opacity = '1';
+        if (floatingFlowers) floatingFlowers.style.opacity = '1';
+      }
+    });
+
+    socket.on('gameRestarted', () => {
+      location.reload();
+    });
+
+    // Initialize host controls when the game starts
+    socket.on('gameStarted', () => {
+      initializeHostControls();
+    });
+
+    // Find the reset vote button handler and update it to only enable the vote button
+    const resetVoteBtn = document.getElementById('resetVoteBtn');
+    if (resetVoteBtn) {
+      resetVoteBtn.addEventListener('click', () => {
+        // Only enable the vote button
+        const voteBtn = document.getElementById('voteSubmitBtn');
+        if (voteBtn) {
+          voteBtn.disabled = false;
+          voteBtn.style.opacity = '1';
+        }
+        // Optionally show a message overlay if you want
+        const overlay = document.getElementById('voteMessageOverlay');
+        if (overlay) {
+          overlay.style.display = 'block';
+          setTimeout(() => {
+            overlay.style.display = 'none';
+            if (voteBtn) {
+              voteBtn.disabled = true;
+              voteBtn.style.opacity = '0.5';
+            }
+          }, 10000);
+        }
+      });
+    }
+
+    // --- Voice Chat Implementation ---
+    
+    class VoiceChat {
+      constructor(roomId, playerName) {
+        this.roomId = roomId;
+        this.playerName = playerName;
+        this.localStream = null;
+        this.peerConnections = {};
+        this.isMuted = true;
+        this.isInitialized = false;
+        this.audioContext = null;
+        this.analyser = null;
+        this.audioLevelInterval = null;
+        this.joinStatus = 'waiting'; // waiting, queued, joining, connected
+        
+        this.init();
+      }
+      
+      async init() {
+        try {
+          // Check if browser supports WebRTC
+          if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+            throw new Error('WebRTC not supported in this browser');
+          }
+          
+          // Check if running on HTTPS (required for getUserMedia)
+          if (location.protocol !== 'https:' && location.hostname !== 'localhost') {
+            throw new Error('Voice chat requires HTTPS (except on localhost)');
+          }
+          
+          // Create UI first to show status
+          this.createVoiceChatUI();
+          this.updateStatus('Requesting microphone access...');
+          
+          // Get microphone access
+          this.localStream = await navigator.mediaDevices.getUserMedia({ 
+            audio: {
+              echoCancellation: true,
+              noiseSuppression: true,
+              autoGainControl: true,
+              sampleRate: 48000,
+              channelCount: 1
+            }, 
+            video: false 
+          });
+          
+          // Create audio context for level monitoring
+          this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
+          this.analyser = this.audioContext.createAnalyser();
+          this.analyser.fftSize = 256;
+          this.analyser.smoothingTimeConstant = 0.8;
+          
+          const source = this.audioContext.createMediaStreamSource(this.localStream);
+          source.connect(this.analyser);
+          
+          this.updateStatus('Joining voice chat queue...');
+          
+          // Join voice chat (will be queued on server)
+          socket.emit('voiceChat:join', { roomId: this.roomId, playerName: this.playerName });
+          
+          this.isInitialized = true;
+          console.log('Voice chat initialized successfully');
+          
+          // Start audio level monitoring
+          this.startAudioLevelMonitoring();
+          
+          // Start connection quality monitoring
+          this.startConnectionQualityMonitoring();
+          
+          // Start participants list updates
+          this.startParticipantsListUpdates();
+          
+        } catch (error) {
+          console.error('Failed to initialize voice chat:', error);
+          this.showMicrophoneError(error.message);
+        }
+      }
+      
+      startParticipantsListUpdates() {
+        // Update participants list every 2 seconds to show connection status
+        setInterval(() => {
+          if (this.isInitialized) {
+            socket.emit('voiceChat:getParticipants', { roomId: this.roomId });
+          }
+        }, 2000);
+      }
+      
+      createVoiceChatUI() {
+        console.log('[VoiceChat] Creating voice chat UI...');
+        
+        const voiceChatContainer = document.createElement('div');
+        voiceChatContainer.className = 'voice-chat-container';
+        voiceChatContainer.innerHTML = `
+          <div class="voice-controls">
+            <button id="muteButton" class="voice-btn mute" disabled>
+              <i class="fas fa-microphone-slash"></i>
+              <span class="btn-text">Muted</span>
+            </button>
+            <div class="audio-level" id="audioLevel">
+              <div class="level-bar"></div>
+            </div>
+          </div>
+          <div class="voice-status" id="voiceStatus">Initializing Voice Chat...</div>
+          <div class="queue-status" id="queueStatus" style="display:none; font-size:11px; color:#666; margin-top:5px;"></div>
+          <div class="participants-list" id="participantsList"></div>
+        `;
+        
+        document.body.appendChild(voiceChatContainer);
+        console.log('[VoiceChat] Voice chat UI created and added to DOM');
+        
+        const muteBtn = document.getElementById('muteButton');
+        if (muteBtn) {
+          console.log('[VoiceChat] Mute button found, adding click listener');
+          muteBtn.addEventListener('click', () => {
+            console.log('[VoiceChat] Mute button clicked!');
+            this.toggleMute();
+          });
+        } else {
+          console.error('[VoiceChat] Mute button not found!');
+        }
+        
+        // Add Font Awesome for icons if not already present
+        if (!document.querySelector('link[href*="font-awesome"]')) {
+          const fontAwesome = document.createElement('link');
+          fontAwesome.rel = 'stylesheet';
+          fontAwesome.href = 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css';
+          document.head.appendChild(fontAwesome);
+          console.log('[VoiceChat] Font Awesome added');
+        }
+        
+        // Make sure the container is visible
+        voiceChatContainer.style.display = 'block';
+        voiceChatContainer.style.visibility = 'visible';
+        voiceChatContainer.style.opacity = '1';
+        
+        console.log('[VoiceChat] Voice chat UI setup complete');
+      }
+      
+      updateJoinStatus(status, data) {
+        this.joinStatus = status;
+        const queueStatusElement = document.getElementById('queueStatus');
+        const muteBtn = document.getElementById('muteButton');
+        
+        switch (status) {
+          case 'queued':
+            this.updateStatus(`In queue: ${data.message}`);
+            if (queueStatusElement) {
+              queueStatusElement.textContent = `Position: ${data.position}`;
+              queueStatusElement.style.display = 'block';
+            }
+            if (muteBtn) muteBtn.disabled = true;
+            break;
+            
+          case 'joining':
+            this.updateStatus(data.message);
+            if (queueStatusElement) {
+              queueStatusElement.textContent = 'Connecting...';
+              queueStatusElement.style.display = 'block';
+            }
+            if (muteBtn) muteBtn.disabled = true;
+            break;
+            
+          case 'connected':
+            this.updateStatus('Voice Chat Ready');
+            if (queueStatusElement) {
+              queueStatusElement.style.display = 'none';
+            }
+            if (muteBtn) muteBtn.disabled = false;
+            break;
+        }
+      }
+      
+      toggleMute() {
+        console.log('[VoiceChat] toggleMute called, current state:', this.isMuted);
+        
+        this.isMuted = !this.isMuted;
+        console.log('[VoiceChat] New mute state:', this.isMuted);
+        
+        // Update local stream
+        if (this.localStream) {
+          this.localStream.getTracks().forEach(track => {
+            track.enabled = !this.isMuted;
+            console.log('[VoiceChat] Audio track enabled:', !this.isMuted);
+          });
+        } else {
+          console.warn('[VoiceChat] No local stream available');
+        }
+        
+        // Update button appearance
+        const muteBtn = document.getElementById('muteButton');
+        if (muteBtn) {
+          if (this.isMuted) {
+            muteBtn.className = 'voice-btn mute';
+            muteBtn.innerHTML = '<i class="fas fa-microphone-slash"></i><span class="btn-text">Muted</span>';
+            console.log('[VoiceChat] Button updated to muted state');
+          } else {
+            muteBtn.className = 'voice-btn unmute';
+            muteBtn.innerHTML = '<i class="fas fa-microphone"></i><span class="btn-text">Speaking</span>';
+            console.log('[VoiceChat] Button updated to speaking state');
+          }
+        } else {
+          console.error('[VoiceChat] Mute button not found for update');
+        }
+        
+        // Notify server
+        socket.emit('voiceChat:toggleMute', { 
+          roomId: this.roomId, 
+          playerName: this.playerName, 
+          isMuted: this.isMuted 
+        });
+        console.log('[VoiceChat] Mute state sent to server');
+        
+        // Update status
+        this.updateStatus(this.isMuted ? 'Muted' : 'Speaking');
+      }
+      
+      startAudioLevelMonitoring() {
+        if (!this.analyser) return;
+        
+        const dataArray = new Uint8Array(this.analyser.frequencyBinCount);
+        
+        this.audioLevelInterval = setInterval(() => {
+          if (this.isMuted) return;
+          
+          this.analyser.getByteFrequencyData(dataArray);
+          const average = dataArray.reduce((a, b) => a + b) / dataArray.length;
+          const level = Math.min(average / 128, 1); // Normalize to 0-1
+          
+          this.updateAudioLevel(level);
+        }, 100);
+      }
+      
+      startConnectionQualityMonitoring() {
+        setInterval(() => {
+          if (!this.peerConnections) return;
+          
+          Object.entries(this.peerConnections).forEach(([playerName, connection]) => {
+            if (connection.connectionState === 'connected') {
+              const stats = connection.getStats();
+              stats.then(results => {
+                results.forEach(report => {
+                  if (report.type === 'inbound-rtp' && report.mediaType === 'audio') {
+                    const packetLoss = report.packetsLost || 0;
+                    const packetsReceived = report.packetsReceived || 0;
+                    const lossRate = packetsReceived > 0 ? packetLoss / packetsReceived : 0;
+                    
+                    if (lossRate > 0.1) { // More than 10% packet loss
+                      console.warn(`[VoiceChat] High packet loss for ${playerName}: ${(lossRate * 100).toFixed(1)}%`);
+                      this.updateStatus(`Poor connection with ${playerName}`);
+                    }
+                  }
+                });
+              });
+            }
+          });
+        }, 5000); // Check every 5 seconds
+      }
+      
+      updateAudioLevel(level) {
+        const levelBar = document.querySelector('.level-bar');
+        if (levelBar) {
+          levelBar.style.height = `${level * 100}%`;
+          levelBar.style.backgroundColor = level > 0.5 ? '#28a745' : '#6c757d';
+        }
+      }
+      
+      updateStatus(status) {
+        const statusElement = document.getElementById('voiceStatus');
+        if (statusElement) {
+          statusElement.textContent = status;
+        }
+      }
+      
+      updateParticipantsList(participants) {
+        const listElement = document.getElementById('participantsList');
+        if (listElement) {
+          listElement.innerHTML = participants.map(name => 
+            `<div class="participant ${name === this.playerName ? 'me' : ''}">
+              <i class="fas fa-user"></i>
+              <span>${name}</span>
+              ${name === this.playerName ? '<span class="mute-indicator">(You)</span>' : ''}
+              ${this.getConnectionStatus(name)}
+            </div>`
+          ).join('');
+        }
+      }
+      
+      getConnectionStatus(playerName) {
+        if (playerName === this.playerName) return '';
+        
+        const connection = this.peerConnections[playerName];
+        if (!connection) return '<span class="connection-status connecting">Connecting...</span>';
+        
+        switch (connection.connectionState) {
+          case 'connected':
+            return '<span class="connection-status connected"><i class="fas fa-circle"></i></span>';
+          case 'connecting':
+            return '<span class="connection-status connecting"><i class="fas fa-spinner fa-spin"></i></span>';
+          case 'disconnected':
+            return '<span class="connection-status disconnected"><i class="fas fa-circle"></i></span>';
+          case 'failed':
+            return '<span class="connection-status failed"><i class="fas fa-exclamation-triangle"></i></span>';
+          default:
+            return '<span class="connection-status unknown"><i class="fas fa-question-circle"></i></span>';
+        }
+      }
+      
+      async createPeerConnection(targetPlayer) {
+        try {
+          const peerConnection = new RTCPeerConnection({
+            iceServers: [
+              { urls: 'stun:stun.l.google.com:19302' },
+              { urls: 'stun:stun1.l.google.com:19302' },
+              { urls: 'stun:stun2.l.google.com:19302' },
+              { urls: 'stun:stun3.l.google.com:19302' },
+              { urls: 'stun:stun4.l.google.com:19302' }
+            ],
+            iceCandidatePoolSize: 10,
+            bundlePolicy: 'max-bundle',
+            rtcpMuxPolicy: 'require'
+          });
+          
+          // Add local stream
+          if (this.localStream) {
+            this.localStream.getTracks().forEach(track => {
+              peerConnection.addTrack(track, this.localStream);
+            });
+          }
+          
+          // Handle incoming audio
+          peerConnection.ontrack = (event) => {
+            console.log('[VoiceChat] Received audio track from:', targetPlayer);
+            const audioElement = this.getOrCreateAudioElement(targetPlayer);
+            audioElement.srcObject = event.streams[0];
+            audioElement.play().catch(e => console.log('Auto-play prevented:', e));
+          };
+          
+          // ICE candidate handling
+          peerConnection.onicecandidate = (event) => {
+            if (event.candidate) {
+              socket.emit('voiceChat:iceCandidate', {
+                roomId: this.roomId,
+                targetPlayer: targetPlayer,
+                candidate: event.candidate
+              });
+            }
+          };
+          
+          // Connection state changes
+          peerConnection.onconnectionstatechange = () => {
+            console.log('[VoiceChat] Connection state changed for', targetPlayer, ':', peerConnection.connectionState);
+            
+            switch (peerConnection.connectionState) {
+              case 'connected':
+                this.updateStatus(`Connected to ${targetPlayer}`);
+                break;
+              case 'disconnected':
+                this.updateStatus(`Disconnected from ${targetPlayer}`);
+                break;
+              case 'failed':
+                console.log('[VoiceChat] Connection failed, retrying...');
+                this.retryConnection(targetPlayer);
+                break;
+              case 'closed':
+                console.log('[VoiceChat] Connection closed for', targetPlayer);
+                break;
+            }
+          };
+          
+          // ICE connection state changes
+          peerConnection.oniceconnectionstatechange = () => {
+            console.log('[VoiceChat] ICE connection state for', targetPlayer, ':', peerConnection.iceConnectionState);
+            
+            if (peerConnection.iceConnectionState === 'failed') {
+              console.log('[VoiceChat] ICE connection failed, retrying...');
+              this.retryConnection(targetPlayer);
+            }
+          };
+          
+          // ICE gathering state changes
+          peerConnection.onicegatheringstatechange = () => {
+            console.log('[VoiceChat] ICE gathering state for', targetPlayer, ':', peerConnection.iceGatheringState);
+          };
+          
+          this.peerConnections[targetPlayer] = peerConnection;
+          
+          // Create and send offer with timeout
+          const offerPromise = peerConnection.createOffer();
+          const timeoutPromise = new Promise((_, reject) => 
+            setTimeout(() => reject(new Error('Offer creation timeout')), 10000)
+          );
+          
+          const offer = await Promise.race([offerPromise, timeoutPromise]);
+          await peerConnection.setLocalDescription(offer);
+          
+          socket.emit('voiceChat:offer', {
+            roomId: this.roomId,
+            targetPlayer: targetPlayer,
+            offer: offer
+          });
+          
+          return peerConnection;
+        } catch (error) {
+          console.error('[VoiceChat] Failed to create peer connection:', error);
+          this.updateStatus(`Failed to connect to ${targetPlayer}`);
+          
+          // Retry after a delay
+          setTimeout(() => {
+            if (!this.peerConnections[targetPlayer]) {
+              this.createPeerConnection(targetPlayer);
+            }
+          }, 3000);
+        }
+      }
+      
+      async retryConnection(targetPlayer) {
+        if (this.peerConnections[targetPlayer]) {
+          this.peerConnections[targetPlayer].close();
+          delete this.peerConnections[targetPlayer];
+        }
+        
+        setTimeout(() => {
+          this.createPeerConnection(targetPlayer);
+        }, 1000);
+      }
+      
+      getOrCreateAudioElement(playerName) {
+        let audioElement = document.getElementById(`audio-${playerName}`);
+        if (!audioElement) {
+          audioElement = document.createElement('audio');
+          audioElement.id = `audio-${playerName}`;
+          audioElement.autoplay = true;
+          audioElement.volume = 0.7;
+          audioElement.style.display = 'none';
+          document.body.appendChild(audioElement);
+        }
+        return audioElement;
+      }
+      
+      showMicrophoneError(message) {
+        const errorDiv = document.createElement('div');
+        errorDiv.className = 'voice-error';
+        errorDiv.innerHTML = `
+          <div class="error-message">
+            <i class="fas fa-exclamation-triangle"></i>
+            <span>${message || 'Microphone access denied. Voice chat unavailable.'}</span>
+            <button onclick="this.parentElement.parentElement.remove()" class="error-close">
+              <i class="fas fa-times"></i>
+            </button>
+          </div>
+        `;
+        document.body.appendChild(errorDiv);
+        
+        // Auto-remove after 10 seconds
+        setTimeout(() => {
+          if (errorDiv.parentElement) {
+            errorDiv.remove();
+          }
+        }, 10000);
+      }
+      
+      cleanup() {
+        console.log('[VoiceChat] Cleaning up voice chat...');
+        
+        // Stop audio level monitoring
+        if (this.audioLevelInterval) {
+          clearInterval(this.audioLevelInterval);
+        }
+        
+        // Stop connection quality monitoring
+        if (this.connectionQualityInterval) {
+          clearInterval(this.connectionQualityInterval);
+        }
+        
+        // Stop participants list updates
+        if (this.participantsUpdateInterval) {
+          clearInterval(this.participantsUpdateInterval);
+        }
+        
+        // Stop local stream
+        if (this.localStream) {
+          this.localStream.getTracks().forEach(track => track.stop());
+        }
+        
+        // Close audio context
+        if (this.audioContext && this.audioContext.state !== 'closed') {
+          this.audioContext.close();
+        }
+        
+        // Close peer connections
+        Object.values(this.peerConnections).forEach(pc => {
+          if (pc && pc.connectionState !== 'closed') {
+            pc.close();
+          }
+        });
+        
+        // Remove audio elements
+        document.querySelectorAll('[id^="audio-"]').forEach(el => el.remove());
+        
+        // Remove UI
+        const voiceChatContainer = document.querySelector('.voice-chat-container');
+        if (voiceChatContainer) {
+          voiceChatContainer.remove();
+        }
+        
+        // Remove error messages
+        document.querySelectorAll('.voice-error').forEach(el => el.remove());
+        
+        // Notify server
+        socket.emit('voiceChat:leave', { roomId: this.roomId, playerName: this.playerName });
+        
+        // Reset state
+        this.isInitialized = false;
+        this.peerConnections = {};
+        
+        console.log('[VoiceChat] Cleanup complete');
+      }
+    }
+
+    // Voice chat instance
+    let voiceChat = null;
+
+    // Initialize voice chat immediately for testing (you can remove this later)
+    function initializeVoiceChatNow() {
+      if (!voiceChat && roomId && myName) {
+        console.log('[VoiceChat] Initializing voice chat immediately...');
+        voiceChat = new VoiceChat(roomId, myName);
+      }
+    }
+
+    // Add a manual trigger button for testing (you can remove this later)
+    function addVoiceChatTestButton() {
+      const testButton = document.createElement('button');
+      testButton.textContent = '🎤 Enable Voice Chat';
+      testButton.id = 'enableVoiceChatBtn';
+      testButton.style.cssText = `
+        position: fixed;
+        top: 80px;
+        right: 32px;
+        z-index: 1000;
+        padding: 12px 28px;
+        background: linear-gradient(120deg, #fffbe7 60%, #ffe7b2 100%);
+        color: #e2a84f;
+        border: 2.5px solid #ffdca8;
+        border-radius: 16px;
+        font-family: 'Gochi Hand', 'Segoe Print', cursive;
+        font-size: 1.08em;
+        font-weight: bold;
+        box-shadow: 0 2px 8px 0 #ffdca833, 0 0 0 1px rgba(255,255,255,0.1) inset;
+        cursor: pointer;
+        letter-spacing: 1px;
+        text-shadow: 0 1px 2px rgba(255, 255, 255, 0.5);
+        transition: all 0.3s ease;
+        margin-top: 16px;
+      `;
+      testButton.onmouseenter = () => {
+        testButton.style.boxShadow = '0 8px 20px 0 #ffdca866, 0 0 0 1px rgba(255,255,255,0.2) inset, 0 0 30px rgba(255,220,168,0.4)';
+        testButton.style.transform = 'translateY(-3px)';
+      };
+      testButton.onmouseleave = () => {
+        testButton.style.boxShadow = '0 2px 8px 0 #ffdca833, 0 0 0 1px rgba(255,255,255,0.1) inset';
+        testButton.style.transform = 'none';
+      };
+      testButton.onclick = initializeVoiceChatNow;
+      document.body.appendChild(testButton);
+    }
+
+    // Initialize voice chat when game starts
+    socket.on('startGame', ({ gameState }) => {
+      // Initialize voice chat after game starts
+      setTimeout(() => {
+        if (!voiceChat) {
+          voiceChat = new VoiceChat(roomId, myName);
+        }
+      }, 1000);
+    });
+
+    // Add test button immediately for testing
+    setTimeout(() => {
+      addVoiceChatTestButton();
+    }, 2000);
+
+    // Cleanup on disconnect
+    window.addEventListener('beforeunload', () => {
+      if (voiceChat) {
+        voiceChat.cleanup();
+      }
+    });
+
+    // Handle voice chat events
+    socket.on('voiceChat:playerJoined', ({ playerName }) => {
+      console.log('[VoiceChat] Player joined:', playerName);
+      if (voiceChat && playerName !== myName) {
+        voiceChat.createPeerConnection(playerName);
+      }
+    });
+
+    socket.on('voiceChat:joinStatus', ({ status, position, message }) => {
+      console.log('[VoiceChat] Join status update:', { status, position, message });
+      if (voiceChat) {
+        voiceChat.updateJoinStatus(status, { position, message });
+      }
+    });
+
+    socket.on('voiceChat:playerLeft', ({ playerName }) => {
+      console.log('[VoiceChat] Player left:', playerName);
+      if (voiceChat) {
+        // Remove audio element
+        const audioElement = document.getElementById(`audio-${playerName}`);
+        if (audioElement) {
+          audioElement.remove();
+        }
+        
+        // Close connection
+        if (voiceChat.peerConnections[playerName]) {
+          voiceChat.peerConnections[playerName].close();
+          delete voiceChat.peerConnections[playerName];
+        }
+      }
+    });
+
+    socket.on('voiceChat:playerMuteChanged', ({ playerName, isMuted }) => {
+      console.log('[VoiceChat] Player mute changed:', playerName, isMuted);
+      // Update UI to show mute status for other players
+      if (voiceChat) {
+        voiceChat.updateStatus(`${playerName} ${isMuted ? 'muted' : 'unmuted'}`);
+      }
+    });
+
+    socket.on('voiceChat:participantsList', ({ participants }) => {
+      console.log('[VoiceChat] Participants list:', participants);
+      if (voiceChat) {
+        voiceChat.updateParticipantsList(participants);
+        
+        // Mark as connected and enable mute button
+        voiceChat.updateJoinStatus('connected', {});
+        
+        // Create connections for existing participants
+        participants.forEach(participantName => {
+          if (participantName !== myName && !voiceChat.peerConnections[participantName]) {
+            voiceChat.createPeerConnection(participantName);
+          }
+        });
+      }
+    });
+
+    // WebRTC signaling events
+    socket.on('voiceChat:offer', async ({ from, offer, roomId }) => {
+      console.log('[VoiceChat] Received offer from:', from);
+      if (voiceChat && roomId === voiceChat.roomId) {
+        try {
+          const peerConnection = new RTCPeerConnection({
+            iceServers: [
+              { urls: 'stun:stun.l.google.com:19302' },
+              { urls: 'stun:stun1.l.google.com:19302' },
+              { urls: 'stun:stun2.l.google.com:19302' },
+              { urls: 'stun:stun3.l.google.com:19302' },
+              { urls: 'stun:stun4.l.google.com:19302' }
+            ]
+          });
+          
+          // Add local stream
+          if (voiceChat.localStream) {
+            voiceChat.localStream.getTracks().forEach(track => {
+              peerConnection.addTrack(track, voiceChat.localStream);
+            });
+          }
+          
+          // Handle incoming audio
+          peerConnection.ontrack = (event) => {
+            const audioElement = voiceChat.getOrCreateAudioElement(from);
+            audioElement.srcObject = event.streams[0];
+            audioElement.play().catch(e => console.log('Auto-play prevented:', e));
+          };
+          
+          // ICE candidate handling
+          peerConnection.onicecandidate = (event) => {
+            if (event.candidate) {
+              socket.emit('voiceChat:iceCandidate', {
+                roomId: voiceChat.roomId,
+                targetPlayer: from,
+                candidate: event.candidate
+              });
+            }
+          };
+          
+          voiceChat.peerConnections[from] = peerConnection;
+          
+          // Set remote description and create answer
+          await peerConnection.setRemoteDescription(offer);
+          const answer = await peerConnection.createAnswer();
+          await peerConnection.setLocalDescription(answer);
+          
+          socket.emit('voiceChat:answer', {
+            roomId: voiceChat.roomId,
+            targetPlayer: from,
+            answer: answer
+          });
+        } catch (error) {
+          console.error('[VoiceChat] Failed to handle offer:', error);
+        }
+      }
+    });
+
+    socket.on('voiceChat:answer', async ({ from, answer, roomId }) => {
+      console.log('[VoiceChat] Received answer from:', from);
+      if (voiceChat && roomId === voiceChat.roomId && voiceChat.peerConnections[from]) {
+        try {
+          await voiceChat.peerConnections[from].setRemoteDescription(answer);
+        } catch (error) {
+          console.error('[VoiceChat] Failed to set remote description:', error);
+        }
+      }
+    });
+
+    socket.on('voiceChat:iceCandidate', async ({ from, candidate, roomId }) => {
+      if (voiceChat && roomId === voiceChat.roomId && voiceChat.peerConnections[from]) {
+        try {
+          await voiceChat.peerConnections[from].addIceCandidate(candidate);
+        } catch (error) {
+          console.error('[VoiceChat] Failed to add ICE candidate:', error);
+        }
+      }
+    });
+
+    // After receiving initialGameState or gameStateUpdate, start a timer to check for missing role
+    let roleCheckTimer = null;
+    function checkRoleAssigned() {
+      if (!gameState || !gameState.players) return;
+      const me = gameState.players.find(p => p.id === socket.id);
+      if (!me || !me.role || me.role === 'backSide') {
+        alert('Connection issue: Please refresh or rejoin the room.');
+      }
+    }
+    socket.on('initialGameState', (state) => {
+      gameState = state;
+      // ... existing code ...
+      if (roleCheckTimer) clearTimeout(roleCheckTimer);
+      roleCheckTimer = setTimeout(checkRoleAssigned, 5000);
+    });
+    socket.on('gameStateUpdate', (state) => {
+      gameState = state;
+      // ... existing code ...
+      if (roleCheckTimer) clearTimeout(roleCheckTimer);
+      roleCheckTimer = setTimeout(checkRoleAssigned, 5000);
+    });
+
+    // Toggle between day and night modes
+    function toggleStage() {
+      const body = document.body;
+      const toggleBtn = document.getElementById('toggleStageBtn');
+      
+      if (body.classList.contains('night-mode')) {
+        // Switch from night to day mode
+        body.classList.remove('night-mode');
+        body.classList.add('day-mode');
+        toggleBtn.innerHTML = '🌙 Switch to Night';
+      } else {
+        // Switch from day to night mode
+        body.classList.remove('day-mode');
+        body.classList.add('night-mode');
+        toggleBtn.innerHTML = '☀️ Switch to Day';
+      }
+    }
+
+    // Initialize the page
+    document.addEventListener('DOMContentLoaded', function() {
+      // Initialize day/night mode toggle
+      const toggleBtn = document.getElementById('toggleStageBtn');
+      const body = document.body;
+      
+      // Set initial button state based on current mode
+      if (body.classList.contains('night-mode')) {
+        toggleBtn.innerHTML = '☀️ Switch to Day';
+      } else {
+        toggleBtn.innerHTML = '🌙 Switch to Night';
+      }
+      
+      // Add event listener for toggle button
+      toggleBtn.addEventListener('click', toggleStage);
+      
+      // Initialize other elements
+      initializeStars();
+      initializeSunRays();
+      initializeFlowers();
+      initializeParticles();
+      initializeMoon();
+      initializeMoonlightReflection();
+      
+      // ... existing code ...
+    });
+
+    // Initialize background elements
+    function initializeStars() {
+      const starsContainer = document.querySelector('.ghibli-stars');
+      if (!starsContainer) return;
+      
+      for (let i = 0; i < 50; i++) {
+        const star = document.createElement('span');
+        star.style.left = Math.random() * 100 + '%';
+        star.style.top = Math.random() * 100 + '%';
+        star.style.width = Math.random() * 3 + 2 + 'px';
+        star.style.height = star.style.width;
+        star.style.animationDelay = Math.random() * 4 + 's';
+        starsContainer.appendChild(star);
+      }
+    }
+
+    function initializeSunRays() {
+      const sunContainer = document.querySelector('.sun-rays');
+      if (!sunContainer) return;
+      
+      for (let i = 0; i < 12; i++) {
+        const ray = document.createElement('div');
+        ray.className = 'sun-ray';
+        ray.style.transform = `translate(-50%, -50%) rotate(${i * 30}deg)`;
+        ray.style.animationDelay = Math.random() * 2 + 's';
+        sunContainer.appendChild(ray);
+      }
+    }
+
+    function initializeFlowers() {
+      const flowersContainer = document.querySelector('.floating-flowers');
+      if (!flowersContainer) return;
+      
+      for (let i = 0; i < 15; i++) {
+        const flower = document.createElement('div');
+        flower.className = 'flower';
+        flower.style.left = Math.random() * 100 + '%';
+        flower.style.animationDelay = Math.random() * 18 + 's';
+        flower.style.animationDuration = (Math.random() * 10 + 15) + 's';
+        flowersContainer.appendChild(flower);
+      }
+    }
+
+    function initializeParticles() {
+      const particlesContainer = document.querySelector('.floating-particles');
+      if (!particlesContainer) return;
+      
+      for (let i = 0; i < 30; i++) {
+        const particle = document.createElement('div');
+        particle.className = 'particle';
+        particle.style.left = Math.random() * 100 + '%';
+        particle.style.animationDelay = Math.random() * 25 + 's';
+        particle.style.animationDuration = (Math.random() * 15 + 20) + 's';
+        particlesContainer.appendChild(particle);
+      }
+    }
+
+    function initializeMoon() {
+      const moon = document.querySelector('.ghibli-moon');
+      if (!moon) return;
+      
+      // Moon is already in HTML, just ensure it's visible
+      moon.style.display = 'block';
+    }
+
+    function initializeMoonlightReflection() {
+      const reflection = document.querySelector('.moonlight-reflection');
+      if (!reflection) return;
+      
+      // Reflection is already in HTML, just ensure it's visible
+      reflection.style.display = 'block';
+    }
+
+    // Example: Render Ghibli-style voice chat status box (replace your current status UI with this)
+    function renderVoiceChatStatusBox(isMuted, participants) {
+      let box = document.getElementById('voiceChatStatusBox');
+      if (!box) {
+        box = document.createElement('div');
+        box.id = 'voiceChatStatusBox';
+        box.className = 'voice-chat-status-box';
+        document.body.appendChild(box);
+      }
+      box.innerHTML = `
+        <div class="voice-chat-status-title"><span class="emoji">🎤</span> Voice Chat Ready</div>
+        <button class="voice-mute-toggle${isMuted ? ' muted' : ''}" id="voiceMuteToggleBtn">
+          <span class="emoji">${isMuted ? '🔇' : '🔊'}</span> ${isMuted ? 'Muted' : 'Speak'}
+        </button>
+        <div style="margin-top:6px;">${participants.map(p => `<div class='voice-chat-participant'>👤 ${p}</div>`).join('')}</div>
+      `;
+      document.getElementById('voiceMuteToggleBtn').onclick = function() {
+        // Toggle mute logic here
+        // ...
+      };
+    }
+
+    // Always join the room on page load, whether host or not
+    socket.emit('joinRoom', { roomId, playerName: myName }, (res) => {
+      if (!res.success) {
+        alert(res.message || 'Failed to join room.');
+        window.location.href = 'joining.html';
+      }
+    });
+
+    const testPlayers = [
+      'Test Player 1',
+      'Test Player 2',
+      'Test Player 3',
+      'Test Player 4',
+      'Test Player 5'
+    ];
+  </script>
+</body>
+</html>
