@@ -75,7 +75,8 @@ async function initializeGameState(roomId, players) {
       name: p.name,
       role: null,  // Will be assigned during role distribution
       position: null,  // Will be assigned during setup
-      isHost: p.name === hostName
+      isHost: p.name === hostName,
+      isPartyHost: false  // Initialize party host status
     })),
     roles: [],  // Will be populated during role distribution
     
@@ -998,6 +999,44 @@ io.on('connection', (socket) => {
 
     // When game ends or room is deleted, clean up party hosts
     delete partyHosts[roomId];
+
+    // Party host selection handlers
+    socket.on('togglePartyHost', async (data) => {
+      const roomId = Object.keys(socket.rooms)[1];
+      if (!roomId) return;
+
+      const gameState = await getGameState(roomId);
+      if (!gameState) return;
+
+      // Only allow the room host to toggle party hosts
+      const currentPlayer = gameState.players.find(p => p.id === socket.id);
+      if (!currentPlayer || !currentPlayer.isHost) return;
+
+      // Toggle party host status for the selected player
+      const targetPlayer = gameState.players.find(p => p.name === data.playerName);
+      if (targetPlayer) {
+        targetPlayer.isPartyHost = !targetPlayer.isPartyHost;
+        await updateGameState(roomId, gameState);
+        io.to(roomId).emit('partyHostsUpdate', gameState.players);
+      }
+    });
+
+    socket.on('resetPartyHosts', async () => {
+      const roomId = Object.keys(socket.rooms)[1];
+      if (!roomId) return;
+
+      const gameState = await getGameState(roomId);
+      if (!gameState) return;
+
+      // Only allow the room host to reset party hosts
+      const currentPlayer = gameState.players.find(p => p.id === socket.id);
+      if (!currentPlayer || !currentPlayer.isHost) return;
+
+      // Reset party host status for all players
+      gameState.players.forEach(p => p.isPartyHost = false);
+      await updateGameState(roomId, gameState);
+      io.to(roomId).emit('partyHostsUpdate', gameState.players);
+    });
   });
 
   // Handle party hosts update

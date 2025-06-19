@@ -1264,6 +1264,8 @@
         <button class="action-btn host-only" id="takeActionBtn">Take Action</button>
         <button class="reset-btn host-only" id="resetLoveHateBtn">Reset Count</button>
         <button class="reset-btn host-only" id="resetVoteBtn">Reset Vote</button>
+        <button class="action-btn host-only" id="selectPartyHostsBtn">Select Party Hosts</button>
+        <button class="reset-btn host-only" id="resetPartyHostsBtn">Reset Party Hosts</button>
       </div>
     </div>
     <!-- Center Panel: Table and Cards -->
@@ -3554,6 +3556,142 @@
         addHostHelperButtons();
       }
       // ... rest of initialization code ...
+    }
+
+    // --- Party Host Selection Logic ---
+    let partyHostSelectionMode = false;
+    const selectPartyHostsBtn = document.getElementById('selectPartyHostsBtn');
+    const resetPartyHostsBtn = document.getElementById('resetPartyHostsBtn');
+
+    selectPartyHostsBtn.addEventListener('click', () => {
+      if (!selectPartyHostsBtn.disabled) {
+        partyHostSelectionMode = true;
+        showUIMessage('Click on player cards to select party hosts. Selected players will be marked with a crown. 👑', 10000);
+      }
+    });
+
+    resetPartyHostsBtn.addEventListener('click', () => {
+      if (!resetPartyHostsBtn.disabled) {
+        partyHostSelectionMode = false;
+        socket.emit('resetPartyHosts');
+        showUIMessage('Party hosts have been reset.', 3000);
+      }
+    });
+
+    // Update card click handler for party host selection
+    function handleCardClick(player, cardContainer) {
+      if (!partyHostSelectionMode) return;
+      const currentPlayer = gameState.players.find(p => p.id === socket.id);
+      if (!currentPlayer || !currentPlayer.isHost) return;
+
+      const isPartyHost = player.isPartyHost;
+      socket.emit('togglePartyHost', { playerName: player.name });
+      
+      // Visual feedback
+      const crownEmoji = cardContainer.querySelector('.crown-emoji');
+      if (!crownEmoji && !isPartyHost) {
+        const crown = document.createElement('div');
+        crown.className = 'crown-emoji';
+        crown.textContent = '👑';
+        crown.style.cssText = 'position: absolute; top: -20px; left: 50%; transform: translateX(-50%); font-size: 20px; z-index: 12;';
+        cardContainer.appendChild(crown);
+      } else if (crownEmoji && isPartyHost) {
+        cardContainer.removeChild(crownEmoji);
+      }
+    }
+
+    // Update positionCardsInCircle to include click handlers and party host indicators
+    function positionCardsInCircle(players) {
+      roleCardsCircle.innerHTML = '';
+      const n = players.length;
+      const radius = 210;
+      const centerX = 260;
+      const centerY = 260;
+      const cardWidth = 68;
+      const cardHeight = 96;
+
+      // Find current player's role
+      const currentPlayer = players.find(p => p.id === socket.id);
+      const myRole = currentPlayer ? currentPlayer.role : null;
+      const myRoleLower = myRole ? myRole.toLowerCase() : '';
+
+      players.forEach((player, index) => {
+        const angle = (index * 2 * Math.PI) / n - Math.PI / 2;
+        const x = centerX + radius * Math.cos(angle);
+        const y = centerY + radius * Math.sin(angle);
+        const cardContainer = document.createElement('div');
+        cardContainer.style.cssText = `position: absolute; left: ${x}px; top: ${y}px; transform: translate(-50%, -50%); width: ${cardWidth}px; height: ${cardHeight}px; transition: all 0.3s ease; cursor: ${currentPlayer?.isHost ? 'pointer' : 'default'};`;
+        
+        // Add click handler for party host selection
+        cardContainer.addEventListener('click', () => handleCardClick(player, cardContainer));
+
+        const roleCard = document.createElement('img');
+        roleCard.className = 'role-card';
+        roleCard.style.width = cardWidth + 'px';
+        roleCard.style.height = cardHeight + 'px';
+
+        // Role visibility logic
+        let shouldShowCard = false;
+        const playerRoleLower = player.role ? player.role.toLowerCase() : '';
+
+        if (player.id === socket.id) {
+          shouldShowCard = true;
+          roleCard.classList.add('me');
+        } else if (myRoleLower === 'abby') {
+          shouldShowCard = (playerRoleLower === 'michael' || playerRoleLower === 'wind');
+        } else if (myRoleLower === 'michael' || myRoleLower === 'wind') {
+          shouldShowCard = (playerRoleLower === 'michael' || playerRoleLower === 'wind');
+        } else {
+          shouldShowCard = false;
+        }
+
+        roleCard.src = shouldShowCard ? `/imgs/${player.role ? player.role.toLowerCase() : 'backSide'}.png` : '/imgs/backSide.png';
+
+        const nameLabel = document.createElement('div');
+        nameLabel.className = 'player-name-label';
+        nameLabel.textContent = player.name + (player.isHost ? ' (Host)' : '') + (player.isPartyHost ? ' 👑' : '');
+        
+        // Add crown emoji for party hosts
+        if (player.isPartyHost) {
+          const crown = document.createElement('div');
+          crown.className = 'crown-emoji';
+          crown.textContent = '👑';
+          crown.style.cssText = 'position: absolute; top: -20px; left: 50%; transform: translateX(-50%); font-size: 20px; z-index: 12;';
+          cardContainer.appendChild(crown);
+        }
+
+        cardContainer.appendChild(roleCard);
+        cardContainer.appendChild(nameLabel);
+        roleCardsCircle.appendChild(cardContainer);
+      });
+    }
+
+    // Update love/hate button states based on party host status
+    function updateLoveHateButtonStates() {
+      if (!gameState) return;
+      const currentPlayer = gameState.players.find(p => p.id === socket.id);
+      if (!currentPlayer) return;
+
+      const isPartyHost = currentPlayer.isPartyHost;
+      const canUseLoveHate = isPartyHost && loveHateWindow && !loveHateClickedThisRound;
+      
+      loveBtn.disabled = !canUseLoveHate;
+      hateBtn.disabled = !canUseLoveHate;
+    }
+
+    // Listen for party host updates
+    socket.on('partyHostsUpdate', (players) => {
+      if (gameState) {
+        gameState.players = players;
+        positionCardsInCircle(players);
+        updateLoveHateButtonStates();
+      }
+    });
+
+    // Update setLoveHateWindow to consider party host status
+    function setLoveHateWindow(enabled) {
+      loveHateWindow = enabled;
+      updateLoveHateButtonStates();
     }
   </script>
 </body>
