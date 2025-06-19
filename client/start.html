@@ -3468,66 +3468,45 @@
       showGhibliNotification('Party hosts have been reset!');
     }
 
-    // Create game controls
-    function createGameControls() {
-      const controls = document.createElement('div');
-      controls.className = 'game-controls';
-      controls.style.position = 'fixed';
-      controls.style.bottom = '32px';
-      controls.style.left = '50%';
-      controls.style.transform = 'translateX(-50%)';
-      controls.style.display = 'flex';
-      controls.style.flexDirection = 'column';
-      controls.style.alignItems = 'center';
-      controls.style.gap = '16px';
+    // Add host helper buttons to game area
+    function addHostHelperButtons() {
+      if (!isHost) return;
       
-      // Love/Hate buttons
-      const actionButtons = document.createElement('div');
-      actionButtons.style.display = 'flex';
-      actionButtons.style.gap = '16px';
-      actionButtons.style.marginBottom = '16px';
-      
-      const loveBtn = document.createElement('button');
-      loveBtn.id = 'loveBtn';
-      loveBtn.className = 'action-button love';
-      loveBtn.innerHTML = '❤️<br>Love';
-      loveBtn.onclick = () => handleLoveHate('love');
-      
-      const hateBtn = document.createElement('button');
-      hateBtn.id = 'hateBtn';
-      hateBtn.className = 'action-button hate';
-      hateBtn.innerHTML = '💔<br>Hate';
-      hateBtn.onclick = () => handleLoveHate('hate');
-      
-      actionButtons.appendChild(loveBtn);
-      actionButtons.appendChild(hateBtn);
-      controls.appendChild(actionButtons);
+      const gameArea = document.querySelector('.game-area');
+      if (!gameArea) return;
 
-      // Host helper buttons (only for host)
-      if (isHost) {
-        const hostHelperButtons = document.createElement('div');
-        hostHelperButtons.style.display = 'flex';
-        hostHelperButtons.style.gap = '16px';
-        hostHelperButtons.style.marginTop = '8px';
-        
-        const selectHostsBtn = document.createElement('button');
-        selectHostsBtn.id = 'hostHelperBtn';
-        selectHostsBtn.className = 'action-button';
-        selectHostsBtn.innerHTML = '👑<br>Select Party Hosts';
-        selectHostsBtn.onclick = toggleHostHelper;
-        
-        const resetHostsBtn = document.createElement('button');
-        resetHostsBtn.id = 'resetHostsBtn';
-        resetHostsBtn.className = 'action-button';
-        resetHostsBtn.innerHTML = '🔄<br>Reset Party Hosts';
-        resetHostsBtn.onclick = resetPartyHosts;
-        
-        hostHelperButtons.appendChild(selectHostsBtn);
-        hostHelperButtons.appendChild(resetHostsBtn);
-        controls.appendChild(hostHelperButtons);
+      // Create host helper buttons container
+      const hostHelperButtons = document.createElement('div');
+      hostHelperButtons.style.display = 'flex';
+      hostHelperButtons.style.justifyContent = 'center';
+      hostHelperButtons.style.gap = '16px';
+      hostHelperButtons.style.marginTop = '16px';
+
+      // Create Select Party Hosts button
+      const selectHostsBtn = document.createElement('button');
+      selectHostsBtn.id = 'hostHelperBtn';
+      selectHostsBtn.className = 'ghibli-btn';
+      selectHostsBtn.textContent = 'Select Party Hosts';
+      selectHostsBtn.onclick = toggleHostHelper;
+
+      // Create Reset Party Hosts button
+      const resetHostsBtn = document.createElement('button');
+      resetHostsBtn.id = 'resetHostsBtn';
+      resetHostsBtn.className = 'ghibli-btn';
+      resetHostsBtn.textContent = 'Reset Party Hosts';
+      resetHostsBtn.onclick = resetPartyHosts;
+
+      // Add buttons to container
+      hostHelperButtons.appendChild(selectHostsBtn);
+      hostHelperButtons.appendChild(resetHostsBtn);
+
+      // Add container after the love/hate buttons
+      const loveHateButtons = gameArea.querySelector('.action-buttons');
+      if (loveHateButtons) {
+        loveHateButtons.after(hostHelperButtons);
+      } else {
+        gameArea.appendChild(hostHelperButtons);
       }
-
-      document.body.appendChild(controls);
     }
 
     // Add styles for the new buttons
@@ -3570,9 +3549,9 @@
       createStarfield();
       createFloatingParticles();
       createGameArea();
-      createGameControls(); // Add this line
       if (isHost) {
         initializeHostControls();
+        addHostHelperButtons();
       }
       // ... rest of initialization code ...
     }
