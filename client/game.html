@@ -152,6 +152,12 @@
   </style>
 </head>
 <body class="ghibli-game">
+  <!-- BGM Audio -->
+  <audio id="bgm" autoplay loop>
+    <source src="musics/Outtstanding.mp3" type="audio/mpeg">
+    Your browser does not support the audio element.
+  </audio>
+
   <div class="game-header">
     <div class="room-id-ghibli" id="roomIdBox">Room ID: <span id="roomId"></span></div>
     <div class="room-name-ghibli" id="roomNameBox" style="margin-top:8px; font-size:1.1rem; color:#a07c4f; background:#fffbe7; border:2px solid #e2c391; border-radius:14px; padding:8px 22px; box-shadow:0 2px 8px 0 #e2c39122;">Room Name: <span id="roomName"></span></div>
@@ -169,6 +175,15 @@
   </div>
   <script src="/socket.io/socket.io.js"></script>
   <script>
+    // Ensure BGM plays when page loads
+    window.addEventListener('load', function() {
+      const bgm = document.getElementById('bgm');
+      bgm.volume = 0.3; // Set volume to 30%
+      bgm.play().catch(function(error) {
+        console.log('BGM autoplay was prevented:', error);
+      });
+    });
+
     // Parse query params for roomId, maxPlayers, name, host, password, roomname
     function getQueryParams() {
       const params = {};

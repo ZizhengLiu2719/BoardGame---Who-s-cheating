@@ -124,6 +124,12 @@
   </style>
 </head>
 <body class="hosting-ghibli">
+  <!-- BGM Audio -->
+  <audio id="bgm" autoplay loop>
+    <source src="musics/Outtstanding.mp3" type="audio/mpeg">
+    Your browser does not support the audio element.
+  </audio>
+
   <div class="hosting-container">
     <h1>Host a Game</h1>
     <div class="gamemode-btns">
@@ -153,6 +159,15 @@
   </div>
   <script src="/socket.io/socket.io.js"></script>
   <script>
+    // Ensure BGM plays when page loads
+    window.addEventListener('load', function() {
+      const bgm = document.getElementById('bgm');
+      bgm.volume = 0.3; // Set volume to 30%
+      bgm.play().catch(function(error) {
+        console.log('BGM autoplay was prevented:', error);
+      });
+    });
+
     // Gamemode button selection
     const gamemodeBtns = document.querySelectorAll('.gamemode-btn');
     const gamemodeInput = document.getElementById('gamemode');

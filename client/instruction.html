@@ -93,6 +93,12 @@
   </style>
 </head>
 <body class="instruction-ghibli">
+  <!-- BGM Audio -->
+  <audio id="bgm" autoplay loop>
+    <source src="musics/Outtstanding.mp3" type="audio/mpeg">
+    Your browser does not support the audio element.
+  </audio>
+
   <div class="ghibli-container">
     <div class="ghibli-title">WHO'S CHEATING? <span style="font-size:1.1rem;">– Family Feud Edition</span></div>
     <div class="ghibli-section">
@@ -198,5 +204,16 @@
       </div>
     </div>
   </div>
+
+  <script>
+    // Ensure BGM plays when page loads
+    window.addEventListener('load', function() {
+      const bgm = document.getElementById('bgm');
+      bgm.volume = 0.3; // Set volume to 30%
+      bgm.play().catch(function(error) {
+        console.log('BGM autoplay was prevented:', error);
+      });
+    });
+  </script>
 </body>
 </html>

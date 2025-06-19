@@ -83,6 +83,12 @@
   </style>
 </head>
 <body class="joining-ghibli">
+  <!-- BGM Audio -->
+  <audio id="bgm" autoplay loop>
+    <source src="musics/Outtstanding.mp3" type="audio/mpeg">
+    Your browser does not support the audio element.
+  </audio>
+
   <div class="joining-container">
     <h1>Join a Game</h1>
     <form class="joining-form" id="joiningForm" autocomplete="off">
@@ -104,6 +110,15 @@
   </div>
   <script src="/socket.io/socket.io.js"></script>
   <script>
+    // Ensure BGM plays when page loads
+    window.addEventListener('load', function() {
+      const bgm = document.getElementById('bgm');
+      bgm.volume = 0.3; // Set volume to 30%
+      bgm.play().catch(function(error) {
+        console.log('BGM autoplay was prevented:', error);
+      });
+    });
+
     const socket = io();
     const errorBox = document.getElementById('errorBox');
     function showError(msg) {
